@@ -27,3 +27,6 @@ export * from "./table-sub-components/chip/chip";
 export * from "./table-sub-components/check-box/check-box";
 export * from "./table-sub-components/flex-box/flex-box";
 export * from "./dynamic-table/dynamic-table";
+export * from "./pagination/pagination";
+export * from "./pagination/pagination.types";
+export * from "./infinite-scroll/infinite-scroll";

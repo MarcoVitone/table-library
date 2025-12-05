@@ -164,6 +164,14 @@ const ProvaTabella = () => {
       onRowSelectionChange={(data) => {
         console.log("Selected Elements:", data);
       }}
+      pagination={{
+        enabled: true,
+        limit: 10,
+        limitOptions: [5, 10, 25, 50],
+        onPaginationChange: ({ limit, offset }) => {
+          console.log({ limit, offset });
+        },
+      }}
     />
   );
 };
