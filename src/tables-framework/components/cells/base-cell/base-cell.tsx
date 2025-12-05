@@ -42,6 +42,7 @@ interface IBaseCellProps extends ICellProps {
   sortParam?: string;
   backgroundColorSort?: string;
   onSortClick?: (dataKey: string, dir: TSortDirection) => void;
+  showHeaderCheckbox?: boolean;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({

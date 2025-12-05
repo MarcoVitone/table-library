@@ -17,6 +17,7 @@ const ProvaTabella = () => {
         fontColor: defaultTheme.palette.neutral.main,
         fontSize: "0.625rem",
         padding: "0.3125rem 0.5rem",
+        showHeaderCheckbox: true,
       },
       bodyProps: {
         textAlignment: "left",
