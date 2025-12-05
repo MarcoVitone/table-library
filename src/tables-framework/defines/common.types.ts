@@ -124,8 +124,10 @@ interface IFilter {
 type TFiltering = IFilter[];
 
 interface IPagination {
-  size: number | null;
-  index: number;
+  limit: number | null;
+  offset: number;
+  position?: "top" | "bottom";
+  alignment?: "left" | "center" | "right";
 }
 
 interface ITableLayout {

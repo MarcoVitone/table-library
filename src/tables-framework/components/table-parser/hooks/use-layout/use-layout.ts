@@ -80,8 +80,8 @@ function useLayout({
     setIsStale(true);
 
     return {
-      size: null,
-      index: 0,
+      limit: null,
+      offset: 0,
     };
   }, [externalLayout]);
 
