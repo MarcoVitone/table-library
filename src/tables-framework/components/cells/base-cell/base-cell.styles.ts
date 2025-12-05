@@ -45,7 +45,8 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "textOverflow" &&
     prop !== "isSorted" &&
     prop !== "backgroundColorSort" &&
-    prop !== "isSortActive",
+    prop !== "isSortActive" &&
+    prop !== "showHeaderCheckbox",
 };
 
 const BaseCellComponent = styled(

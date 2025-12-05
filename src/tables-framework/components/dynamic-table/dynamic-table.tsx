@@ -86,11 +86,20 @@ const DynamicTable = <T extends object>({
           <Column key={col.id} width={col.width}>
             <HeaderCell
               label={col.label}
-              cell={[HeaderComponent, { ...col.headerProps } as IBaseCellProps]}
+              cell={[
+                HeaderComponent,
+                {
+                  ...col.headerProps,
+                  showHeaderCheckbox: col.headerProps?.showHeaderCheckbox,
+                } as Partial<IBaseCellProps>,
+              ]}
             />
             <BodyCell
               dataKey={col.dataKey || col.id}
-              cell={[CellComponent, { ...col.bodyProps } as IBaseCellProps]}
+              cell={[
+                CellComponent,
+                { ...col.bodyProps } as Partial<IBaseCellProps>,
+              ]}
             />
           </Column>
         );

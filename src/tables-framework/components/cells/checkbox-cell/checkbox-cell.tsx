@@ -11,6 +11,7 @@ import {
 interface ICheckboxCellProps extends IBaseCellProps {
   onChange?: TTableCheckboxProps["onChange"];
   disabled?: TTableCheckboxProps["disabled"];
+  showHeaderCheckbox?: boolean;
 }
 
 const CheckboxCell: FC<ICheckboxCellProps> = ({
@@ -18,6 +19,7 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
   disabled = false,
   area,
   data,
+  showHeaderCheckbox = true,
   ...rest
 }) => {
   const {
@@ -26,6 +28,7 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
     selectAllRows,
     clearSelectedRows,
     selectedRows,
+    source,
   } = useTable(data);
 
   const onChangeHandler = useCallback<
@@ -53,11 +56,17 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
 
   const checked = useMemo(() => {
     if (area === "header") {
-      return !!selectedRows && !!selectedRows.length;
+      const totalRows = source?.body?.rows?.length || 0;
+      const selectedCount = selectedRows?.length || 0;
+      return totalRows > 0 && selectedCount === totalRows;
     } else {
       return !!rowStatus && rowStatus.isSelected;
     }
-  }, [area, rowStatus, selectedRows]);
+  }, [area, rowStatus, selectedRows, source?.body?.rows?.length]);
+
+  if (area === "header" && !showHeaderCheckbox) {
+    return <BaseCell {...rest} area={area} data={data} variant={"body"} />;
+  }
 
   return (
     <BaseCell {...rest} area={area} data={data} variant={"body"}>
