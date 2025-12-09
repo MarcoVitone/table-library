@@ -18,11 +18,11 @@ function useColumns({ columns, tableLayout }: IProps): IColumn[] {
       const match = columnsLayout.find((l) => l.id === column.id);
 
       if (match) {
-        if (typeof match.props.isHidden !== "undefined") {
+        if (match.props.isHidden !== undefined) {
           column.props.isHidden = match.props.isHidden;
         }
 
-        if (typeof match.props.width !== "undefined") {
+        if (match.props.width !== undefined) {
           column.props.width = match.props.width;
         }
       } else {

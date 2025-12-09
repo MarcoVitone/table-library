@@ -8,6 +8,7 @@ export interface IMockUser {
   lastLogin: string;
   age: number;
   department: string;
+  [key: string]: unknown;
 }
 
 export const MOCK_USERS: IMockUser[] = [

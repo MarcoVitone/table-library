@@ -1,21 +1,25 @@
-import type {ElementType, FC, ReactNode} from 'react';
+import type { ElementType, FC, ReactNode } from "react";
 
 interface IBaseTableProps {
-    component?: ElementType;
-    children: ReactNode;
-    className?: string;
+  component?: ElementType;
+  children: ReactNode;
+  className?: string;
 }
 
 const BaseTable: FC<IBaseTableProps> = ({
-    component: Component = 'table',
-    children
+  component: Component = "table",
+  children,
+  className,
 }) => {
-    return (
-        <Component style={{borderCollapse: 'collapse', width: '100%'}}>
-            {children}
-        </Component>
-    );
+  return (
+    <Component
+      style={{ borderCollapse: "collapse", width: "100%" }}
+      className={className}
+    >
+      {children}
+    </Component>
+  );
 };
 
-export type {IBaseTableProps};
-export {BaseTable};
+export type { IBaseTableProps };
+export { BaseTable };

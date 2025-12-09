@@ -43,6 +43,7 @@ interface IBaseCellProps extends ICellProps {
   backgroundColorSort?: string;
   onSortClick?: (dataKey: string, dir: TSortDirection) => void;
   showHeaderCheckbox?: boolean;
+  onHeaderClick?: (e: React.MouseEvent) => void;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -71,6 +72,8 @@ const BaseCell: FC<IBaseCellProps> = ({
   backgroundColorSort,
   onSortClick,
   data,
+  onHeaderClick,
+  queryParam,
   ...rest
 }) => {
   const type = variant || area;
@@ -115,41 +118,46 @@ const BaseCell: FC<IBaseCellProps> = ({
     }
   }, [angle, api, sortable]);
 
-  const handleClick = useCallback(() => {
-    if (!sortable || !setSorting || !dataKey) {
-      return;
-    }
+  const handleSortClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
 
-    if (dir === 0) {
-      setSorting([
-        {
-          key: sortParam ?? dataKey,
-          dir: "asc",
-          isServerSide: isServerSideSort,
-        },
-      ]);
-      onSortClick?.(dataKey, "ASC");
-    } else if (dir === 1) {
-      setSorting([
-        {
-          key: sortParam ?? dataKey,
-          dir: "desc",
-          isServerSide: isServerSideSort,
-        },
-      ]);
-      onSortClick?.(dataKey, "DESC");
-    } else {
-      setSorting([]);
-    }
-  }, [
-    dataKey,
-    dir,
-    sortable,
-    setSorting,
-    isServerSideSort,
-    onSortClick,
-    sortParam,
-  ]);
+      if (!sortable || !setSorting || !dataKey) {
+        return;
+      }
+
+      if (dir === 0) {
+        setSorting([
+          {
+            key: sortParam ?? dataKey,
+            dir: "asc",
+            isServerSide: isServerSideSort,
+          },
+        ]);
+        onSortClick?.(dataKey, "ASC");
+      } else if (dir === 1) {
+        setSorting([
+          {
+            key: sortParam ?? dataKey,
+            dir: "desc",
+            isServerSide: isServerSideSort,
+          },
+        ]);
+        onSortClick?.(dataKey, "DESC");
+      } else {
+        setSorting([]);
+      }
+    },
+    [
+      dataKey,
+      dir,
+      sortable,
+      setSorting,
+      isServerSideSort,
+      onSortClick,
+      sortParam,
+    ]
+  );
 
   const justifyContent = useMemo(() => {
     if (textAlignment === "center") return "center";
@@ -167,7 +175,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       borderColor={borderColor}
       bold={!!bold || type === "header"}
       textPosition={textAlignment as TAlignment}
-      textTransform={textTransform as TtextTransform}
+      textTransform={textTransform}
       fontColor={fontColor}
       backgroundColor={backgroundColor}
       fontSize={fontSize}
@@ -177,8 +185,11 @@ const BaseCell: FC<IBaseCellProps> = ({
       isSorted={dir !== 0 && !!backgroundColorSort}
       backgroundColorSort={backgroundColorSort}
       isSortActive={dir !== 0}
-      onClick={sortable ? handleClick : undefined}
-      style={{ cursor: sortable ? "pointer" : undefined }}
+      onClick={onHeaderClick}
+      style={{
+        cursor: onHeaderClick ? "pointer" : "default",
+      }}
+      data-query-param={queryParam}
       {...rest}
     >
       {sortable ? (
@@ -191,8 +202,18 @@ const BaseCell: FC<IBaseCellProps> = ({
           }}
         >
           {children}
-          <animated.span className="sort-icon" style={rotation}>
-            <span style={{ color: palette.primary.main, display: "flex" }}>
+          <animated.span
+            className="sort-icon"
+            style={rotation}
+            onClick={handleSortClick}
+          >
+            <span
+              style={{
+                color: palette.primary.main,
+                display: "flex",
+                cursor: "pointer",
+              }}
+            >
               {sortIcon}
             </span>
           </animated.span>

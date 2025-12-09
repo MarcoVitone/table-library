@@ -52,6 +52,7 @@ interface ITableRendererProps<T = unknown> {
   container?: ElementType;
   showFooter?: boolean;
   onRowSelectionChange?: (data: T[]) => void;
+  onRowDoubleClick?: import("../../defines/common.types.ts").IRowNavigationConfig<T>;
 }
 
 const TableRenderer = <T,>({
@@ -68,6 +69,7 @@ const TableRenderer = <T,>({
   container: Container = Fragment,
   showFooter = true,
   onRowSelectionChange,
+  onRowDoubleClick,
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -88,15 +90,18 @@ const TableRenderer = <T,>({
   }, [rowsStatus, onRowSelectionChange, source.body.rows]);
 
   const header = useMemo(
-    () => renderRows(source.header.rows),
-    [source.header.rows]
+    () => renderRows(source.header.rows, onRowDoubleClick),
+    [source.header.rows, onRowDoubleClick]
   );
 
-  const body = useMemo(() => renderRows(source.body.rows), [source.body.rows]);
+  const body = useMemo(
+    () => renderRows(source.body.rows, onRowDoubleClick),
+    [source.body.rows, onRowDoubleClick]
+  );
 
   const footer = useMemo(
-    () => renderRows(source.footer.rows),
-    [source.footer.rows]
+    () => renderRows(source.footer.rows, onRowDoubleClick),
+    [source.footer.rows, onRowDoubleClick]
   );
 
   const beforeNode = useMemo(() => {

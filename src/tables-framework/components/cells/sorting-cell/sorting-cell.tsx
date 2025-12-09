@@ -81,7 +81,7 @@ const SortingCell: FC<ISortingCellProps> = ({
       setSorting([{ key: dataKey, dir: "desc", isServerSide: isServerSide }]);
       onClick?.(dataKey, "DESC");
     }
-  }, [dataKey, dir, disabled, setSorting]);
+  }, [dataKey, dir, disabled, isServerSide, onClick, setSorting]);
 
   useEffect(() => {
     api.start({ rotate: angle });

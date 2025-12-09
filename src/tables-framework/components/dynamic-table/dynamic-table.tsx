@@ -20,11 +20,20 @@ import type {
 } from "../pagination/pagination.types";
 import { usePaginationPersistence } from "../../hooks/use-pagination-persistence/use-pagination-persistence";
 
-import type { ICellProps, IUnknownProps } from "../../defines/common.types";
+import type {
+  ICellProps,
+  ILinkConfig,
+  ILinkObject,
+  IRowNavigationConfig,
+  IUnknownProps,
+  TRouterType,
+} from "../../defines/common.types";
+
+export type { ILinkConfig, IRowNavigationConfig, TRouterType };
 
 type TUserBaseCellProps = Partial<Omit<IBaseCellProps, keyof ICellProps>>;
 
-export interface IColumnConfig {
+export interface IColumnConfig<T = Record<string, unknown>> {
   id: string;
   label: string;
   dataKey?: string;
@@ -33,6 +42,9 @@ export interface IColumnConfig {
   headerProps?: TUserBaseCellProps;
   bodyProps?: TUserBaseCellProps;
   component?: ElementType;
+  queryParam?: string;
+  onHeaderClick?: (dataKey: string) => void;
+  link?: ILinkConfig<T>;
 }
 
 export interface IPaginationConfig extends IPaginationCustomization {
@@ -60,9 +72,10 @@ interface IDynamicTableProps<T>
     >,
     "children" | "data"
   > {
-  columns: IColumnConfig[];
+  columns: IColumnConfig<T>[];
   data: T[];
   onRowSelectionChange?: (data: T[]) => void;
+  onRowDoubleClick?: IRowNavigationConfig<T>;
   pagination?: IPaginationConfig;
   infiniteScroll?: IInfiniteScrollConfig;
 }
@@ -71,6 +84,7 @@ const DynamicTable = <T extends object>({
   columns,
   data,
   onRowSelectionChange,
+  onRowDoubleClick,
   pagination: paginationConfig,
   infiniteScroll: infiniteScrollConfig,
   ...tableProps
@@ -195,30 +209,30 @@ const DynamicTable = <T extends object>({
   };
 
   const paginationComponent =
-    paginationEnabled && totalItems > 0 && customPaginationComponent ? (
-      customPaginationComponent
-    ) : (
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={limit}
-        totalItems={totalItems}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handleLimitChange}
-        pageSizeOptions={limitOptions}
-        alignment={paginationAlignment}
-        // Customization
-        visibility={visibility}
-        icons={icons}
-        labels={labels}
-        slots={slots}
-        classNames={classNames}
-        // Phase 1 features
-        isLoading={isLoading}
-        responsive={responsive}
-        loadingComponent={serverSide?.loadingComponent}
-      />
-    );
+    paginationEnabled && customPaginationComponent
+      ? customPaginationComponent || (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={limit}
+            totalItems={totalItems}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handleLimitChange}
+            pageSizeOptions={limitOptions}
+            alignment={paginationAlignment}
+            // Customization
+            visibility={visibility}
+            icons={icons}
+            labels={labels}
+            slots={slots}
+            classNames={classNames}
+            // Phase 1 features
+            isLoading={isLoading}
+            responsive={responsive}
+            loadingComponent={serverSide?.loadingComponent}
+          />
+        )
+      : null;
 
   return (
     <div>
@@ -239,6 +253,7 @@ const DynamicTable = <T extends object>({
         <Table
           data={paginatedData}
           onRowSelectionChange={onRowSelectionChange}
+          onRowDoubleClick={onRowDoubleClick}
           {...tableProps}
         >
           {columns.map((col) => {
@@ -247,7 +262,11 @@ const DynamicTable = <T extends object>({
               col.type === "checkbox" ? CheckboxCell : BaseCell;
 
             return (
-              <Column key={col.id} width={col.width}>
+              <Column
+                key={col.id}
+                width={col.width}
+                link={col.link as ILinkConfig<ILinkObject>}
+              >
                 <HeaderCell
                   label={col.label}
                   cell={[
@@ -255,6 +274,10 @@ const DynamicTable = <T extends object>({
                     {
                       ...col.headerProps,
                       showHeaderCheckbox: col.headerProps?.showHeaderCheckbox,
+                      onHeaderClick: col.onHeaderClick
+                        ? () => col.onHeaderClick?.(col.dataKey || col.id)
+                        : undefined,
+                      queryParam: col.queryParam,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />

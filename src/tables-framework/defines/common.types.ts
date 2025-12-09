@@ -62,6 +62,32 @@ interface IColumn {
     isResizable: boolean;
     width: string | number | null;
   };
+  link?: ILinkConfig<ILinkObject>;
+}
+
+export type TRouterType = "native" | "react-router" | "nextjs" | "custom";
+
+export interface ILinkObject {
+  id?: string | number;
+  label?: string;
+  [k: string]: unknown;
+}
+
+export interface IRowNavigationConfig<T = ILinkObject> {
+  baseUrl: string;
+  targetKey?: keyof T;
+  onNavigate?: (path: string) => void;
+  target?: string;
+}
+
+export interface ILinkConfig<T = ILinkObject> {
+  types: TRouterType;
+  component?: ElementType;
+  to: (row: T) => string | object;
+  target?: string;
+  className?: string;
+  style?: import("react").CSSProperties;
+  textDecoration?: "none" | "underline" | "overline" | "line-through" | "blink";
 }
 
 type TAggregator = (column: IColumn) => ReactNode;

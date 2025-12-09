@@ -1,11 +1,11 @@
 import type { IColumnConfig } from "./tables-framework/components/dynamic-table/dynamic-table";
 import { DynamicTable } from "./tables-framework/components/dynamic-table/dynamic-table";
 import { EmptyBody } from "./tables-framework/components";
-import { MOCK_USERS } from "./tables-framework/mock-data";
+import { MOCK_USERS, type IMockUser } from "./tables-framework/mock-data";
 import { defaultTheme } from "./tables-framework/theme/theme";
 
 const ProvaTabella = () => {
-  const columns: IColumnConfig[] = [
+  const columns: IColumnConfig<IMockUser>[] = [
     {
       id: "checkbox",
       label: "",
@@ -38,6 +38,11 @@ const ProvaTabella = () => {
         padding: "0.3125rem 0.5rem",
         sortable: true,
         backgroundColorSort: defaultTheme.palette.primary.light,
+      },
+      link: {
+        types: "native",
+        to: (row: IMockUser) => `/users/${row.id}`,
+        target: "_self",
       },
       bodyProps: {
         textAlignment: "left",
@@ -163,6 +168,11 @@ const ProvaTabella = () => {
       showFooter={false}
       onRowSelectionChange={(data) => {
         console.log("Selected Elements:", data);
+      }}
+      onRowDoubleClick={{
+        baseUrl: "/users",
+        targetKey: "id",
+        onNavigate: (path) => console.log("Navigating to:", path),
       }}
       pagination={{
         enabled: true,

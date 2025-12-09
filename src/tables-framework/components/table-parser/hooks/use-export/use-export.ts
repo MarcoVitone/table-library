@@ -53,14 +53,11 @@ function useExport({ source }: IProps): TNonNullable<IExportAPI> {
     cellData: ICell,
     translation?: TExportTranslation
   ): ICell => {
-    let cellValue =
-      cellData.value === undefined || cellData.value === null
-        ? ""
-        : cellData.value;
+    let cellValue = cellData.value ?? "";
 
     // Doing this because \n and % break the rows and ; add another column on the Excel file
     if (typeof cellValue === "string") {
-      cellValue = cellValue.replace(/\n|%/g, " \\ ").replace(/;/g, ",");
+      cellValue = cellValue.replaceAll(/\n|%/g, " \\ ").replaceAll(";", ",");
     }
 
     // In order to have a correct translations for boolean and "Y/N" values.
