@@ -8,13 +8,13 @@ import { DateTypography } from "./date-cell.style.ts";
 import { useTimezone } from "../../../hooks/use-timezone/use-timezone.tsx";
 
 interface IDateCellProps extends IBaseCellProps {
-  format: string;
+  format?: string;
   isNormalDate?: boolean;
 }
 
 const DateCell: FC<IDateCellProps> = ({
   data,
-  format,
+  format = "P",
   textAlignment,
   ...rest
 }) => {
