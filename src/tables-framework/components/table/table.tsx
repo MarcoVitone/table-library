@@ -19,6 +19,7 @@ interface ITableProps<TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T = unknown>
   cells?: TSingleCell<TC> | IMultipleCells<TCH, TCB, TCF>;
   rows?: TSingleRow<TR> | IMultipleRows<TRH, TRB, TRF>;
   onRowSelectionChange?: (data: T[]) => void;
+  onRowDoubleClick?: import("../../defines/common.types.ts").IRowNavigationConfig<T>;
 }
 
 const Table = <TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T>({
@@ -27,6 +28,7 @@ const Table = <TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T>({
   rows: customRows = undefined,
   children = null,
   onRowSelectionChange,
+  onRowDoubleClick,
   ...rest
 }: ITableProps<TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T>): JSX.Element => {
   const cells = useCustomElements(customCells, BaseCell);
@@ -38,6 +40,7 @@ const Table = <TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T>({
       cells={cells}
       rows={rows}
       onRowSelectionChange={onRowSelectionChange}
+      onRowDoubleClick={onRowDoubleClick}
     >
       {children}
     </ParserComponent>

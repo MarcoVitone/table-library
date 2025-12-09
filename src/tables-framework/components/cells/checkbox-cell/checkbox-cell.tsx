@@ -51,7 +51,7 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
         onChange(event, checked);
       }
     },
-    [area, clearSelectedRows, data, onChange, selectAllRows, setRowStatus]
+    [area, clearSelectedRows, onChange, selectAllRows, setRowStatus]
   );
 
   const checked = useMemo(() => {

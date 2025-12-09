@@ -54,6 +54,7 @@ function parseColumn(
       isResizable: resolve(props.isResizable, true),
       width: resolve(props.width, null),
     },
+    link: props.link,
   };
 
   Children.toArray(props.children).forEach((c) => {

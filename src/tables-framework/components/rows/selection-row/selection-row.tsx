@@ -48,7 +48,7 @@ const SelectionRow: FC<ISelectionRowProps> = ({
     <BaseTr
       isSelected={isSelected}
       isLoading={isLoading}
-      onClick={!isSelected ? onRowSelectHandler : onRowUnselectHandler}
+      onClick={isSelected ? onRowUnselectHandler : onRowSelectHandler}
     >
       {children}
     </BaseTr>

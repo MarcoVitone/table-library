@@ -39,6 +39,7 @@ interface ITableParserProps<T = unknown> extends TBase<T> {
   freeze?: boolean;
   children?: TJSX;
   onRowSelectionChange?: (data: T[]) => void;
+  onRowDoubleClick?: import("../../defines/common.types.ts").IRowNavigationConfig<T>;
 }
 
 const TableParser = <T,>({
@@ -52,6 +53,7 @@ const TableParser = <T,>({
   freeze = false,
   children = null,
   onRowSelectionChange,
+  onRowDoubleClick,
   ...rest
 }: ITableParserProps<T>) => {
   const parsedColumns = useParser({
@@ -150,6 +152,7 @@ const TableParser = <T,>({
       source={source}
       parserAPI={parserAPI}
       onRowSelectionChange={onRowSelectionChange}
+      onRowDoubleClick={onRowDoubleClick}
     />
   );
 };
