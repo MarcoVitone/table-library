@@ -36,6 +36,8 @@ interface IBaseCellProps {
   maxWidth?: string | number;
   borderRight?: IBorderConfig;
   borderBottom?: IBorderConfig;
+  borderTop?: IBorderConfig;
+  borderLeft?: IBorderConfig;
 }
 
 const stylesFromProps: IStyleFromProps = {
@@ -68,7 +70,9 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "ellipsis" &&
     prop !== "maxWidth" &&
     prop !== "borderRight" &&
-    prop !== "borderBottom",
+    prop !== "borderBottom" &&
+    prop !== "borderTop" &&
+    prop !== "borderLeft",
 };
 
 const BaseCellComponent = styled(
@@ -99,6 +103,8 @@ const BaseCellComponent = styled(
     maxWidth,
     borderRight,
     borderBottom,
+    borderTop,
+    borderLeft,
   }) => {
     const defaultBorderColor = convertHexToRGBA(
       theme?.palette?.primary?.dark,
@@ -114,8 +120,16 @@ const BaseCellComponent = styled(
     console.log({ isSelected });
 
     return css({
-      borderLeft: "none",
-      borderTop: "none",
+      borderLeft: borderLeft?.show
+        ? `${borderLeft.width || "1px"} ${borderLeft.style || "solid"} ${
+            borderLeft.color || finalBorderColor
+          }`
+        : "none",
+      borderTop: borderTop?.show
+        ? `${borderTop.width || "1px"} ${borderTop.style || "solid"} ${
+            borderTop.color || finalBorderColor
+          }`
+        : "none",
       borderRight: borderRight?.show
         ? `${borderRight.width || "1px"} ${borderRight.style || "solid"} ${
             borderRight.color || finalBorderColor
