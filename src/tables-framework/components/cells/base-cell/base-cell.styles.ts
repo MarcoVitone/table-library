@@ -30,6 +30,9 @@ interface IBaseCellProps {
   fixed?: boolean;
   isSelected?: boolean;
   rowSelectedColor?: string;
+  wrapText?: boolean;
+  ellipsis?: boolean;
+  maxWidth?: string | number;
 }
 
 const stylesFromProps: IStyleFromProps = {
@@ -57,7 +60,10 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "fixed" &&
     prop !== "fixedColumn" &&
     prop !== "isSelected" &&
-    prop !== "rowSelectedColor",
+    prop !== "rowSelectedColor" &&
+    prop !== "wrapText" &&
+    prop !== "ellipsis" &&
+    prop !== "maxWidth",
 };
 
 const BaseCellComponent = styled(
@@ -85,6 +91,9 @@ const BaseCellComponent = styled(
     fixed,
     isSelected,
     rowSelectedColor,
+    wrapText,
+    ellipsis,
+    maxWidth,
   }) => {
     const defaultBorderColor = convertHexToRGBA(
       theme?.palette?.primary?.dark,
@@ -143,14 +152,16 @@ const BaseCellComponent = styled(
       textTransform: textTransform,
       fontSize: fontSize || "1rem",
       fontFamily: theme.typography.body1.fontFamily,
+      whiteSpace: ellipsis ? "nowrap" : wrapText ? "normal" : "nowrap",
+      maxWidth: maxWidth,
+      overflow: ellipsis ? "hidden" : overFlow,
+      textOverflow: ellipsis ? "ellipsis" : textOverflow,
       position: isSticky || fixed ? "sticky" : "relative",
       top: isSticky ? "0" : undefined,
       left: fixed ? "0" : undefined,
       zIndex: fixed && isSticky ? 40 : fixed ? 30 : isSticky ? 10 : undefined,
       boxShadow: undefined,
       // boxShadow: shadows.length ? shadows.join(", ") : "none",
-      ...(overFlow ? { overflow: overFlow } : {}),
-      ...(textOverflow ? { textOverflow } : {}),
       "& .sort-icon": {
         opacity: isSortActive ? 1 : 0,
         transition: "opacity 0.2s",
