@@ -32,6 +32,7 @@ interface ILayoutAPI {
   setFiltering: TSetFiltering | null;
   pagination: IPagination | null;
   setPagination: TSetPagination | null;
+  stickyHeader?: boolean;
 }
 
 // *** EXPORT API ***
@@ -88,6 +89,7 @@ interface IHookAPI {
   selectedRows: IRow[] | null;
   clearSelectedRows: TClearSelectedRows;
   selectAllRows: TSelectAllRows;
+  stickyHeader?: boolean;
 }
 
 // *** FULL API ***

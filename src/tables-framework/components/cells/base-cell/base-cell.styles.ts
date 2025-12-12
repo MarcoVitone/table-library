@@ -25,6 +25,11 @@ interface IBaseCellProps {
   isSorted?: boolean;
   backgroundColorSort?: string;
   isSortActive?: boolean;
+  isSticky?: boolean;
+  isFirstRow?: boolean;
+  fixed?: boolean;
+  isSelected?: boolean;
+  rowSelectedColor?: string;
 }
 
 const stylesFromProps: IStyleFromProps = {
@@ -46,7 +51,12 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "isSorted" &&
     prop !== "backgroundColorSort" &&
     prop !== "isSortActive" &&
-    prop !== "showHeaderCheckbox",
+    prop !== "showHeaderCheckbox" &&
+    prop !== "isSticky" &&
+    prop !== "isFirstRow" &&
+    prop !== "fixedColumn" &&
+    prop !== "isSelected" &&
+    prop !== "rowSelectedColor",
 };
 
 const BaseCellComponent = styled(
@@ -72,25 +82,88 @@ const BaseCellComponent = styled(
     backgroundColorSort,
     isSortActive,
     theme,
+    isSticky,
+    isFirstRow,
+    fixed,
+    isSelected,
+    rowSelectedColor,
   }) => {
+    const defaultBorderColor = convertHexToRGBA(
+      theme?.palette?.primary?.dark,
+      0.6
+    );
+    const finalBorderColor = borderColor || defaultBorderColor;
+    const selectedStyles = {
+      outlineStyle: "none" as const,
+      outlineColor: theme.palette.secondary.dark,
+      outlineWidth: 1,
+      backgroundColor: rowSelectedColor || "rgba(0, 73, 135, 0.1)",
+    };
+    console.log({ isSelected });
+    // const shadows: string[] = [];
+
+    // if (!noTop && area !== "header") {
+    //   shadows.push(`inset 0 0.5px 0 0 ${finalBorderColor}`); // top: offset-y positivo
+    // } else if (!noTop && area === "header") {
+    //   shadows.push(`inset 0 1px 0 0 ${finalBorderColor}`); // top: offset-y positivo
+    // }
+    // if (!noRight && area !== "header") {
+    //   shadows.push(`inset 0.5px 0 0 0 ${finalBorderColor}`); // right: offset-x negativo
+    // } else if (!noRight && area === "header") {
+    //   shadows.push(`inset 1px 0 0 0 ${finalBorderColor}`); // right: offset-x negativo
+    // }
+    // if (!noBorder && area !== "header") {
+    //   shadows.push(`inset 0 -0.5px 0 0 ${finalBorderColor}`); // bottom: offset-y negativo
+    // } else if (!noBorder && area === "header") {
+    //   shadows.push(`inset 0 -1px 0 0 ${finalBorderColor}`); // bottom: offset-y negativo
+    // }
+    // if (!noLeft && area !== "header") {
+    //   shadows.push(`inset -0.5px 0 0 0 ${finalBorderColor}`); // left: offset-x positivo
+    // } else if (!noLeft && area === "header") {
+    //   shadows.push(`inset -1px 0 0 0 ${finalBorderColor}`); // left: offset-x positivo
+    // }
     return css({
-      border: noBorder
-        ? "none"
-        : `1px solid ${convertHexToRGBA(theme?.palette?.primary?.dark, 0.6)}`,
-      padding: padding ? padding : "0.1rem 0.5rem",
+      ...(noBorder
+        ? { border: "none" }
+        : {
+            borderLeft:
+              fixed || noLeft ? "none" : `1px solid ${finalBorderColor}`,
+            borderRight:
+              fixed || noRight ? "none" : `1px solid ${finalBorderColor}`,
+            borderTop:
+              isSticky || isFirstRow || noTop
+                ? "none"
+                : `1px solid ${finalBorderColor}`,
+            borderBottom:
+              fixed || isSticky ? "none" : `1px solid ${finalBorderColor}`,
+          }),
+      padding: padding || "0.1rem 0.5rem",
       color: fontColor || theme.palette.primary.dark,
-      borderLeft: noLeft ? "none" : undefined,
-      borderRight: noRight ? "none" : undefined,
-      borderTop: noTop ? "none" : undefined,
-      borderColor: borderColor ? borderColor : undefined,
       backgroundColor: isSorted
         ? backgroundColorSort
-        : backgroundColor || "transparent",
+        : backgroundColor || (backgroundColor && isSticky)
+        ? backgroundColor
+        : fixed && !backgroundColor
+        ? "#FFFFFF"
+        : "transparent",
       fontWeight: bold ? "bold" : "normal",
       textAlign: textPosition,
       textTransform: textTransform,
       fontSize: fontSize || "1rem",
       fontFamily: theme.typography.body1.fontFamily,
+      position: isSticky || fixed ? "sticky" : "relative",
+      top: isSticky ? "0" : undefined,
+      left: fixed ? "0" : undefined,
+      zIndex: fixed && isSticky ? 40 : fixed ? 30 : isSticky ? 10 : undefined,
+      boxShadow:
+        isSticky && !fixed && !noBorder
+          ? `inset 0 1px 0 0 ${finalBorderColor}, inset 0 -1px 0 0 ${finalBorderColor}`
+          : !isSticky && fixed && !noBorder
+          ? `inset 1px 0 0 0 ${finalBorderColor}`
+          : isSticky && fixed && !noBorder
+          ? `inset 1px 1px 0 0 ${finalBorderColor}, inset -1px -1px 0 0 ${finalBorderColor}`
+          : undefined,
+      // boxShadow: shadows.length ? shadows.join(", ") : "none",
       ...(overFlow ? { overflow: overFlow } : {}),
       ...(textOverflow ? { textOverflow } : {}),
       "& .sort-icon": {
@@ -100,6 +173,7 @@ const BaseCellComponent = styled(
       "&:hover .sort-icon": {
         opacity: 1,
       },
+      ...(isSelected ? selectedStyles : {}),
     });
   }
 );

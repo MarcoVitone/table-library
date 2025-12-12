@@ -1,5 +1,5 @@
 import type { ElementType, ReactNode } from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, isValidElement } from "react";
 import type { IBaseCellProps } from "../cells/base-cell/base-cell";
 import { BaseCell } from "../cells/base-cell/base-cell";
 import { ActionsCell } from "../cells/actions-cell/actions-cell";
@@ -11,6 +11,7 @@ import { Column } from "../table-parser/components/column/column";
 import { HeaderCell } from "../table-parser/components/header-cell/header-cell";
 import { BodyCell } from "../table-parser/components/body-cell/body-cell";
 import type { ITableProps } from "../table/table";
+import type { ITableRendererProps } from "../table-renderer/table-renderer";
 import { Table } from "../table/table";
 import { Pagination } from "../pagination/pagination";
 import { InfiniteScroll } from "../infinite-scroll/infinite-scroll";
@@ -45,6 +46,7 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   queryParam?: string;
   onHeaderClick?: (dataKey: string) => void;
   link?: ILinkConfig<T>;
+  fixed?: boolean;
 }
 
 export interface IPaginationConfig extends IPaginationCustomization {
@@ -78,6 +80,23 @@ interface IDynamicTableProps<T>
   onRowDoubleClick?: IRowNavigationConfig<T>;
   pagination?: IPaginationConfig;
   infiniteScroll?: IInfiniteScrollConfig;
+  maxHeight?: string | number;
+  stickyHeader?: boolean;
+  noBorder?: boolean;
+  externalBorderColor?: string;
+  rowSelectedColor?: string;
+  headerBorder?: {
+    top?: boolean;
+    bottom?: boolean;
+    right?: boolean;
+    left?: boolean;
+  };
+  bodyBorder?: {
+    top?: boolean;
+    bottom?: boolean;
+    right?: boolean;
+    left?: boolean;
+  };
 }
 
 const DynamicTable = <T extends object>({
@@ -87,13 +106,18 @@ const DynamicTable = <T extends object>({
   onRowDoubleClick,
   pagination: paginationConfig,
   infiniteScroll: infiniteScrollConfig,
+  maxHeight,
+  stickyHeader = true,
+  noBorder,
+  externalBorderColor,
+  rowSelectedColor,
   ...tableProps
 }: IDynamicTableProps<T>) => {
   const {
     enabled: paginationEnabled = false,
     position: paginationPosition = "bottom",
     alignment: paginationAlignment = "right",
-    limit: initialLimit = 10,
+    limit: initialLimit = 50,
     limitOptions = [5, 10, 25, 50],
     onPaginationChange,
     paginationComponent: customPaginationComponent,
@@ -234,9 +258,21 @@ const DynamicTable = <T extends object>({
         )
       : null;
 
+  const { before, after, ...passedTableProps } =
+    tableProps as ITableRendererProps<T>;
+
+  const renderNode = (node: ReactNode | undefined) => {
+    if (!node) return null;
+    if (isValidElement(node)) return node;
+    const Component = node as ElementType;
+    return <Component />;
+  };
+
   return (
     <div>
       {paginationPosition === "top" && paginationComponent}
+
+      {renderNode(before)}
 
       {infiniteScrollConfig?.enabled && (
         <InfiniteScroll
@@ -249,18 +285,32 @@ const DynamicTable = <T extends object>({
         />
       )}
       {/* Horizontal scroll wrapper */}
-      <div style={{ overflowX: "auto" }}>
+      <div
+        style={{
+          overflowX: "auto",
+          overflowY: maxHeight ? "auto" : undefined,
+          maxHeight,
+          ...(externalBorderColor
+            ? {
+                border: `1px solid ${externalBorderColor}`,
+                boxSizing: "border-box",
+                borderRadius: "8px",
+              }
+            : {}),
+        }}
+      >
         <Table
+          stickyHeader={stickyHeader}
           data={paginatedData}
           onRowSelectionChange={onRowSelectionChange}
           onRowDoubleClick={onRowDoubleClick}
-          {...tableProps}
+          {...passedTableProps}
         >
           {columns.map((col) => {
             const CellComponent = col.component || getComponentByType(col.type);
             const HeaderComponent =
               col.type === "checkbox" ? CheckboxCell : BaseCell;
-
+            const fixed = col.fixed || false;
             return (
               <Column
                 key={col.id}
@@ -278,6 +328,8 @@ const DynamicTable = <T extends object>({
                         ? () => col.onHeaderClick?.(col.dataKey || col.id)
                         : undefined,
                       queryParam: col.queryParam,
+                      fixed,
+                      noBorder,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
@@ -285,7 +337,12 @@ const DynamicTable = <T extends object>({
                   dataKey={col.dataKey || col.id}
                   cell={[
                     CellComponent,
-                    { ...col.bodyProps } as Partial<IBaseCellProps>,
+                    {
+                      ...col.bodyProps,
+                      fixed,
+                      noBorder,
+                      rowSelectedColor,
+                    } as Partial<IBaseCellProps>,
                   ]}
                 />
               </Column>
@@ -293,6 +350,7 @@ const DynamicTable = <T extends object>({
           })}
         </Table>
       </div>
+      {renderNode(after)}
       {paginationPosition === "bottom" && paginationComponent}
     </div>
   );

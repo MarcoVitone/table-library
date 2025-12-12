@@ -54,24 +54,9 @@ const BaseTr = styled(
 
     ...(isLoading ? loadingStyles : {}),
 
-    ...(!isSelected
-      ? {
-          // "&::before": {
-          //   content: '""',
-          //   position: "absolute",
-          //   top: "0.5rem",
-          //   bottom: "0.5rem",
-          //   left: "0.375rem",
-          //   width: "0.25rem",
-          //   borderRadius: "0.125rem",
-          //   backgroundColor: theme.palette.primary.light,
-          // },
-        }
-      : {}),
-
     ...(isConfigured
       ? {
-          borderBottom: "1px solid #FFF",
+          borderBottom: "1px solid #888",
           backgroundColor: "rgba(0, 73, 135, 0.1)",
           position: "relative",
 

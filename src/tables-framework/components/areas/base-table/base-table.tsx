@@ -13,7 +13,11 @@ const BaseTable: FC<IBaseTableProps> = ({
 }) => {
   return (
     <Component
-      style={{ borderCollapse: "collapse", width: "100%" }}
+      style={{
+        borderCollapse: "separate",
+        borderSpacing: "0",
+        width: "100%",
+      }}
       className={className}
     >
       {children}

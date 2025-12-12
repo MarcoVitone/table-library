@@ -18,7 +18,6 @@ interface IProps {
 function useHeader({ columns, cell: cellCombo, row: rowCombo }: IProps) {
   return useMemo<IRowGroup>(() => {
     const rows: IRow[] = [];
-
     const paths = new Map<string, string>();
 
     columns.forEach((column) => {

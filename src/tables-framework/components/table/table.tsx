@@ -33,7 +33,6 @@ const Table = <TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T>({
 }: ITableProps<TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T>): JSX.Element => {
   const cells = useCustomElements(customCells, BaseCell);
   const rows = useCustomElements(customRows, BaseRow);
-
   return (
     <ParserComponent
       {...rest}

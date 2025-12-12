@@ -31,6 +31,7 @@ function useTable(data?: ICell | IRow): TFullTableAPI {
     rowsStatus,
     setRowsStatus,
     source,
+    stickyHeader,
   } = useContext(TableContext);
 
   const columnLayout = useMemo<IColumnLayout | null>(() => {
@@ -186,6 +187,7 @@ function useTable(data?: ICell | IRow): TFullTableAPI {
     selectedRows,
     selectAllRows,
     source,
+    stickyHeader,
   };
 }
 

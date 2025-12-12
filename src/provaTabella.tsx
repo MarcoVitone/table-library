@@ -4,11 +4,10 @@ import { Delete, Edit, Visibility } from "@mui/icons-material";
 
 import type { IColumnConfig } from "./tables-framework/components/dynamic-table/dynamic-table";
 import { DynamicTable } from "./tables-framework/components/dynamic-table/dynamic-table";
-import { EmptyBody } from "./tables-framework/components";
-import { useTable } from "./tables-framework/hooks/use-table/use-table";
-import type { IFilter } from "./tables-framework/defines/common.types";
+import { EmptyBody, useTable } from "./tables-framework/components";
 import { MOCK_USERS, type IMockUser } from "./tables-framework/mock-data";
 import { defaultTheme } from "./tables-framework/theme/theme";
+import type { IFilter } from "./tables-framework/defines/common.types";
 
 type TFilterState = {
   search: string;
@@ -202,6 +201,7 @@ const ProvaTabella = () => {
         id: "checkbox",
         label: "",
         type: "checkbox",
+        fixed: true,
         // headerProps abilita il checkbox master e lo stile dell'intestazione
         headerProps: {
           textAlignment: "left",
@@ -556,7 +556,9 @@ const ProvaTabella = () => {
       columns={columns}
       before={<TableControls filters={filters} onFiltersChange={setFilters} />}
       empty={<EmptyBody content="Nessun utente trovato" />}
-      showFooter
+      maxHeight={500}
+      // noBorder={true}
+      // externalBorderColor={"#888"}
       onRowSelectionChange={(data) => {
         console.log("Selected Elements:", data);
       }}
@@ -569,7 +571,6 @@ const ProvaTabella = () => {
         enabled: true,
         position: "top",
         alignment: "right",
-        limit: 10,
         limitOptions: [5, 10, 15, 25, 50],
         onPaginationChange: ({ limit, offset }) => {
           console.log({ limit, offset });
@@ -598,6 +599,7 @@ const ProvaTabella = () => {
         threshold: 120,
         endMessage: "Hai caricato tutti gli utenti disponibili.",
       }}
+      rowSelectedColor="#FF0000"
     />
   );
 };

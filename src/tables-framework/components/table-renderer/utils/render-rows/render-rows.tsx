@@ -6,12 +6,14 @@ function renderRows<T>(
   rows: IRow[],
   onRowDoubleClick?: import("../../../../defines/common.types").IRowNavigationConfig<T>
 ): (React.ReactElement | null)[] {
-  return rows.map((row) => {
+  return rows.map((row, rowIndex) => {
+    // <-- Aggiungi rowIndex qui
     if (!row.component) {
       return null;
     }
 
     let isEmptyRow = true;
+    const isFirstBodyRow = row.area === "body" && rowIndex === 0; // <-- Calcola se è la prima riga del body
 
     const children = row.cells.map((cell, index) => {
       if (!cell.component) {
@@ -40,6 +42,7 @@ function renderRows<T>(
             data={cell}
             area={row.area}
             index={index}
+            noTop={isFirstBodyRow}
           >
             <LinkWrapper
               config={row.area === "body" ? cell.column.link : undefined}

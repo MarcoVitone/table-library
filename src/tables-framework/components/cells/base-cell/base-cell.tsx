@@ -44,6 +44,9 @@ interface IBaseCellProps extends ICellProps {
   onSortClick?: (dataKey: string, dir: TSortDirection) => void;
   showHeaderCheckbox?: boolean;
   onHeaderClick?: (e: React.MouseEvent) => void;
+  isStickyCheckbox?: boolean;
+  isFirstRow?: boolean;
+  fixed?: boolean;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -74,11 +77,15 @@ const BaseCell: FC<IBaseCellProps> = ({
   data,
   onHeaderClick,
   queryParam,
+  isStickyCheckbox,
   ...rest
 }) => {
   const type = variant || area;
+
   const { palette } = useTheme();
-  const { sorting, setSorting } = useTable();
+  const { sorting, setSorting, stickyHeader, rowStatus } = useTable(data);
+
+  const isSelected = !!rowStatus && rowStatus.isSelected;
 
   const dataKey = useMemo(() => {
     return data?.column?.dataKey;
@@ -190,6 +197,11 @@ const BaseCell: FC<IBaseCellProps> = ({
         cursor: onHeaderClick ? "pointer" : "default",
       }}
       data-query-param={queryParam}
+      isSticky={
+        (type === "header" || area === "header") &&
+        (isStickyCheckbox || stickyHeader)
+      }
+      isSelected={isSelected}
       {...rest}
     >
       {sortable ? (

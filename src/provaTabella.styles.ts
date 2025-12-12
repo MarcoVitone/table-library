@@ -20,10 +20,6 @@ const Stack = styled(MuiStack)(({ theme }) =>
       height: "2.5rem!important",
       padding: "0",
     },
-    "& table tbody": {
-      height: "100%",
-      overflowY: "auto",
-    },
     "& table tbody::-webkit-scrollbar": {
       width: "0.375rem",
     },

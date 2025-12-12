@@ -29,6 +29,7 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
     clearSelectedRows,
     selectedRows,
     source,
+    stickyHeader,
   } = useTable(data);
 
   const onChangeHandler = useCallback<
@@ -69,7 +70,13 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
   }
 
   return (
-    <BaseCell {...rest} area={area} data={data} variant={"body"}>
+    <BaseCell
+      {...rest}
+      area={area}
+      data={data}
+      variant={"body"}
+      isStickyCheckbox={area === "header" && showHeaderCheckbox && stickyHeader}
+    >
       <TableCheckbox
         id={data.row.source.id}
         onChange={onChangeHandler}

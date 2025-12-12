@@ -14,10 +14,10 @@ import type { ISource } from "../../defines/common.types.ts";
 import { BaseBody } from "../areas/base-body/base-body.tsx";
 import { BaseFooter } from "../areas/base-footer/base-footer.tsx";
 import { BaseHeader } from "../areas/base-header/base-header.tsx";
-import { BaseTable } from "../areas/base-table/base-table.tsx";
 import type { TRowStatusMapper } from "./hooks/use-status/use-status.ts";
 import { useStatus } from "./hooks/use-status/use-status.ts";
 import { renderRows } from "./utils/render-rows/render-rows.tsx";
+import { BaseTable } from "../areas/base-table/base-table.tsx";
 
 const defaultAPI = {
   tableLayout: null,
@@ -34,6 +34,7 @@ const defaultAPI = {
   rowsStatus: null,
   setRowsStatus: null,
   source: null,
+  stickyHeader: true,
 };
 
 const TableContext = createContext<TTableRendererAPI>(defaultAPI);
@@ -53,6 +54,7 @@ interface ITableRendererProps<T = unknown> {
   showFooter?: boolean;
   onRowSelectionChange?: (data: T[]) => void;
   onRowDoubleClick?: import("../../defines/common.types.ts").IRowNavigationConfig<T>;
+  stickyHeader?: boolean;
 }
 
 const TableRenderer = <T,>({
@@ -67,9 +69,10 @@ const TableRenderer = <T,>({
   rowStatusMapper = undefined,
   parserAPI = {},
   container: Container = Fragment,
-  showFooter = true,
+  showFooter = false,
   onRowSelectionChange,
   onRowDoubleClick,
+  stickyHeader = true,
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -153,8 +156,9 @@ const TableRenderer = <T,>({
       rowsStatus,
       setRowsStatus,
       source,
+      stickyHeader,
     };
-  }, [parserAPI, rowsStatus, setRowsStatus, source]);
+  }, [parserAPI, rowsStatus, setRowsStatus, source, stickyHeader]);
 
   return (
     <TableContext.Provider value={rendererAPI}>
