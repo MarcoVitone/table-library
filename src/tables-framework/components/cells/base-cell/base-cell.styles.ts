@@ -3,6 +3,7 @@ import { css, styled } from "@mui/material/styles";
 import type {
   TAlignment,
   TtextTransform,
+  IBorderConfig,
 } from "../../../defines/common.types.ts";
 import type { IStyleFromProps } from "../../../theme/common.types.ts";
 import { convertHexToRGBA } from "../../../utils/index.ts";
@@ -33,6 +34,8 @@ interface IBaseCellProps {
   wrapText?: boolean;
   ellipsis?: boolean;
   maxWidth?: string | number;
+  borderRight?: IBorderConfig;
+  borderBottom?: IBorderConfig;
 }
 
 const stylesFromProps: IStyleFromProps = {
@@ -63,7 +66,9 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "rowSelectedColor" &&
     prop !== "wrapText" &&
     prop !== "ellipsis" &&
-    prop !== "maxWidth",
+    prop !== "maxWidth" &&
+    prop !== "borderRight" &&
+    prop !== "borderBottom",
 };
 
 const BaseCellComponent = styled(
@@ -71,8 +76,6 @@ const BaseCellComponent = styled(
   stylesFromProps
 )<IBaseCellProps>(
   ({
-    noRight,
-    noBorder,
     borderColor,
     bold,
     textPosition = "left",
@@ -94,6 +97,8 @@ const BaseCellComponent = styled(
     wrapText,
     ellipsis,
     maxWidth,
+    borderRight,
+    borderBottom,
   }) => {
     const defaultBorderColor = convertHexToRGBA(
       theme?.palette?.primary?.dark,
@@ -107,37 +112,20 @@ const BaseCellComponent = styled(
       backgroundColor: rowSelectedColor || "rgba(0, 73, 135, 0.1)",
     };
     console.log({ isSelected });
-    // const shadows: string[] = [];
 
-    // if (!noTop && area !== "header") {
-    //   shadows.push(`inset 0 0.5px 0 0 ${finalBorderColor}`); // top: offset-y positivo
-    // } else if (!noTop && area === "header") {
-    //   shadows.push(`inset 0 1px 0 0 ${finalBorderColor}`); // top: offset-y positivo
-    // }
-    // if (!noRight && area !== "header") {
-    //   shadows.push(`inset 0.5px 0 0 0 ${finalBorderColor}`); // right: offset-x negativo
-    // } else if (!noRight && area === "header") {
-    //   shadows.push(`inset 1px 0 0 0 ${finalBorderColor}`); // right: offset-x negativo
-    // }
-    // if (!noBorder && area !== "header") {
-    //   shadows.push(`inset 0 -0.5px 0 0 ${finalBorderColor}`); // bottom: offset-y negativo
-    // } else if (!noBorder && area === "header") {
-    //   shadows.push(`inset 0 -1px 0 0 ${finalBorderColor}`); // bottom: offset-y negativo
-    // }
-    // if (!noLeft && area !== "header") {
-    //   shadows.push(`inset -0.5px 0 0 0 ${finalBorderColor}`); // left: offset-x positivo
-    // } else if (!noLeft && area === "header") {
-    //   shadows.push(`inset -1px 0 0 0 ${finalBorderColor}`); // left: offset-x positivo
-    // }
     return css({
-      ...(noBorder
-        ? { border: "none" }
-        : {
-            borderLeft: "none",
-            borderRight: noRight ? "none" : `1px solid ${finalBorderColor}`,
-            borderTop: "none",
-            borderBottom: `1px solid ${finalBorderColor}`,
-          }),
+      borderLeft: "none",
+      borderTop: "none",
+      borderRight: borderRight?.show
+        ? `${borderRight.width || "1px"} ${borderRight.style || "solid"} ${
+            borderRight.color || finalBorderColor
+          }`
+        : "none",
+      borderBottom: borderBottom?.show
+        ? `${borderBottom.width || "1px"} ${borderBottom.style || "solid"} ${
+            borderBottom.color || finalBorderColor
+          }`
+        : "none",
       padding: padding || "0.1rem 0.5rem",
       color: fontColor || theme.palette.primary.dark,
       backgroundColor: isSorted

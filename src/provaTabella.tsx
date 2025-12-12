@@ -557,8 +557,18 @@ const ProvaTabella = () => {
       before={<TableControls filters={filters} onFiltersChange={setFilters} />}
       empty={<EmptyBody content="Nessun utente trovato" />}
       maxHeight={500}
-      // noBorder={true}
-      // externalBorderColor={"#888"}
+      headerBorder={{
+        show: true,
+        color: defaultTheme.palette.secondary.dark,
+        width: "1px",
+        style: "solid",
+      }}
+      bodyBorder={{
+        show: true,
+        color: "#e0e0e0",
+        width: "1px",
+        style: "solid",
+      }}
       onRowSelectionChange={(data) => {
         console.log("Selected Elements:", data);
       }}
