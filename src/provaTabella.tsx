@@ -418,6 +418,13 @@ const ProvaTabella = () => {
           padding: "0.3125rem 0.5rem",
           sortable: true,
           backgroundColorSort: defaultTheme.palette.primary.light,
+          // VERIFICATION: Add a specific TOP border to verify 4-side control
+          borderTop: {
+            show: true,
+            color: "red",
+            width: "3px",
+            style: "solid",
+          },
         },
         // bodyProps centra i numeri per leggibilità
         bodyProps: {
@@ -442,12 +449,16 @@ const ProvaTabella = () => {
           padding: "0.3125rem 0.5rem",
           sortable: true,
           backgroundColorSort: defaultTheme.palette.primary.light,
+          // VERIFICATION: Override global border to hide it for this column header
+          borderBottom: { show: false },
         },
         // bodyProps mostra numeri centrati
         bodyProps: {
           textAlignment: "center",
           fontColor: defaultTheme.palette.neutral.main,
           fontSize: "0.6875rem",
+          // VERIFICATION: Override global border to hide it for this column body
+          borderBottom: { show: false },
         },
       },
       {

@@ -52,6 +52,8 @@ interface IBaseCellProps extends ICellProps {
   maxWidth?: string | number;
   borderRight?: import("../../../defines/common.types.ts").IBorderConfig;
   borderBottom?: import("../../../defines/common.types.ts").IBorderConfig;
+  borderTop?: import("../../../defines/common.types.ts").IBorderConfig;
+  borderLeft?: import("../../../defines/common.types.ts").IBorderConfig;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -88,6 +90,8 @@ const BaseCell: FC<IBaseCellProps> = ({
   maxWidth,
   borderRight,
   borderBottom,
+  borderTop,
+  borderLeft,
   ...rest
 }) => {
   const type = variant || area;
@@ -217,6 +221,8 @@ const BaseCell: FC<IBaseCellProps> = ({
       maxWidth={maxWidth}
       borderRight={borderRight}
       borderBottom={borderBottom}
+      borderTop={borderTop}
+      borderLeft={borderLeft}
       {...rest}
     >
       {sortable ? (

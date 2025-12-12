@@ -321,8 +321,11 @@ const DynamicTable = <T extends object>({
                       queryParam: col.queryParam,
                       fixed,
                       // Pass headerBorder config to both right/bottom for a grid effect if valid
-                      borderRight: headerBorder,
-                      borderBottom: headerBorder,
+                      borderRight: col.headerProps?.borderRight ?? headerBorder,
+                      borderBottom:
+                        col.headerProps?.borderBottom ?? headerBorder,
+                      borderTop: col.headerProps?.borderTop, // Opt-in only
+                      borderLeft: col.headerProps?.borderLeft, // Opt-in only
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
@@ -335,8 +338,10 @@ const DynamicTable = <T extends object>({
                       fixed,
                       rowSelectedColor,
                       // Pass bodyBorder config to both right/bottom for a grid effect if valid
-                      borderRight: bodyBorder,
-                      borderBottom: bodyBorder,
+                      borderRight: col.bodyProps?.borderRight ?? bodyBorder,
+                      borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
+                      borderTop: col.bodyProps?.borderTop, // Opt-in only
+                      borderLeft: col.bodyProps?.borderLeft, // Opt-in only
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
