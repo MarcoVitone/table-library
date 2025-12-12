@@ -1,8 +1,8 @@
-import type { FC } from "react";
-import { IconButton } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
+import type { ButtonProps } from "@mui/material";
+import type { FC, ReactNode } from "react";
 import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
 import { BaseCell } from "../base-cell/base-cell.tsx";
-import type { TExtendedButtonProps } from "../../table-sub-components/button/button.tsx";
 import { useTable } from "../../../hooks/use-table/use-table.ts";
 
 interface IContext {
@@ -11,7 +11,7 @@ interface IContext {
 }
 
 interface IAction {
-  icon: TExtendedButtonProps["icon"];
+  icon?: ReactNode;
   onAction: (
     item: Record<string, unknown>,
     context: IContext
@@ -21,7 +21,10 @@ interface IAction {
     context: IContext
   ) => void | Promise<boolean>;
   onEnd?: (item: Record<string, unknown>, context: IContext) => void;
-  variant?: TExtendedButtonProps["variant"];
+  variant?: ButtonProps["variant"];
+  component?: "icon" | "button";
+  label?: string;
+  color?: ButtonProps["color"];
 }
 
 interface IActionsCellProps extends IBaseCellProps {
@@ -48,54 +51,87 @@ const ActionsCell: FC<IActionsCellProps> = ({
           gap: 4,
         }}
       >
-        {actions.map(({ icon, onAction, onPrompt, onEnd }, index) => {
-          return (
-            <IconButton
-              key={index + index}
-              disabled={isLoading}
-              onClick={async () => {
-                const context = {
-                  isSelected: rowStatus?.isSelected,
-                  isPinned: rowStatus?.isPinned,
-                };
+        {actions.map(
+          (
+            {
+              icon,
+              onAction,
+              onPrompt,
+              onEnd,
+              component = "icon",
+              label: actionLabel,
+              color,
+              variant,
+            },
+            index
+          ) => {
+            const handleAction = async () => {
+              const context = {
+                isSelected: rowStatus?.isSelected,
+                isPinned: rowStatus?.isPinned,
+              };
 
-                const res = onPrompt
-                  ? await onPrompt(data.row.source.full, context)
-                  : true;
+              const res = onPrompt
+                ? await onPrompt(data.row.source.full, context)
+                : true;
 
-                if (!res) {
-                  return;
-                }
+              if (!res) {
+                return;
+              }
 
-                const val = onAction(data.row.source.full, context);
+              const val = onAction(data.row.source.full, context);
 
-                if (val instanceof Promise) {
-                  setRowStatus({ state: "pending" });
+              if (val instanceof Promise) {
+                setRowStatus({ state: "pending" });
 
-                  await val;
+                await val;
 
-                  setRowStatus({ state: "ready" });
-                }
+                setRowStatus({ state: "ready" });
+              }
 
-                if (onEnd) {
-                  onEnd(data.row.source.full, context);
-                }
-              }}
-            >
-              {labelAfter ? (
-                <>
-                  {icon}
-                  {label}
-                </>
-              ) : (
-                <>
-                  {label}
-                  {icon}
-                </>
-              )}
-            </IconButton>
-          );
-        })}
+              if (onEnd) {
+                onEnd(data.row.source.full, context);
+              }
+            };
+
+            if (component === "button") {
+              return (
+                <Button
+                  key={index + index}
+                  disabled={isLoading}
+                  onClick={handleAction}
+                  startIcon={icon}
+                  color={color}
+                  variant={variant || "contained"}
+                  size="small"
+                >
+                  {actionLabel || label}
+                </Button>
+              );
+            }
+
+            return (
+              <IconButton
+                key={index + index}
+                disabled={isLoading}
+                onClick={handleAction}
+                color={color}
+              >
+                {labelAfter ? (
+                  <>
+                    {icon}
+                    {label}
+                  </>
+                ) : (
+                  <>
+                    {label}
+                    {icon}
+                  </>
+                )}
+              </IconButton>
+            );
+          }
+        )}
       </span>
     </BaseCell>
   );

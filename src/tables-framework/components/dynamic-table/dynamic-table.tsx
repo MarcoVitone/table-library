@@ -7,6 +7,7 @@ import { CheckboxCell } from "../cells/checkbox-cell/checkbox-cell";
 import { NumCell } from "../cells/num-cell/num-cell";
 import { StatusCell } from "../cells/status-cell/status-cell";
 import { DateCell } from "../cells/date-cell/date-cell";
+import { CustomCell } from "../cells/custom-cell/custom-cell";
 import { Column } from "../table-parser/components/column/column";
 import { HeaderCell } from "../table-parser/components/header-cell/header-cell";
 import { BodyCell } from "../table-parser/components/body-cell/body-cell";
@@ -39,7 +40,14 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   id: string;
   label: string;
   dataKey?: string;
-  type?: "text" | "action" | "checkbox" | "date" | "number" | "status";
+  type?:
+    | "text"
+    | "action"
+    | "checkbox"
+    | "date"
+    | "number"
+    | "status"
+    | "custom";
   width?: string;
   headerProps?: TUserBaseCellProps;
   bodyProps?: TUserBaseCellProps;
@@ -217,6 +225,8 @@ const DynamicTable = <T extends object>({
         return StatusCell;
       case "date":
         return DateCell;
+      case "custom":
+        return CustomCell;
       case "text":
       default:
         return BaseCell;
@@ -298,7 +308,7 @@ const DynamicTable = <T extends object>({
           {...passedTableProps}
         >
           {columns.map((col) => {
-            const CellComponent = col.component || getComponentByType(col.type);
+            const CellComponent = getComponentByType(col.type);
             const HeaderComponent =
               col.type === "checkbox" ? CheckboxCell : BaseCell;
             const fixed = col.fixed || false;
@@ -337,6 +347,7 @@ const DynamicTable = <T extends object>({
                       ...col.bodyProps,
                       fixed,
                       rowSelectedColor,
+                      component: col.component,
                       // Pass bodyBorder config to both right/bottom for a grid effect if valid
                       borderRight: col.bodyProps?.borderRight ?? bodyBorder,
                       borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
