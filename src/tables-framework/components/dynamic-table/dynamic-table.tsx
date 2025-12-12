@@ -8,6 +8,7 @@ import { NumCell } from "../cells/num-cell/num-cell";
 import { StatusCell } from "../cells/status-cell/status-cell";
 import { DateCell } from "../cells/date-cell/date-cell";
 import { CustomCell } from "../cells/custom-cell/custom-cell";
+import { InputCell } from "../cells/input-cell/input-cell";
 import { Column } from "../table-parser/components/column/column";
 import { HeaderCell } from "../table-parser/components/header-cell/header-cell";
 import { BodyCell } from "../table-parser/components/body-cell/body-cell";
@@ -47,7 +48,11 @@ export interface IColumnConfig<T = Record<string, unknown>> {
     | "date"
     | "number"
     | "status"
-    | "custom";
+    | "custom"
+    | "input";
+  inputType?: import("../cells/input-cell/input-cell").TInputType;
+  inputHeight?: string;
+  inputWidth?: string;
   width?: string;
   headerProps?: TUserBaseCellProps;
   bodyProps?: TUserBaseCellProps;
@@ -95,6 +100,7 @@ interface IDynamicTableProps<T>
   rowSelectedColor?: string;
   headerBorder?: IBorderConfig;
   bodyBorder?: IBorderConfig;
+  onDataChange?: (newData: T[], updatedRow: T) => void;
 }
 
 const DynamicTable = <T extends object>({
@@ -110,6 +116,7 @@ const DynamicTable = <T extends object>({
   rowSelectedColor,
   headerBorder,
   bodyBorder,
+  onDataChange,
   ...tableProps
 }: IDynamicTableProps<T>) => {
   const {
@@ -213,6 +220,29 @@ const DynamicTable = <T extends object>({
     onPaginationChange?.({ limit: newLimit, offset: 0 });
   };
 
+  const handleCellChange = (
+    rowId: string,
+    colKey: string,
+    newValue: string | number | boolean
+  ) => {
+    if (!onDataChange) return;
+
+    // Find the row to update
+    const rowIndex = data.findIndex(
+      (item) =>
+        (item as Record<string, unknown>).id === rowId ||
+        (item as Record<string, unknown>)._id === rowId
+    );
+
+    if (rowIndex === -1) return;
+
+    const updatedRow = { ...data[rowIndex], [colKey]: newValue };
+    const newData = [...data];
+    newData[rowIndex] = updatedRow;
+
+    onDataChange(newData, updatedRow);
+  };
+
   const getComponentByType = (type: string = "text") => {
     switch (type) {
       case "action":
@@ -227,6 +257,8 @@ const DynamicTable = <T extends object>({
         return DateCell;
       case "custom":
         return CustomCell;
+      case "input":
+        return InputCell;
       case "text":
       default:
         return BaseCell;
@@ -353,6 +385,23 @@ const DynamicTable = <T extends object>({
                       borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
                       borderTop: col.bodyProps?.borderTop, // Opt-in only
                       borderLeft: col.bodyProps?.borderLeft, // Opt-in only
+                      inputType: col.inputType,
+                      inputHeight: col.inputHeight,
+                      inputWidth: col.inputWidth,
+                      padding:
+                        col.type === "input" ? "0.1rem 0.25rem" : undefined,
+                      onCellChange:
+                        col.type === "input"
+                          ? (
+                              val: string | number | boolean,
+                              cellData: import("../../defines/common.types").ICell
+                            ) =>
+                              handleCellChange(
+                                cellData.row.source.id,
+                                col.dataKey || col.id,
+                                val
+                              )
+                          : undefined,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
