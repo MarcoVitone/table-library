@@ -4,7 +4,11 @@ import { Delete, Edit, Visibility } from "@mui/icons-material";
 
 import type { IColumnConfig } from "./tables-framework/components/dynamic-table/dynamic-table";
 import { DynamicTable } from "./tables-framework/components/dynamic-table/dynamic-table";
-import { EmptyBody, useTable } from "./tables-framework/components";
+import {
+  EmptyBody,
+  useTable,
+  type IBaseCellProps,
+} from "./tables-framework/components";
 import { MOCK_USERS, type IMockUser } from "./tables-framework/mock-data";
 import { defaultTheme } from "./tables-framework/theme/theme";
 import type { IFilter } from "./tables-framework/defines/common.types";
@@ -195,6 +199,36 @@ const ProvaTabella = () => {
     }, 350);
   }, [hasMore, isLoadingMore]);
 
+  // Esempio di componente custom semplice
+  const Peppe: FC<IBaseCellProps> = ({ data }) => {
+    return (
+      <div style={{ color: "blue", fontWeight: "bold" }}>
+        {String(data.row.source.flat.department)} (Custom)
+      </div>
+    );
+  };
+
+  const CityWithButton: FC<IBaseCellProps> = ({ data }) => {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <span>{String(data.value)}</span>
+        <button
+          type="button"
+          onClick={() => {
+            console.log(data.row.source.full);
+          }}
+          style={{
+            padding: "0.25rem 0.5rem",
+            fontSize: "0.75rem",
+            cursor: "pointer",
+          }}
+        >
+          Log Info
+        </button>
+      </div>
+    );
+  };
+
   const columns: IColumnConfig<IMockUser>[] = useMemo(
     () => [
       {
@@ -340,7 +374,8 @@ const ProvaTabella = () => {
         id: "department",
         label: "Dipartimento",
         dataKey: "department",
-        type: "text",
+        type: "custom", // Changed to custom
+        component: Peppe, // Added component
         // headerProps controlla allineamento e casing header
         headerProps: {
           textAlignment: "left",
@@ -361,7 +396,8 @@ const ProvaTabella = () => {
         id: "city",
         label: "Città",
         dataKey: "city",
-        type: "text",
+        type: "custom",
+        component: CityWithButton,
         // headerProps per controllare estetica dell'intestazione
         headerProps: {
           textAlignment: "left",
@@ -543,6 +579,10 @@ const ProvaTabella = () => {
             },
             {
               icon: <Delete fontSize="small" />,
+              component: "button",
+              label: "Elimina",
+              color: "error",
+              variant: "contained",
               onPrompt: () =>
                 Promise.resolve(
                   window.confirm("Confermi l'eliminazione dell'utente?")
