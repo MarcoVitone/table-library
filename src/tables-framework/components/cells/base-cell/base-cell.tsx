@@ -47,6 +47,11 @@ interface IBaseCellProps extends ICellProps {
   isStickyCheckbox?: boolean;
   isFirstRow?: boolean;
   fixed?: boolean;
+  wrapText?: boolean;
+  ellipsis?: boolean;
+  maxWidth?: string | number;
+  borderRight?: import("../../../defines/common.types.ts").IBorderConfig;
+  borderBottom?: import("../../../defines/common.types.ts").IBorderConfig;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -78,6 +83,11 @@ const BaseCell: FC<IBaseCellProps> = ({
   onHeaderClick,
   queryParam,
   isStickyCheckbox,
+  wrapText,
+  ellipsis,
+  maxWidth,
+  borderRight,
+  borderBottom,
   ...rest
 }) => {
   const type = variant || area;
@@ -202,6 +212,11 @@ const BaseCell: FC<IBaseCellProps> = ({
         (isStickyCheckbox || stickyHeader)
       }
       isSelected={isSelected}
+      wrapText={wrapText}
+      ellipsis={ellipsis}
+      maxWidth={maxWidth}
+      borderRight={borderRight}
+      borderBottom={borderBottom}
       {...rest}
     >
       {sortable ? (

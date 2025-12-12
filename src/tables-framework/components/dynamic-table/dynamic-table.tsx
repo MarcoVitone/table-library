@@ -28,9 +28,10 @@ import type {
   IRowNavigationConfig,
   IUnknownProps,
   TRouterType,
+  IBorderConfig,
 } from "../../defines/common.types";
 
-export type { ILinkConfig, IRowNavigationConfig, TRouterType };
+export type { ILinkConfig, IRowNavigationConfig, TRouterType, IBorderConfig };
 
 type TUserBaseCellProps = Partial<Omit<IBaseCellProps, keyof ICellProps>>;
 
@@ -82,21 +83,10 @@ interface IDynamicTableProps<T>
   infiniteScroll?: IInfiniteScrollConfig;
   maxHeight?: string | number;
   stickyHeader?: boolean;
-  noBorder?: boolean;
   externalBorderColor?: string;
   rowSelectedColor?: string;
-  headerBorder?: {
-    top?: boolean;
-    bottom?: boolean;
-    right?: boolean;
-    left?: boolean;
-  };
-  bodyBorder?: {
-    top?: boolean;
-    bottom?: boolean;
-    right?: boolean;
-    left?: boolean;
-  };
+  headerBorder?: IBorderConfig;
+  bodyBorder?: IBorderConfig;
 }
 
 const DynamicTable = <T extends object>({
@@ -106,11 +96,12 @@ const DynamicTable = <T extends object>({
   onRowDoubleClick,
   pagination: paginationConfig,
   infiniteScroll: infiniteScrollConfig,
-  maxHeight,
   stickyHeader = true,
-  noBorder,
   externalBorderColor,
+  maxHeight,
   rowSelectedColor,
+  headerBorder,
+  bodyBorder,
   ...tableProps
 }: IDynamicTableProps<T>) => {
   const {
@@ -329,7 +320,9 @@ const DynamicTable = <T extends object>({
                         : undefined,
                       queryParam: col.queryParam,
                       fixed,
-                      noBorder,
+                      // Pass headerBorder config to both right/bottom for a grid effect if valid
+                      borderRight: headerBorder,
+                      borderBottom: headerBorder,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
@@ -340,8 +333,10 @@ const DynamicTable = <T extends object>({
                     {
                       ...col.bodyProps,
                       fixed,
-                      noBorder,
                       rowSelectedColor,
+                      // Pass bodyBorder config to both right/bottom for a grid effect if valid
+                      borderRight: bodyBorder,
+                      borderBottom: bodyBorder,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />

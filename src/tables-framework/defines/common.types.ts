@@ -295,3 +295,24 @@ type TDirection = "row" | "row-reverse";
 type TAlignment = "left" | "right" | "center";
 
 type TtextTransform = "capitalize" | "uppercase" | "lowercase" | "none";
+
+type TBorderStyle =
+  | "solid"
+  | "dashed"
+  | "dotted"
+  | "double"
+  | "groove"
+  | "ridge"
+  | "inset"
+  | "outset"
+  | "none"
+  | "hidden";
+
+interface IBorderConfig {
+  show?: boolean;
+  color?: string;
+  width?: string;
+  style?: TBorderStyle;
+}
+
+export type { IBorderConfig, TBorderStyle };
