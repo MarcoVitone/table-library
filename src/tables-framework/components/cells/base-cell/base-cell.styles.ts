@@ -54,6 +54,7 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "showHeaderCheckbox" &&
     prop !== "isSticky" &&
     prop !== "isFirstRow" &&
+    prop !== "fixed" &&
     prop !== "fixedColumn" &&
     prop !== "isSelected" &&
     prop !== "rowSelectedColor",
@@ -64,9 +65,7 @@ const BaseCellComponent = styled(
   stylesFromProps
 )<IBaseCellProps>(
   ({
-    noLeft,
     noRight,
-    noTop,
     noBorder,
     borderColor,
     bold,
@@ -83,7 +82,6 @@ const BaseCellComponent = styled(
     isSortActive,
     theme,
     isSticky,
-    isFirstRow,
     fixed,
     isSelected,
     rowSelectedColor,
@@ -126,16 +124,10 @@ const BaseCellComponent = styled(
       ...(noBorder
         ? { border: "none" }
         : {
-            borderLeft:
-              fixed || noLeft ? "none" : `1px solid ${finalBorderColor}`,
-            borderRight:
-              fixed || noRight ? "none" : `1px solid ${finalBorderColor}`,
-            borderTop:
-              isSticky || isFirstRow || noTop
-                ? "none"
-                : `1px solid ${finalBorderColor}`,
-            borderBottom:
-              fixed || isSticky ? "none" : `1px solid ${finalBorderColor}`,
+            borderLeft: "none",
+            borderRight: noRight ? "none" : `1px solid ${finalBorderColor}`,
+            borderTop: "none",
+            borderBottom: `1px solid ${finalBorderColor}`,
           }),
       padding: padding || "0.1rem 0.5rem",
       color: fontColor || theme.palette.primary.dark,
@@ -155,14 +147,7 @@ const BaseCellComponent = styled(
       top: isSticky ? "0" : undefined,
       left: fixed ? "0" : undefined,
       zIndex: fixed && isSticky ? 40 : fixed ? 30 : isSticky ? 10 : undefined,
-      boxShadow:
-        isSticky && !fixed && !noBorder
-          ? `inset 0 1px 0 0 ${finalBorderColor}, inset 0 -1px 0 0 ${finalBorderColor}`
-          : !isSticky && fixed && !noBorder
-          ? `inset 1px 0 0 0 ${finalBorderColor}`
-          : isSticky && fixed && !noBorder
-          ? `inset 1px 1px 0 0 ${finalBorderColor}, inset -1px -1px 0 0 ${finalBorderColor}`
-          : undefined,
+      boxShadow: undefined,
       // boxShadow: shadows.length ? shadows.join(", ") : "none",
       ...(overFlow ? { overflow: overFlow } : {}),
       ...(textOverflow ? { textOverflow } : {}),
