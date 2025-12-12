@@ -332,7 +332,8 @@ const ProvaTabella = () => {
         id: "role",
         label: "Ruolo",
         dataKey: "role",
-        type: "text",
+        type: "input",
+        inputType: "text",
         // headerProps mostra label in maiuscolo e margini
         headerProps: {
           textAlignment: "left",
@@ -619,6 +620,10 @@ const ProvaTabella = () => {
         color: "#e0e0e0",
         width: "1px",
         style: "solid",
+      }}
+      onDataChange={(newData, updatedRow) => {
+        console.log("Data changed:", newData, updatedRow);
+        setVisibleUsers(newData);
       }}
       onRowSelectionChange={(data) => {
         console.log("Selected Elements:", data);

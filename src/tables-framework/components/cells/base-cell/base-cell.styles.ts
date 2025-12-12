@@ -117,7 +117,6 @@ const BaseCellComponent = styled(
       outlineWidth: 1,
       backgroundColor: rowSelectedColor || "rgba(0, 73, 135, 0.1)",
     };
-    console.log({ isSelected });
 
     return css({
       borderLeft: borderLeft?.show
