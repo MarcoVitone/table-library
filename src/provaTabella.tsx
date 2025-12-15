@@ -12,6 +12,7 @@ import {
 import { MOCK_USERS, type IMockUser } from "./tables-framework/mock-data";
 import { defaultTheme } from "./tables-framework/theme/theme";
 import type { IFilter } from "./tables-framework/defines/common.types";
+import type { TStatusConfig } from "./tables-framework/components/cells/status-cell/status-constants";
 
 type TFilterState = {
   search: string;
@@ -98,7 +99,7 @@ const TableControls: FC<ITableControlsProps> = ({
         <option value="User">User</option>
       </select>
       <select
-        value={filters.status}
+        value={filters.status.label}
         onChange={(event) =>
           onFiltersChange({
             ...filters,
@@ -229,6 +230,24 @@ const ProvaTabella = () => {
     );
   };
 
+  const MY_USER_STATUS_CONFIG: TStatusConfig = {
+    active: {
+      backgroundColor: "rgba(0, 128, 0, 0.1)",
+      textColor: "green",
+      iconColor: "green",
+    },
+    inactive: {
+      backgroundColor: "rgba(255, 165, 0, 0.1)",
+      textColor: "orange",
+      iconColor: "orange",
+    },
+    confirmed: {
+      backgroundColor: "rgba(255, 0, 0, 0.1)",
+      textColor: "red",
+      iconColor: "red",
+    },
+  };
+
   const columns: IColumnConfig<IMockUser>[] = useMemo(
     () => [
       {
@@ -353,8 +372,14 @@ const ProvaTabella = () => {
       {
         id: "status",
         label: "Stato",
-        dataKey: "status",
+        dataKey: "status.id",
         type: "status",
+        // Example of custom renderer (uncomment to test)
+        // renderStatus: (value, color) => (
+        //   <div style={{ border: `2px solid ${color}`, padding: '4px' }}>
+        //     CUSTOM RENDER: {value}
+        //   </div>
+        // ),
         // headerProps configura l'intestazione per la colonna badge
         headerProps: {
           textAlignment: "left",
@@ -366,10 +391,12 @@ const ProvaTabella = () => {
         },
         // bodyProps definisce lo stile dei chip di stato
         bodyProps: {
+          labelKey: "status.label",
           textAlignment: "left",
           fontColor: defaultTheme.palette.neutral.main,
           fontSize: "0.6875rem",
         },
+        statusConfig: MY_USER_STATUS_CONFIG,
       },
       {
         id: "department",

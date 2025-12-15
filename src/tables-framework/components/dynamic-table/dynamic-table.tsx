@@ -60,6 +60,9 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   symbolPosition?: import("../cells/currency-cell/currency-cell").TCurrencySymbolPosition;
   decimals?: number;
   width?: string;
+  // Status Props
+  statusConfig?: import("../cells/status-cell/status-constants").TStatusConfig;
+  renderStatus?: (value: unknown, color?: string) => ReactNode;
   headerProps?: TUserBaseCellProps;
   bodyProps?: TUserBaseCellProps;
   component?: ElementType;
@@ -399,6 +402,8 @@ const DynamicTable = <T extends object>({
                       currencySymbol: col.currencySymbol,
                       symbolPosition: col.symbolPosition,
                       decimals: col.decimals,
+                      statusConfig: col.statusConfig,
+                      renderStatus: col.renderStatus,
                       padding:
                         col.type === "input" ? "0.1rem 0.25rem" : undefined,
                       onCellChange:
