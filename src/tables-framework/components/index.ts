@@ -12,6 +12,7 @@ export * from "./cells/num-cell/num-cell";
 export * from "./cells/sorting-cell/sorting-cell";
 export * from "./cells/status-cell/status-cell";
 export * from "./cells/input-cell/input-cell";
+export * from "./cells/currency-cell/currency-cell";
 export * from "./rows/base-row/base-row";
 export * from "./rows/collapsible-row/collapsible-row";
 export * from "./rows/selection-row/selection-row";

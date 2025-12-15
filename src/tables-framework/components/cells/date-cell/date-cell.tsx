@@ -14,7 +14,7 @@ interface IDateCellProps extends IBaseCellProps {
 
 const DateCell: FC<IDateCellProps> = ({
   data,
-  format = "P",
+  format = "dd/MM/yyyy",
   textAlignment,
   ...rest
 }) => {
