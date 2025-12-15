@@ -15,6 +15,32 @@ interface IStatusCellProps extends IBaseCellProps {
   fallbackStyle?: IStatusStyle;
 }
 
+const getNestedValue = (
+  obj: Record<string, unknown>,
+  path: string
+): string | undefined => {
+  if (!path) return undefined;
+  const keys = path.split(".");
+  let current: unknown = obj;
+
+  for (const key of keys) {
+    if (
+      current &&
+      typeof current === "object" &&
+      key in (current as Record<string, unknown>)
+    ) {
+      current = (current as Record<string, unknown>)[key];
+    } else {
+      return undefined;
+    }
+  }
+
+  // Ritorna undefined se il valore è null/undefined, altrimenti lo converte in stringa
+  return current !== undefined && current !== null
+    ? String(current)
+    : undefined;
+};
+
 const StatusCell: FC<IStatusCellProps> = ({
   data,
   statusConfig,
@@ -52,7 +78,7 @@ const StatusCell: FC<IStatusCellProps> = ({
     // B. Estratta da un campo specifico della riga
     // Supporta anche nested keys se necessario usando una utility come lodash.get,
     // ma qui facciamo accesso diretto per semplicità
-    label = String(rowData[labelKey] ?? "");
+    label = getNestedValue(rowData, labelKey ?? "") ?? "";
   } else if (activeStyle?.label) {
     // C. Presa dalla configurazione statica
     label = activeStyle.label;

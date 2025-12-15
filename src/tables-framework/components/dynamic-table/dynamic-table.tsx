@@ -8,11 +8,11 @@ import { NumCell } from "../cells/num-cell/num-cell";
 import { StatusCell } from "../cells/status-cell/status-cell";
 import { DateCell } from "../cells/date-cell/date-cell";
 import { CustomCell } from "../cells/custom-cell/custom-cell";
-import { InputCell } from "../cells/input-cell/input-cell";
-import { CurrencyCell } from "../cells/currency-cell/currency-cell";
-import { CustomCell } from "../cells/custom-cell/custom-cell";
-import { InputCell } from "../cells/input-cell/input-cell";
-import { CurrencyCell } from "../cells/currency-cell/currency-cell";
+import { InputCell, type TInputType } from "../cells/input-cell/input-cell";
+import {
+  CurrencyCell,
+  type TCurrencySymbolPosition,
+} from "../cells/currency-cell/currency-cell";
 import { Column } from "../table-parser/components/column/column";
 import { HeaderCell } from "../table-parser/components/header-cell/header-cell";
 import { BodyCell } from "../table-parser/components/body-cell/body-cell";
@@ -36,6 +36,11 @@ import type {
   TRouterType,
   IBorderConfig,
 } from "../../defines/common.types";
+import {
+  AutocompleteCell,
+  type TAutocompleteOption,
+} from "../cells/autocomplete-cell.tsx/autocomplete-cell";
+import type { TStatusConfig } from "../cells/status-cell/status-constants";
 
 export type { ILinkConfig, IRowNavigationConfig, TRouterType, IBorderConfig };
 
@@ -54,34 +59,18 @@ export interface IColumnConfig<T = Record<string, unknown>> {
     | "status"
     | "custom"
     | "input"
-    | "currency";
-  inputType?: import("../cells/input-cell/input-cell").TInputType;
+    | "currency"
+    | "autocomplete";
+  inputType?: TInputType;
   inputHeight?: string;
   inputWidth?: string;
   // Currency Props
   currencySymbol?: string | ReactNode;
-  symbolPosition?: import("../cells/currency-cell/currency-cell").TCurrencySymbolPosition;
-  decimals?: number;
-  type?:
-    | "text"
-    | "action"
-    | "checkbox"
-    | "date"
-    | "number"
-    | "status"
-    | "custom"
-    | "input"
-    | "currency";
-  inputType?: import("../cells/input-cell/input-cell").TInputType;
-  inputHeight?: string;
-  inputWidth?: string;
-  // Currency Props
-  currencySymbol?: string | ReactNode;
-  symbolPosition?: import("../cells/currency-cell/currency-cell").TCurrencySymbolPosition;
+  symbolPosition?: TCurrencySymbolPosition;
   decimals?: number;
   width?: string;
   // Status Props
-  statusConfig?: import("../cells/status-cell/status-constants").TStatusConfig;
+  statusConfig?: TStatusConfig;
   renderStatus?: (value: unknown, color?: string) => ReactNode;
   headerProps?: TUserBaseCellProps;
   bodyProps?: TUserBaseCellProps;
@@ -90,6 +79,13 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   onHeaderClick?: (dataKey: string) => void;
   link?: ILinkConfig<T>;
   fixed?: boolean;
+  autocompleteOptions?: TAutocompleteOption[];
+  getOptionLabel?: (option: TAutocompleteOption) => string;
+  isOptionEqualToValue?: (
+    option: TAutocompleteOption,
+    value: TAutocompleteOption
+  ) => boolean;
+  disableClearable?: boolean;
 }
 
 export interface IPaginationConfig extends IPaginationCustomization {
@@ -130,7 +126,6 @@ interface IDynamicTableProps<T>
   headerBorder?: IBorderConfig;
   bodyBorder?: IBorderConfig;
   onDataChange?: (newData: T[], updatedRow: T) => void;
-  onDataChange?: (newData: T[], updatedRow: T) => void;
 }
 
 const DynamicTable = <T extends object>({
@@ -146,7 +141,6 @@ const DynamicTable = <T extends object>({
   rowSelectedColor,
   headerBorder,
   bodyBorder,
-  onDataChange,
   onDataChange,
   ...tableProps
 }: IDynamicTableProps<T>) => {
@@ -274,29 +268,6 @@ const DynamicTable = <T extends object>({
     onDataChange(newData, updatedRow);
   };
 
-  const handleCellChange = (
-    rowId: string,
-    colKey: string,
-    newValue: string | number | boolean
-  ) => {
-    if (!onDataChange) return;
-
-    // Find the row to update
-    const rowIndex = data.findIndex(
-      (item) =>
-        (item as Record<string, unknown>).id === rowId ||
-        (item as Record<string, unknown>)._id === rowId
-    );
-
-    if (rowIndex === -1) return;
-
-    const updatedRow = { ...data[rowIndex], [colKey]: newValue };
-    const newData = [...data];
-    newData[rowIndex] = updatedRow;
-
-    onDataChange(newData, updatedRow);
-  };
-
   const getComponentByType = (type: string = "text") => {
     switch (type) {
       case "action":
@@ -315,12 +286,8 @@ const DynamicTable = <T extends object>({
         return InputCell;
       case "currency":
         return CurrencyCell;
-      case "custom":
-        return CustomCell;
-      case "input":
-        return InputCell;
-      case "currency":
-        return CurrencyCell;
+      case "autocomplete":
+        return AutocompleteCell;
       case "text":
       default:
         return BaseCell;
@@ -403,7 +370,6 @@ const DynamicTable = <T extends object>({
         >
           {columns.map((col) => {
             const CellComponent = getComponentByType(col.type);
-            const CellComponent = getComponentByType(col.type);
             const HeaderComponent =
               col.type === "checkbox" ? CheckboxCell : BaseCell;
             const fixed = col.fixed || false;
@@ -443,7 +409,6 @@ const DynamicTable = <T extends object>({
                       fixed,
                       rowSelectedColor,
                       component: col.component,
-                      component: col.component,
                       // Pass bodyBorder config to both right/bottom for a grid effect if valid
                       borderRight: col.bodyProps?.borderRight ?? bodyBorder,
                       borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
@@ -459,8 +424,11 @@ const DynamicTable = <T extends object>({
                       renderStatus: col.renderStatus,
                       padding:
                         col.type === "input" ? "0.1rem 0.25rem" : undefined,
+                      options: col.autocompleteOptions,
+                      getOptionLabel: col.getOptionLabel,
+                      isOptionEqualToValue: col.isOptionEqualToValue,
                       onCellChange:
-                        col.type === "input"
+                        col.type === "input" || col.type === "autocomplete"
                           ? (
                               val: string | number | boolean,
                               cellData: import("../../defines/common.types").ICell
@@ -471,6 +439,7 @@ const DynamicTable = <T extends object>({
                                 val
                               )
                           : undefined,
+                      disableClearable: col.disableClearable,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />

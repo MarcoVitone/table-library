@@ -4,7 +4,13 @@ import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
 import { BaseCell } from "../base-cell/base-cell.tsx";
 import { InputComponent, InputContainer } from "./input-cell.styles.ts";
 
-export type TInputType = "text" | "number" | "date" | "email" | "password";
+export type TInputType =
+  | "text"
+  | "number"
+  | "date"
+  | "email"
+  | "autocomplete"
+  | "boolean";
 
 interface IInputCellProps extends IBaseCellProps {
   inputType?: TInputType;

@@ -1,14 +1,9 @@
 import type { ChangeEvent, FC } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Delete, Edit, Visibility } from "@mui/icons-material";
+import { Check, Delete, Edit, Visibility } from "@mui/icons-material";
 
 import type { IColumnConfig } from "./tables-framework/components/dynamic-table/dynamic-table";
 import { DynamicTable } from "./tables-framework/components/dynamic-table/dynamic-table";
-import {
-  EmptyBody,
-  useTable,
-  type IBaseCellProps,
-} from "./tables-framework/components";
 import {
   EmptyBody,
   useTable,
@@ -59,7 +54,7 @@ const TableControls: FC<ITableControlsProps> = ({
     }
 
     if (filters.status !== "all") {
-      activeFilters.push({ key: "status", op: "eq", val: filters.status });
+      activeFilters.push({ key: "status", op: "eq", val: filters.status.id });
     }
 
     if (filters.remoteOnly) {
@@ -102,26 +97,6 @@ const TableControls: FC<ITableControlsProps> = ({
         <option value="Manager">Manager</option>
         <option value="Editor">Editor</option>
         <option value="User">User</option>
-      </select>
-      <select
-        value={filters.status.label}
-        onChange={(event) =>
-          onFiltersChange({
-            ...filters,
-            status: event.target.value as TFilterState["status"],
-          })
-        }
-      >
-        <option value="all">Tutti gli status</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        <option value="pending">Pending</option>
-        <option value="validated">Validated</option>
-        <option value="confirmed">Confirmed</option>
-        <option value="inProcess">In process</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-        <option value="closed">Closed</option>
       </select>
       <label style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
         <input
@@ -236,20 +211,21 @@ const ProvaTabella = () => {
   };
 
   const MY_USER_STATUS_CONFIG: TStatusConfig = {
-    active: {
+    1: {
       backgroundColor: "rgba(0, 128, 0, 0.1)",
       textColor: "green",
       iconColor: "green",
     },
-    inactive: {
+    2: {
       backgroundColor: "rgba(255, 165, 0, 0.1)",
       textColor: "orange",
       iconColor: "orange",
     },
-    confirmed: {
-      backgroundColor: "rgba(255, 0, 0, 0.1)",
-      textColor: "red",
-      iconColor: "red",
+    3: {
+      backgroundColor: "rgba(0, 247, 255, 0.1)",
+      textColor: "blue",
+      iconColor: "blue",
+      iconChip: <Check />,
     },
   };
 
@@ -356,8 +332,13 @@ const ProvaTabella = () => {
         id: "role",
         label: "Ruolo",
         dataKey: "role",
-        type: "input",
-        inputType: "text",
+        type: "autocomplete",
+        autocompleteOptions: MOCK_USERS.map((user) => user.role).filter(
+          (value, index, self) => self.indexOf(value) === index
+        ),
+        getOptionLabel: (option) => String(option),
+        isOptionEqualToValue: (option, value) => option === value,
+        disableClearable: true,
         // headerProps mostra label in maiuscolo e margini
         headerProps: {
           textAlignment: "left",
@@ -379,12 +360,6 @@ const ProvaTabella = () => {
         label: "Stato",
         dataKey: "status.id",
         type: "status",
-        // Example of custom renderer (uncomment to test)
-        // renderStatus: (value, color) => (
-        //   <div style={{ border: `2px solid ${color}`, padding: '4px' }}>
-        //     CUSTOM RENDER: {value}
-        //   </div>
-        // ),
         // headerProps configura l'intestazione per la colonna badge
         headerProps: {
           textAlignment: "left",
@@ -400,6 +375,7 @@ const ProvaTabella = () => {
           textAlignment: "left",
           fontColor: defaultTheme.palette.neutral.main,
           fontSize: "0.6875rem",
+          textTransform: "capitalize",
         },
         statusConfig: MY_USER_STATUS_CONFIG,
       },

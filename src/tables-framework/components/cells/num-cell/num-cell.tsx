@@ -1,5 +1,4 @@
 import type { FC } from "react";
-import { Typography } from "@mui/material";
 import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
 import { BaseCell } from "../base-cell/base-cell.tsx";
 
@@ -8,11 +7,7 @@ interface INumCellProps extends IBaseCellProps {
 }
 
 const NumCell: FC<INumCellProps> = ({ children, ...rest }) => {
-  return (
-    <BaseCell {...rest}>
-      <Typography>{children}</Typography>
-    </BaseCell>
-  );
+  return <BaseCell {...rest}>{children}</BaseCell>;
 };
 
 export type { INumCellProps };
