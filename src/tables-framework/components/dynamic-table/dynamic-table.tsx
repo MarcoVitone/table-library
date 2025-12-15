@@ -9,6 +9,7 @@ import { StatusCell } from "../cells/status-cell/status-cell";
 import { DateCell } from "../cells/date-cell/date-cell";
 import { CustomCell } from "../cells/custom-cell/custom-cell";
 import { InputCell } from "../cells/input-cell/input-cell";
+import { CurrencyCell } from "../cells/currency-cell/currency-cell";
 import { Column } from "../table-parser/components/column/column";
 import { HeaderCell } from "../table-parser/components/header-cell/header-cell";
 import { BodyCell } from "../table-parser/components/body-cell/body-cell";
@@ -49,10 +50,15 @@ export interface IColumnConfig<T = Record<string, unknown>> {
     | "number"
     | "status"
     | "custom"
-    | "input";
+    | "input"
+    | "currency";
   inputType?: import("../cells/input-cell/input-cell").TInputType;
   inputHeight?: string;
   inputWidth?: string;
+  // Currency Props
+  currencySymbol?: string | ReactNode;
+  symbolPosition?: import("../cells/currency-cell/currency-cell").TCurrencySymbolPosition;
+  decimals?: number;
   width?: string;
   headerProps?: TUserBaseCellProps;
   bodyProps?: TUserBaseCellProps;
@@ -259,6 +265,8 @@ const DynamicTable = <T extends object>({
         return CustomCell;
       case "input":
         return InputCell;
+      case "currency":
+        return CurrencyCell;
       case "text":
       default:
         return BaseCell;
@@ -388,6 +396,9 @@ const DynamicTable = <T extends object>({
                       inputType: col.inputType,
                       inputHeight: col.inputHeight,
                       inputWidth: col.inputWidth,
+                      currencySymbol: col.currencySymbol,
+                      symbolPosition: col.symbolPosition,
+                      decimals: col.decimals,
                       padding:
                         col.type === "input" ? "0.1rem 0.25rem" : undefined,
                       onCellChange:

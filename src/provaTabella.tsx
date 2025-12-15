@@ -419,7 +419,10 @@ const ProvaTabella = () => {
         id: "salary",
         label: "Stipendio",
         dataKey: "salary",
-        type: "number",
+        type: "currency",
+        currencySymbol: "€",
+        symbolPosition: "right",
+        decimals: 2,
         width: "8rem",
         // headerProps aggiunge allineamento e abilita sort numerico
         headerProps: {
