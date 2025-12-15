@@ -10,6 +10,9 @@ import { DateCell } from "../cells/date-cell/date-cell";
 import { CustomCell } from "../cells/custom-cell/custom-cell";
 import { InputCell } from "../cells/input-cell/input-cell";
 import { CurrencyCell } from "../cells/currency-cell/currency-cell";
+import { CustomCell } from "../cells/custom-cell/custom-cell";
+import { InputCell } from "../cells/input-cell/input-cell";
+import { CurrencyCell } from "../cells/currency-cell/currency-cell";
 import { Column } from "../table-parser/components/column/column";
 import { HeaderCell } from "../table-parser/components/header-cell/header-cell";
 import { BodyCell } from "../table-parser/components/body-cell/body-cell";
@@ -42,6 +45,23 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   id: string;
   label: string;
   dataKey?: string;
+  type?:
+    | "text"
+    | "action"
+    | "checkbox"
+    | "date"
+    | "number"
+    | "status"
+    | "custom"
+    | "input"
+    | "currency";
+  inputType?: import("../cells/input-cell/input-cell").TInputType;
+  inputHeight?: string;
+  inputWidth?: string;
+  // Currency Props
+  currencySymbol?: string | ReactNode;
+  symbolPosition?: import("../cells/currency-cell/currency-cell").TCurrencySymbolPosition;
+  decimals?: number;
   type?:
     | "text"
     | "action"
@@ -110,6 +130,7 @@ interface IDynamicTableProps<T>
   headerBorder?: IBorderConfig;
   bodyBorder?: IBorderConfig;
   onDataChange?: (newData: T[], updatedRow: T) => void;
+  onDataChange?: (newData: T[], updatedRow: T) => void;
 }
 
 const DynamicTable = <T extends object>({
@@ -125,6 +146,7 @@ const DynamicTable = <T extends object>({
   rowSelectedColor,
   headerBorder,
   bodyBorder,
+  onDataChange,
   onDataChange,
   ...tableProps
 }: IDynamicTableProps<T>) => {
@@ -252,6 +274,29 @@ const DynamicTable = <T extends object>({
     onDataChange(newData, updatedRow);
   };
 
+  const handleCellChange = (
+    rowId: string,
+    colKey: string,
+    newValue: string | number | boolean
+  ) => {
+    if (!onDataChange) return;
+
+    // Find the row to update
+    const rowIndex = data.findIndex(
+      (item) =>
+        (item as Record<string, unknown>).id === rowId ||
+        (item as Record<string, unknown>)._id === rowId
+    );
+
+    if (rowIndex === -1) return;
+
+    const updatedRow = { ...data[rowIndex], [colKey]: newValue };
+    const newData = [...data];
+    newData[rowIndex] = updatedRow;
+
+    onDataChange(newData, updatedRow);
+  };
+
   const getComponentByType = (type: string = "text") => {
     switch (type) {
       case "action":
@@ -264,6 +309,12 @@ const DynamicTable = <T extends object>({
         return StatusCell;
       case "date":
         return DateCell;
+      case "custom":
+        return CustomCell;
+      case "input":
+        return InputCell;
+      case "currency":
+        return CurrencyCell;
       case "custom":
         return CustomCell;
       case "input":
@@ -352,6 +403,7 @@ const DynamicTable = <T extends object>({
         >
           {columns.map((col) => {
             const CellComponent = getComponentByType(col.type);
+            const CellComponent = getComponentByType(col.type);
             const HeaderComponent =
               col.type === "checkbox" ? CheckboxCell : BaseCell;
             const fixed = col.fixed || false;
@@ -390,6 +442,7 @@ const DynamicTable = <T extends object>({
                       ...col.bodyProps,
                       fixed,
                       rowSelectedColor,
+                      component: col.component,
                       component: col.component,
                       // Pass bodyBorder config to both right/bottom for a grid effect if valid
                       borderRight: col.bodyProps?.borderRight ?? bodyBorder,

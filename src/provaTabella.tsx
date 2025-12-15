@@ -9,6 +9,11 @@ import {
   useTable,
   type IBaseCellProps,
 } from "./tables-framework/components";
+import {
+  EmptyBody,
+  useTable,
+  type IBaseCellProps,
+} from "./tables-framework/components";
 import { MOCK_USERS, type IMockUser } from "./tables-framework/mock-data";
 import { defaultTheme } from "./tables-framework/theme/theme";
 import type { IFilter } from "./tables-framework/defines/common.types";
