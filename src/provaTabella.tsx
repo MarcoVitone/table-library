@@ -361,6 +361,7 @@ const ProvaTabella = () => {
         label: "Stato",
         dataKey: "status.id",
         type: "status",
+        isResizable: false,
         // headerProps configura l'intestazione per la colonna badge
         headerProps: {
           textAlignment: "left",
@@ -677,7 +678,8 @@ const ProvaTabella = () => {
         threshold: 120,
         endMessage: "Hai caricato tutti gli utenti disponibili.",
       }}
-      rowSelectedColor="#FF0000"
+      rowSelectedColor={"#FF0000"}
+      isResizable={true}
     />
   );
 };

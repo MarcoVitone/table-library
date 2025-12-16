@@ -12,6 +12,7 @@ import type {
 import { useSpring } from "../../../hooks/use-spring/use-spring.ts";
 import { useTable } from "../../../hooks/use-table/use-table.ts";
 import { BaseCellComponent } from "./base-cell.styles.ts";
+import { ColumnResizer } from "../../table-sub-components/column-resizer/column-resizer.tsx";
 
 type TVariant = "header" | "body" | "footer";
 
@@ -57,6 +58,7 @@ interface IBaseCellProps extends ICellProps {
   borderLeft?: IBorderConfig;
   stickyLeft?: string;
   measuredRef?: Ref<HTMLTableCellElement>;
+  isResizable?: boolean;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -97,12 +99,14 @@ const BaseCell: FC<IBaseCellProps> = ({
   borderLeft,
   stickyLeft,
   measuredRef,
+  isResizable,
   ...rest
 }) => {
   const type = variant || area;
 
   const { palette } = useTheme();
-  const { sorting, setSorting, stickyHeader, rowStatus } = useTable(data);
+  const { sorting, setSorting, stickyHeader, rowStatus, setColumnLayout } =
+    useTable(data);
 
   const isSelected = !!rowStatus && rowStatus.isSelected;
 
@@ -185,6 +189,24 @@ const BaseCell: FC<IBaseCellProps> = ({
     ]
   );
 
+  const handleResizeEnd = useCallback(
+    (newWidth: number) => {
+      if (data?.column?.id && setColumnLayout) {
+        // Aggiorna lo stato globale della tabella con la nuova larghezza
+        setColumnLayout(
+          {
+            props: {
+              width: newWidth, // Salva la larghezza in pixel
+              isHidden: data.column.props.isHidden,
+            },
+          },
+          data.column.id
+        );
+      }
+    },
+    [data?.column?.id, data?.column?.props?.isHidden, setColumnLayout]
+  );
+
   const justifyContent = useMemo(() => {
     if (textAlignment === "center") return "center";
     if (textAlignment === "right") return "flex-end";
@@ -260,6 +282,9 @@ const BaseCell: FC<IBaseCellProps> = ({
         </div>
       ) : (
         children
+      )}
+      {(type === "header" || area === "header") && isResizable && (
+        <ColumnResizer onResizeEnd={handleResizeEnd} />
       )}
     </BaseCellComponent>
   );
