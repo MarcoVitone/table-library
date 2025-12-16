@@ -2,6 +2,7 @@ import type { ComponentType, JSX } from "react";
 import type {
   IMultipleCells,
   IMultipleRows,
+  IRowNavigationConfig,
   TSingleCell,
   TSingleRow,
 } from "../../defines/common.types.ts";
@@ -19,7 +20,7 @@ interface ITableProps<TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T = unknown>
   cells?: TSingleCell<TC> | IMultipleCells<TCH, TCB, TCF>;
   rows?: TSingleRow<TR> | IMultipleRows<TRH, TRB, TRF>;
   onRowSelectionChange?: (data: T[]) => void;
-  onRowDoubleClick?: import("../../defines/common.types.ts").IRowNavigationConfig<T>;
+  onRowDoubleClick?: IRowNavigationConfig<T>;
 }
 
 const Table = <TC, TCH, TCB, TCF, TR, TRH, TRB, TRF, T>({

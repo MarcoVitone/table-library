@@ -1,5 +1,8 @@
 import type { FC, ReactNode } from "react";
-import type { ILinkObject } from "../../../../defines/common.types";
+import type {
+  ILinkConfig,
+  ILinkObject,
+} from "../../../../defines/common.types";
 
 interface IColumnProps {
   suffix?: string;
@@ -7,7 +10,7 @@ interface IColumnProps {
   isResizable?: boolean;
   width?: string | number;
   // link config
-  link?: import("../../../../defines/common.types").ILinkConfig<ILinkObject>;
+  link?: ILinkConfig<ILinkObject>;
   children: ReactNode;
 }
 

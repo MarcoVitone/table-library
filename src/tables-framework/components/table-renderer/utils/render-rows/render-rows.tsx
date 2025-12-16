@@ -1,10 +1,14 @@
 import React from "react";
-import type { IRow } from "../../../../defines/common.types";
+import type {
+  ILinkObject,
+  IRow,
+  IRowNavigationConfig,
+} from "../../../../defines/common.types";
 import { LinkWrapper } from "../../../link-wrapper/link-wrapper";
 
 function renderRows<T>(
   rows: IRow[],
-  onRowDoubleClick?: import("../../../../defines/common.types").IRowNavigationConfig<T>
+  onRowDoubleClick?: IRowNavigationConfig<T>
 ): (React.ReactElement | null)[] {
   return rows.map((row, rowIndex) => {
     // <-- Aggiungi rowIndex qui
@@ -46,10 +50,7 @@ function renderRows<T>(
           >
             <LinkWrapper
               config={row.area === "body" ? cell.column.link : undefined}
-              row={
-                row.source
-                  ?.full as unknown as import("../../../../defines/common.types").ILinkObject
-              }
+              row={row.source?.full as unknown as ILinkObject}
             >
               {cell.value}
             </LinkWrapper>

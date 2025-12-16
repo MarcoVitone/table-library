@@ -4,16 +4,10 @@ export interface IMockUser {
   lastName: string;
   email: string;
   role: "Admin" | "User" | "Editor" | "Manager";
-  status:
-    | "active"
-    | "inactive"
-    | "pending"
-    | "validated"
-    | "confirmed"
-    | "inProcess"
-    | "delivered"
-    | "cancelled"
-    | "closed";
+  status: {
+    label: string;
+    id: number;
+  };
   lastLogin: string;
   createdAt: string;
   age: number;
@@ -32,7 +26,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Rossi",
     email: "mario.rossi@example.com",
     role: "Admin",
-    status: "active",
+    status: {
+      label: "active",
+      id: 1,
+    },
     lastLogin: "2024-10-25T08:30:00Z",
     createdAt: "2021-02-10T10:00:00Z",
     age: 34,
@@ -48,7 +45,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Verdi",
     email: "luigi.verdi@example.com",
     role: "User",
-    status: "inactive",
+    status: {
+      label: "inactive",
+      id: 2,
+    },
     lastLogin: "2024-10-20T14:15:00Z",
     createdAt: "2022-06-12T09:00:00Z",
     age: 28,
@@ -64,7 +64,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Bianchi",
     email: "anna.bianchi@example.com",
     role: "Editor",
-    status: "confirmed",
+    status: {
+      label: "confirmed",
+      id: 3,
+    },
     lastLogin: "2024-10-26T09:45:00Z",
     createdAt: "2020-11-05T11:30:00Z",
     age: 42,
@@ -80,7 +83,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Neri",
     email: "giulia.neri@example.com",
     role: "User",
-    status: "pending",
+    status: {
+      label: "pending",
+      id: 4,
+    },
     lastLogin: "2024-10-24T11:20:00Z",
     createdAt: "2023-01-18T08:15:00Z",
     age: 25,
@@ -96,7 +102,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Gialli",
     email: "paolo.gialli@example.com",
     role: "Admin",
-    status: "validated",
+    status: {
+      label: "validated",
+      id: 5,
+    },
     lastLogin: "2024-10-26T16:00:00Z",
     createdAt: "2019-09-02T15:00:00Z",
     age: 50,
@@ -112,7 +121,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Viola",
     email: "francesca.viola@example.com",
     role: "Editor",
-    status: "active",
+    status: {
+      label: "active",
+      id: 1,
+    },
     lastLogin: "2024-10-23T10:00:00Z",
     createdAt: "2021-04-11T12:45:00Z",
     age: 31,
@@ -128,7 +140,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Marrone",
     email: "alessandro.marrone@example.com",
     role: "User",
-    status: "inactive",
+    status: {
+      label: "inactive",
+      id: 2,
+    },
     lastLogin: "2024-09-15T09:30:00Z",
     createdAt: "2020-03-04T14:00:00Z",
     age: 29,
@@ -144,7 +159,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Azzurri",
     email: "elena.azzurri@example.com",
     role: "User",
-    status: "active",
+    status: {
+      label: "active",
+      id: 1,
+    },
     lastLogin: "2024-10-25T13:45:00Z",
     createdAt: "2022-02-22T16:20:00Z",
     age: 37,
@@ -160,7 +178,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Arancio",
     email: "roberto.arancio@example.com",
     role: "Editor",
-    status: "inProcess",
+    status: {
+      label: "inProcess",
+      id: 7,
+    },
     lastLogin: "2024-10-26T08:15:00Z",
     createdAt: "2021-08-30T10:10:00Z",
     age: 45,
@@ -176,7 +197,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Rosa",
     email: "chiara.rosa@example.com",
     role: "Admin",
-    status: "delivered",
+    status: {
+      label: "delivered",
+      id: 8,
+    },
     lastLogin: "2024-10-26T17:30:00Z",
     createdAt: "2018-12-12T09:35:00Z",
     age: 39,
@@ -192,7 +216,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Blu",
     email: "davide.blu@example.com",
     role: "Manager",
-    status: "confirmed",
+    status: {
+      label: "confirmed",
+      id: 3,
+    },
     lastLogin: "2024-10-21T09:10:00Z",
     createdAt: "2017-07-01T08:00:00Z",
     age: 46,
@@ -208,7 +235,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Argento",
     email: "sara.argento@example.com",
     role: "User",
-    status: "pending",
+    status: {
+      label: "pending",
+      id: 4,
+    },
     lastLogin: "2024-10-19T12:00:00Z",
     createdAt: "2023-04-14T13:00:00Z",
     age: 33,
@@ -224,7 +254,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Ciano",
     email: "luca.ciano@example.com",
     role: "Editor",
-    status: "cancelled",
+    status: {
+      label: "cancelled",
+      id: 9,
+    },
     lastLogin: "2024-10-18T07:50:00Z",
     createdAt: "2020-10-01T09:45:00Z",
     age: 41,
@@ -240,7 +273,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Celeste",
     email: "roberta.celeste@example.com",
     role: "Manager",
-    status: "active",
+    status: {
+      label: "active",
+      id: 1,
+    },
     lastLogin: "2024-10-17T16:40:00Z",
     createdAt: "2019-05-23T10:20:00Z",
     age: 38,
@@ -256,7 +292,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Fucsia",
     email: "giorgio.fucsia@example.com",
     role: "Admin",
-    status: "active",
+    status: {
+      label: "active",
+      id: 1,
+    },
     lastLogin: "2024-10-22T15:25:00Z",
     createdAt: "2022-09-09T11:05:00Z",
     age: 36,
@@ -272,7 +311,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Porpora",
     email: "valentina.porpora@example.com",
     role: "User",
-    status: "validated",
+    status: {
+      label: "validated",
+      id: 5,
+    },
     lastLogin: "2024-10-16T10:55:00Z",
     createdAt: "2021-07-30T12:30:00Z",
     age: 30,
@@ -288,7 +330,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Corallo",
     email: "nicola.corallo@example.com",
     role: "Editor",
-    status: "closed",
+    status: {
+      label: "closed",
+      id: 10,
+    },
     lastLogin: "2024-10-14T09:05:00Z",
     createdAt: "2018-04-18T14:00:00Z",
     age: 44,
@@ -304,7 +349,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Zaffiro",
     email: "chiara.zaffiro@example.com",
     role: "User",
-    status: "delivered",
+    status: {
+      label: "delivered",
+      id: 8,
+    },
     lastLogin: "2024-10-13T08:50:00Z",
     createdAt: "2020-02-27T10:40:00Z",
     age: 35,
@@ -320,7 +368,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Granata",
     email: "simone.granata@example.com",
     role: "Manager",
-    status: "inProcess",
+    status: {
+      label: "inProcess",
+      id: 7,
+    },
     lastLogin: "2024-10-12T14:30:00Z",
     createdAt: "2023-03-03T09:15:00Z",
     age: 40,
@@ -336,7 +387,10 @@ export const MOCK_USERS: IMockUser[] = [
     lastName: "Bordò",
     email: "elisa.bordo@example.com",
     role: "User",
-    status: "active",
+    status: {
+      label: "active",
+      id: 1,
+    },
     lastLogin: "2024-10-11T17:00:00Z",
     createdAt: "2022-11-15T16:00:00Z",
     age: 27,

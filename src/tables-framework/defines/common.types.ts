@@ -6,6 +6,7 @@ import type {
 } from "react";
 import type { IColumnProps } from "../components/table-parser/components/column/column.tsx";
 import type { IColumnGroupProps } from "../components/table-parser/components/column-group/column-group.tsx";
+import type { CSSProperties } from "@mui/material";
 
 // *** CORE ***
 
@@ -86,7 +87,7 @@ export interface ILinkConfig<T = ILinkObject> {
   to: (row: T) => string | object;
   target?: string;
   className?: string;
-  style?: import("react").CSSProperties;
+  style?: CSSProperties;
   textDecoration?: "none" | "underline" | "overline" | "line-through" | "blink";
 }
 

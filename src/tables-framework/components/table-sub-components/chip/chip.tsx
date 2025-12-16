@@ -1,62 +1,41 @@
-import type { FC } from "react";
+import type { CSSProperties, FC, ReactElement } from "react";
 import { Circle } from "@mui/icons-material";
 import type { ChipProps as MUIChipProps } from "@mui/material";
 import { Chip } from "./chip.styles.ts";
 
-type TChipStatus =
-  | "validated"
-  | "pending"
-  | "partiallyConfirmed"
-  | "confirmed"
-  | "toBeApproved"
-  | "inProcess"
-  | "inDelivery"
-  | "submitted"
-  | "delivered"
-  | "requested"
-  | "cancelled"
-  | "active"
-  | "inactive"
-  | "closed";
-
 interface IChipProps {
-  status: TChipStatus;
+  label: string;
+  backgroundColor?: string;
+  textColor?: string;
+  iconColor?: string;
+  iconChip?: ReactElement;
+  style?: CSSProperties;
+  className?: string;
 }
 
-type TLabelMap = {
-  [key in TChipStatus]: string;
-};
-
-const TableStatusChip: FC<IChipProps & MUIChipProps> = ({
-  status,
+const TableStatusChip: FC<IChipProps & Omit<MUIChipProps, "label">> = ({
+  label,
+  backgroundColor,
+  textColor,
+  iconColor,
+  iconChip,
+  style,
+  className,
   ...props
 }) => {
-  const labelObject: TLabelMap = {
-    validated: "Validated",
-    cancelled: "Cancelled",
-    confirmed: "Confirmed",
-    pending: "Pending",
-    partiallyConfirmed: "Partially confirmed",
-    toBeApproved: "To be approved",
-    inProcess: "In process",
-    inDelivery: "In delivery",
-    submitted: "Submitted",
-    delivered: "Delivered",
-    requested: "Requested",
-    closed: "Closed",
-    active: "Active",
-    inactive: "Inactive",
-  };
-
   return (
     <Chip
-      label={labelObject[status]}
-      status={status}
-      icon={<Circle />}
+      label={label}
+      backgroundColor={backgroundColor}
+      textColor={textColor}
+      iconColor={iconColor}
+      icon={iconChip ?? <Circle />}
+      style={style}
+      className={className}
       {...props}
     />
   );
 };
 
-export type { IChipProps, TChipStatus };
+export type { IChipProps };
 export { TableStatusChip };
