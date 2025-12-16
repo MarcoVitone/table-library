@@ -87,6 +87,7 @@ export interface IColumnConfig<T = Record<string, unknown>> {
     value: TAutocompleteOption
   ) => boolean;
   disableClearable?: boolean;
+  isResizable?: boolean;
 }
 
 export interface IPaginationConfig extends IPaginationCustomization {
@@ -127,6 +128,7 @@ interface IDynamicTableProps<T>
   headerBorder?: IBorderConfig;
   bodyBorder?: IBorderConfig;
   onDataChange?: (newData: T[], updatedRow: T) => void;
+  isResizable?: boolean;
 }
 
 const DynamicTable = <T extends object>({
@@ -143,6 +145,7 @@ const DynamicTable = <T extends object>({
   headerBorder,
   bodyBorder,
   onDataChange,
+  isResizable: globalResizable = false,
   ...tableProps
 }: IDynamicTableProps<T>) => {
   const {
@@ -409,6 +412,8 @@ const DynamicTable = <T extends object>({
               col.type === "checkbox" ? CheckboxCell : BaseCell;
             const fixed = col.fixed || false;
             const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
+            const isColumnResizable =
+              col.isResizable ?? globalResizable ?? false;
             return (
               <Column
                 key={col.id}
@@ -438,6 +443,7 @@ const DynamicTable = <T extends object>({
                         ? (el: HTMLTableCellElement) =>
                             measureColumn(col.id, el)
                         : undefined,
+                      isResizable: isColumnResizable,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
