@@ -258,6 +258,7 @@ const ProvaTabella = () => {
         label: "Nome",
         dataKey: "firstName",
         type: "text",
+        fixed: true,
         // headerProps abilita l'ordinamento client-side e lo sfondo per la colonna attiva
         headerProps: {
           textAlignment: "left",

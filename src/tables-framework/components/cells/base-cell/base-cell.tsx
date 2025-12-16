@@ -1,4 +1,4 @@
-import type { ElementType, FC, ReactNode } from "react";
+import type { ElementType, FC, ReactNode, Ref } from "react";
 import { useCallback, useMemo, useEffect } from "react";
 import { ArrowUpward } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
@@ -55,6 +55,8 @@ interface IBaseCellProps extends ICellProps {
   borderBottom?: IBorderConfig;
   borderTop?: IBorderConfig;
   borderLeft?: IBorderConfig;
+  stickyLeft?: string;
+  measuredRef?: Ref<HTMLTableCellElement>;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -93,6 +95,8 @@ const BaseCell: FC<IBaseCellProps> = ({
   borderBottom,
   borderTop,
   borderLeft,
+  stickyLeft,
+  measuredRef,
   ...rest
 }) => {
   const type = variant || area;
@@ -189,6 +193,7 @@ const BaseCell: FC<IBaseCellProps> = ({
 
   return (
     <BaseCellComponent
+      ref={measuredRef}
       colSpan={colSpan}
       noLeft={!!noLeftBorder}
       noRight={!!noRightBorder}
@@ -224,6 +229,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       borderBottom={borderBottom}
       borderTop={borderTop}
       borderLeft={borderLeft}
+      stickyLeft={stickyLeft}
       {...rest}
     >
       {sortable ? (
