@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
 import { BaseCell } from "../base-cell/base-cell.tsx";
 import { InputComponent, InputContainer } from "./input-cell.styles.ts";
+import type { ICell } from "../../../defines/common.types.ts";
 
 export type TInputType =
   | "text"
@@ -16,10 +17,7 @@ interface IInputCellProps extends IBaseCellProps {
   inputType?: TInputType;
   inputHeight?: string;
   inputWidth?: string;
-  onCellChange?: (
-    value: string | number | boolean,
-    cellData: import("../../../defines/common.types.ts").ICell
-  ) => void;
+  onCellChange?: (value: string | number | boolean, cellData: ICell) => void;
 }
 
 const InputCell: FC<IInputCellProps> = ({

@@ -35,6 +35,7 @@ import type {
   IUnknownProps,
   TRouterType,
   IBorderConfig,
+  ICell,
 } from "../../defines/common.types";
 import {
   AutocompleteCell,
@@ -429,10 +430,7 @@ const DynamicTable = <T extends object>({
                       isOptionEqualToValue: col.isOptionEqualToValue,
                       onCellChange:
                         col.type === "input" || col.type === "autocomplete"
-                          ? (
-                              val: string | number | boolean,
-                              cellData: import("../../defines/common.types").ICell
-                            ) =>
+                          ? (val: string | number | boolean, cellData: ICell) =>
                               handleCellChange(
                                 cellData.row.source.id,
                                 col.dataKey || col.id,

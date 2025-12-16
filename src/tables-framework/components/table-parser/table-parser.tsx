@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { useMemo } from "react";
 import type {
   IDatum,
+  IRowNavigationConfig,
   ITableLayout,
   TCellCombo,
   TJSX,
@@ -39,7 +40,7 @@ interface ITableParserProps<T = unknown> extends TBase<T> {
   freeze?: boolean;
   children?: TJSX;
   onRowSelectionChange?: (data: T[]) => void;
-  onRowDoubleClick?: import("../../defines/common.types.ts").IRowNavigationConfig<T>;
+  onRowDoubleClick?: IRowNavigationConfig<T>;
 }
 
 const TableParser = <T,>({

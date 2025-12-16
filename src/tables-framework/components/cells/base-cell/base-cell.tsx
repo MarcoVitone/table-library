@@ -4,6 +4,7 @@ import { ArrowUpward } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
 import { animated } from "@react-spring/web";
 import type {
+  IBorderConfig,
   ICellProps,
   TAlignment,
   TtextTransform,
@@ -50,10 +51,10 @@ interface IBaseCellProps extends ICellProps {
   wrapText?: boolean;
   ellipsis?: boolean;
   maxWidth?: string | number;
-  borderRight?: import("../../../defines/common.types.ts").IBorderConfig;
-  borderBottom?: import("../../../defines/common.types.ts").IBorderConfig;
-  borderTop?: import("../../../defines/common.types.ts").IBorderConfig;
-  borderLeft?: import("../../../defines/common.types.ts").IBorderConfig;
+  borderRight?: IBorderConfig;
+  borderBottom?: IBorderConfig;
+  borderTop?: IBorderConfig;
+  borderLeft?: IBorderConfig;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({

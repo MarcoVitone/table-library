@@ -10,7 +10,10 @@ import type {
   TTableParserAPI,
   TTableRendererAPI,
 } from "../../defines/api.types.ts";
-import type { ISource } from "../../defines/common.types.ts";
+import type {
+  IRowNavigationConfig,
+  ISource,
+} from "../../defines/common.types.ts";
 import { BaseBody } from "../areas/base-body/base-body.tsx";
 import { BaseFooter } from "../areas/base-footer/base-footer.tsx";
 import { BaseHeader } from "../areas/base-header/base-header.tsx";
@@ -53,7 +56,7 @@ interface ITableRendererProps<T = unknown> {
   container?: ElementType;
   showFooter?: boolean;
   onRowSelectionChange?: (data: T[]) => void;
-  onRowDoubleClick?: import("../../defines/common.types.ts").IRowNavigationConfig<T>;
+  onRowDoubleClick?: IRowNavigationConfig<T>;
   stickyHeader?: boolean;
 }
 

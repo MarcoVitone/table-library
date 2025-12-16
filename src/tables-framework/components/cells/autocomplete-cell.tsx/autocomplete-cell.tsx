@@ -3,6 +3,7 @@ import { Autocomplete, TextField, type InputProps } from "@mui/material";
 import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
 import { BaseCell } from "../base-cell/base-cell.tsx";
 import { InputContainer } from "./autocomplete-cell.styles.tsx";
+import type { ICell } from "../../../defines/common.types.ts";
 
 // Definiamo un tipo generico per le opzioni (stringa o oggetto)
 export type TAutocompleteOption = string | Record<string, unknown>;
@@ -14,10 +15,7 @@ export interface IAutocompleteCellProps extends IBaseCellProps {
     option: TAutocompleteOption,
     value: TAutocompleteOption
   ) => boolean;
-  onCellChange?: (
-    value: TAutocompleteOption | null,
-    cellData: import("../../../defines/common.types.ts").ICell
-  ) => void;
+  onCellChange?: (value: TAutocompleteOption | null, cellData: ICell) => void;
   placeholder?: string;
   disableClearable?: boolean;
 }
