@@ -38,6 +38,7 @@ interface IBaseCellProps {
   borderBottom?: IBorderConfig;
   borderTop?: IBorderConfig;
   borderLeft?: IBorderConfig;
+  stickyLeft?: string;
 }
 
 const stylesFromProps: IStyleFromProps = {
@@ -72,7 +73,8 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "borderRight" &&
     prop !== "borderBottom" &&
     prop !== "borderTop" &&
-    prop !== "borderLeft",
+    prop !== "borderLeft" &&
+    prop !== "stickyLeft",
 };
 
 const BaseCellComponent = styled(
@@ -105,6 +107,7 @@ const BaseCellComponent = styled(
     borderBottom,
     borderTop,
     borderLeft,
+    stickyLeft,
   }) => {
     const defaultBorderColor = convertHexToRGBA(
       theme?.palette?.primary?.dark,
@@ -159,7 +162,7 @@ const BaseCellComponent = styled(
       textOverflow: ellipsis ? "ellipsis" : textOverflow,
       position: isSticky || fixed ? "sticky" : "relative",
       top: isSticky ? "0" : undefined,
-      left: fixed ? "0" : undefined,
+      left: fixed ? stickyLeft || "0" : undefined,
       zIndex: fixed && isSticky ? 40 : fixed ? 30 : isSticky ? 10 : undefined,
       boxShadow: undefined,
       // boxShadow: shadows.length ? shadows.join(", ") : "none",

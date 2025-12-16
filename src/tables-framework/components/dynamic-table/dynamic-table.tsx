@@ -1,5 +1,5 @@
 import type { ElementType, ReactNode } from "react";
-import { useState, useMemo, isValidElement } from "react";
+import { useState, useMemo, isValidElement, useCallback } from "react";
 import type { IBaseCellProps } from "../cells/base-cell/base-cell";
 import { BaseCell } from "../cells/base-cell/base-cell";
 import { ActionsCell } from "../cells/actions-cell/actions-cell";
@@ -188,6 +188,8 @@ const DynamicTable = <T extends object>({
     () => persistedLimit ?? initialLimit
   );
 
+  const [stickyWidths, setStickyWidths] = useState<Record<string, number>>({});
+
   // Use controlled values if provided, otherwise use internal state
   const isControlled = !!controlled;
   const currentPage = isControlled
@@ -246,28 +248,43 @@ const DynamicTable = <T extends object>({
     onPaginationChange?.({ limit: newLimit, offset: 0 });
   };
 
-  const handleCellChange = (
-    rowId: string,
-    colKey: string,
-    newValue: string | number | boolean
-  ) => {
-    if (!onDataChange) return;
+  const handleCellChange = useCallback(
+    (rowId: string, colKey: string, newValue: string | number | boolean) => {
+      if (!onDataChange) return;
 
-    // Find the row to update
-    const rowIndex = data.findIndex(
-      (item) =>
-        (item as Record<string, unknown>).id === rowId ||
-        (item as Record<string, unknown>)._id === rowId
-    );
+      // Find the row to update
+      const rowIndex = data.findIndex(
+        (item) =>
+          (item as Record<string, unknown>).id === rowId ||
+          (item as Record<string, unknown>)._id === rowId
+      );
 
-    if (rowIndex === -1) return;
+      if (rowIndex === -1) return;
 
-    const updatedRow = { ...data[rowIndex], [colKey]: newValue };
-    const newData = [...data];
-    newData[rowIndex] = updatedRow;
+      const updatedRow = { ...data[rowIndex], [colKey]: newValue };
+      const newData = [...data];
+      newData[rowIndex] = updatedRow;
 
-    onDataChange(newData, updatedRow);
-  };
+      onDataChange(newData, updatedRow);
+    },
+    [data, onDataChange]
+  );
+
+  const measureColumn = useCallback(
+    (id: string, element: HTMLTableCellElement | null) => {
+      if (element) {
+        // Usiamo getBoundingClientRect per precisione (include decimali)
+        const width = element.getBoundingClientRect().width;
+
+        setStickyWidths((prev) => {
+          // Aggiorna solo se la larghezza è cambiata (evita re-render infiniti)
+          if (Math.abs((prev[id] || 0) - width) < 1) return prev;
+          return { ...prev, [id]: width };
+        });
+      }
+    },
+    []
+  );
 
   const getComponentByType = (type: string = "text") => {
     switch (type) {
@@ -331,6 +348,23 @@ const DynamicTable = <T extends object>({
     return <Component />;
   };
 
+  const stickyOffsets = useMemo(() => {
+    const offsets: Record<string, string> = {};
+    let accumulator = 0;
+
+    for (const col of columns) {
+      if (col.fixed) {
+        // Registra l'offset corrente per questa colonna
+        offsets[col.id] = `${accumulator}px`;
+
+        // Aggiungi la sua larghezza per la prossima colonna
+        // Se non abbiamo ancora la misura (primo render), aggiungiamo 0
+        accumulator += stickyWidths[col.id] || 0;
+      }
+    }
+    return offsets;
+  }, [columns, stickyWidths]);
+
   return (
     <div>
       {paginationPosition === "top" && paginationComponent}
@@ -374,6 +408,7 @@ const DynamicTable = <T extends object>({
             const HeaderComponent =
               col.type === "checkbox" ? CheckboxCell : BaseCell;
             const fixed = col.fixed || false;
+            const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
             return (
               <Column
                 key={col.id}
@@ -398,6 +433,11 @@ const DynamicTable = <T extends object>({
                         col.headerProps?.borderBottom ?? headerBorder,
                       borderTop: col.headerProps?.borderTop, // Opt-in only
                       borderLeft: col.headerProps?.borderLeft, // Opt-in only
+                      stickyLeft: stickyLeftValue,
+                      measuredRef: fixed
+                        ? (el: HTMLTableCellElement) =>
+                            measureColumn(col.id, el)
+                        : undefined,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
@@ -429,7 +469,9 @@ const DynamicTable = <T extends object>({
                       getOptionLabel: col.getOptionLabel,
                       isOptionEqualToValue: col.isOptionEqualToValue,
                       onCellChange:
-                        col.type === "input" || col.type === "autocomplete"
+                        col.type === "input" ||
+                        col.type === "autocomplete" ||
+                        col.type === "custom"
                           ? (val: string | number | boolean, cellData: ICell) =>
                               handleCellChange(
                                 cellData.row.source.id,
@@ -438,6 +480,7 @@ const DynamicTable = <T extends object>({
                               )
                           : undefined,
                       disableClearable: col.disableClearable,
+                      stickyLeft: stickyLeftValue,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />
