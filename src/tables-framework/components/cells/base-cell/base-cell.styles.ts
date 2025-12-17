@@ -39,6 +39,8 @@ interface IBaseCellProps {
   borderTop?: IBorderConfig;
   borderLeft?: IBorderConfig;
   stickyLeft?: string;
+  isDragging?: boolean;
+  draggable?: boolean;
 }
 
 const stylesFromProps: IStyleFromProps = {
@@ -74,7 +76,9 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "borderBottom" &&
     prop !== "borderTop" &&
     prop !== "borderLeft" &&
-    prop !== "stickyLeft",
+    prop !== "stickyLeft" &&
+    prop !== "isDragging" &&
+    prop !== "draggable",
 };
 
 const BaseCellComponent = styled(
@@ -108,6 +112,8 @@ const BaseCellComponent = styled(
     borderTop,
     borderLeft,
     stickyLeft,
+    isDragging,
+    draggable,
   }) => {
     const defaultBorderColor = convertHexToRGBA(
       theme?.palette?.primary?.dark,
@@ -165,6 +171,8 @@ const BaseCellComponent = styled(
       left: fixed ? stickyLeft || "0" : undefined,
       zIndex: fixed && isSticky ? 40 : fixed ? 30 : isSticky ? 10 : undefined,
       boxShadow: undefined,
+      opacity: isDragging ? 0.5 : 1,
+      cursor: draggable ? "grab" : "inherit",
       // boxShadow: shadows.length ? shadows.join(", ") : "none",
       "& .sort-icon": {
         opacity: isSortActive ? 1 : 0,

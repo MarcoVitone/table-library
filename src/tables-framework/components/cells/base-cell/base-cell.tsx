@@ -1,7 +1,7 @@
-import type { ElementType, FC, ReactNode, Ref } from "react";
+import type { DragEvent, ElementType, FC, ReactNode, Ref } from "react";
 import { useCallback, useMemo, useEffect } from "react";
-import { ArrowUpward } from "@mui/icons-material";
-import { useTheme } from "@mui/material";
+import { ArrowUpward, VisibilityOff } from "@mui/icons-material";
+import { IconButton, useTheme } from "@mui/material";
 import { animated } from "@react-spring/web";
 import type {
   IBorderConfig,
@@ -13,6 +13,7 @@ import { useSpring } from "../../../hooks/use-spring/use-spring.ts";
 import { useTable } from "../../../hooks/use-table/use-table.ts";
 import { BaseCellComponent } from "./base-cell.styles.ts";
 import { ColumnResizer } from "../../table-sub-components/column-resizer/column-resizer.tsx";
+import { useColumnDrag } from "../../../hooks/use-column-drag/use-column-drag.ts";
 
 type TVariant = "header" | "body" | "footer";
 
@@ -59,6 +60,17 @@ interface IBaseCellProps extends ICellProps {
   stickyLeft?: string;
   measuredRef?: Ref<HTMLTableCellElement>;
   isResizable?: boolean;
+  // Hiding
+  enableHiding?: boolean;
+  onHide?: () => void;
+
+  // Drag & Drop
+  draggable?: boolean;
+  onDragStart?: (e: DragEvent<HTMLTableCellElement>) => void;
+  onDragOver?: (e: DragEvent<HTMLTableCellElement>) => void;
+  onDrop?: (e: DragEvent<HTMLTableCellElement>) => void;
+  onDragEnter?: (e: DragEvent<HTMLTableCellElement>) => void;
+  onDragLeave?: (e: DragEvent<HTMLTableCellElement>) => void;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -100,6 +112,14 @@ const BaseCell: FC<IBaseCellProps> = ({
   stickyLeft,
   measuredRef,
   isResizable,
+  enableHiding,
+  onHide,
+  draggable,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnter,
+  onDragLeave,
   ...rest
 }) => {
   const type = variant || area;
@@ -107,6 +127,15 @@ const BaseCell: FC<IBaseCellProps> = ({
   const { palette } = useTheme();
   const { sorting, setSorting, stickyHeader, rowStatus, setColumnLayout } =
     useTable(data);
+
+  const {
+    dragProps,
+    isDragging: isDraggingColumn,
+    isOver,
+  } = useColumnDrag({
+    columnId: data?.column?.id || "",
+    enabled: (draggable && (type === "header" || area === "header")) || false, // Abilita solo se header
+  });
 
   const isSelected = !!rowStatus && rowStatus.isSelected;
 
@@ -207,6 +236,25 @@ const BaseCell: FC<IBaseCellProps> = ({
     [data?.column?.id, data?.column?.props?.isHidden, setColumnLayout]
   );
 
+  const handleHideColumn = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation(); // Evita di triggerare il sort o il drag
+
+      if (data?.column?.id && setColumnLayout) {
+        // Aggiorna lo stato globale impostando isHidden a true
+        setColumnLayout(
+          {
+            props: { isHidden: true, width: data.column.props.width },
+          },
+          data.column.id
+        );
+      }
+
+      if (onHide) onHide();
+    },
+    [data?.column?.id, setColumnLayout, onHide]
+  );
+
   const justifyContent = useMemo(() => {
     if (textAlignment === "center") return "center";
     if (textAlignment === "right") return "flex-end";
@@ -236,7 +284,16 @@ const BaseCell: FC<IBaseCellProps> = ({
       isSortActive={dir !== 0}
       onClick={onHeaderClick}
       style={{
-        cursor: onHeaderClick ? "pointer" : "default",
+        opacity: isDraggingColumn ? 0.5 : 1,
+        backgroundColor: isDraggingColumn ? "#f0f0f0" : undefined,
+        border: isDraggingColumn
+          ? `2px dashed ${palette.neutral?.light || "#999"}`
+          : undefined,
+        borderLeft:
+          isOver && !isDraggingColumn
+            ? `3px solid ${palette.primary.main}`
+            : undefined,
+        ...(onHeaderClick ? { cursor: "pointer" } : {}),
       }}
       data-query-param={queryParam}
       isSticky={
@@ -252,6 +309,13 @@ const BaseCell: FC<IBaseCellProps> = ({
       borderTop={borderTop}
       borderLeft={borderLeft}
       stickyLeft={stickyLeft}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      {...dragProps}
       {...rest}
     >
       {sortable ? (
@@ -261,6 +325,7 @@ const BaseCell: FC<IBaseCellProps> = ({
             alignItems: "center",
             justifyContent,
             gap: "4px",
+            width: "100%",
           }}
         >
           {children}
@@ -282,6 +347,21 @@ const BaseCell: FC<IBaseCellProps> = ({
         </div>
       ) : (
         children
+      )}
+      {(type === "header" || area === "header") && enableHiding && (
+        <IconButton
+          size="small"
+          onClick={handleHideColumn}
+          sx={{
+            padding: "2px",
+            marginLeft: "4px",
+            opacity: 0.5, // Leggermente trasparente di default
+            "&:hover": { opacity: 1, color: palette.error.main },
+          }}
+          title="Nascondi colonna"
+        >
+          <VisibilityOff fontSize="inherit" style={{ fontSize: "1rem" }} />
+        </IconButton>
       )}
       {(type === "header" || area === "header") && isResizable && (
         <ColumnResizer onResizeEnd={handleResizeEnd} />

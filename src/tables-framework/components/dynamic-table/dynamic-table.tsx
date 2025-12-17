@@ -42,6 +42,8 @@ import {
   type TAutocompleteOption,
 } from "../cells/autocomplete-cell.tsx/autocomplete-cell";
 import type { TStatusConfig } from "../cells/status-cell/status-constants";
+import { TableToolbar } from "../table-sub-components/table-toolbar/table-toolbar";
+import { ColumnsConfigModal } from "../modals/columns-config-modal/columns-config-modal";
 
 export type { ILinkConfig, IRowNavigationConfig, TRouterType, IBorderConfig };
 
@@ -88,6 +90,8 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   ) => boolean;
   disableClearable?: boolean;
   isResizable?: boolean;
+  hideable?: boolean; // Se false, l'icona "nascondi" non apparirà per questa colonna
+  draggable?: boolean; // Se false, questa colonna non può essere spostata
 }
 
 export interface IPaginationConfig extends IPaginationCustomization {
@@ -129,6 +133,9 @@ interface IDynamicTableProps<T>
   bodyBorder?: IBorderConfig;
   onDataChange?: (newData: T[], updatedRow: T) => void;
   isResizable?: boolean;
+  enableColumnReorder?: boolean; // Abilita il Drag & Drop
+  enableColumnHiding?: boolean; // Abilita l'icona "occhio sbarrato" nell'header
+  enableColumnConfig?: boolean; // Abilita il bottone "Settings" per la modale
 }
 
 const DynamicTable = <T extends object>({
@@ -146,6 +153,10 @@ const DynamicTable = <T extends object>({
   bodyBorder,
   onDataChange,
   isResizable: globalResizable = false,
+  // Estrai le nuove props (default false)
+  enableColumnReorder = false,
+  enableColumnHiding = false,
+  enableColumnConfig = false,
   ...tableProps
 }: IDynamicTableProps<T>) => {
   const {
@@ -184,14 +195,16 @@ const DynamicTable = <T extends object>({
   });
 
   // Internal state (used when not in controlled mode)
-  const [internalOffset, setInternalOffset] = useState(
+  const [internalOffset, setInternalOffset] = useState<number>(
     () => (persistedPage ?? 0) * (persistedLimit ?? initialLimit)
   );
-  const [internalLimit, setInternalLimit] = useState(
+  const [internalLimit, setInternalLimit] = useState<number>(
     () => persistedLimit ?? initialLimit
   );
 
   const [stickyWidths, setStickyWidths] = useState<Record<string, number>>({});
+
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
 
   // Use controlled values if provided, otherwise use internal state
   const isControlled = !!controlled;
@@ -368,6 +381,27 @@ const DynamicTable = <T extends object>({
     return offsets;
   }, [columns, stickyWidths]);
 
+  const tableExtensions = (
+    <>
+      {/* TOOLBAR */}
+      {enableColumnConfig && (
+        <TableToolbar
+          showConfigButton={true}
+          onOpenConfig={() => setIsConfigModalOpen(true)}
+        />
+      )}
+
+      {/* MODALE */}
+      {enableColumnConfig && (
+        <ColumnsConfigModal
+          open={isConfigModalOpen}
+          onClose={() => setIsConfigModalOpen(false)}
+          columns={columns}
+        />
+      )}
+    </>
+  );
+
   return (
     <div>
       {paginationPosition === "top" && paginationComponent}
@@ -404,6 +438,7 @@ const DynamicTable = <T extends object>({
           data={paginatedData}
           onRowSelectionChange={onRowSelectionChange}
           onRowDoubleClick={onRowDoubleClick}
+          before={<>{tableExtensions}</>}
           {...passedTableProps}
         >
           {columns.map((col) => {
@@ -414,6 +449,8 @@ const DynamicTable = <T extends object>({
             const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
             const isColumnResizable =
               col.isResizable ?? globalResizable ?? false;
+            const isDraggable = enableColumnReorder && col.draggable !== false;
+            const isHideable = enableColumnHiding && col.hideable !== false;
             return (
               <Column
                 key={col.id}
@@ -444,6 +481,8 @@ const DynamicTable = <T extends object>({
                             measureColumn(col.id, el)
                         : undefined,
                       isResizable: isColumnResizable,
+                      draggable: isDraggable,
+                      enableHiding: isHideable,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />

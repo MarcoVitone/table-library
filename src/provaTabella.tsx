@@ -680,6 +680,9 @@ const ProvaTabella = () => {
       }}
       rowSelectedColor={"#FF0000"}
       isResizable={true}
+      enableColumnHiding={true}
+      enableColumnReorder={true}
+      enableColumnConfig={true}
     />
   );
 };
