@@ -39,7 +39,7 @@ export const useColumnDrag = ({ columnId, enabled }: IUseColumnDragParams) => {
 
       // Ritardo per permettere al browser di generare l'immagine fantasma
       // prima che applichiamo l'opacità all'elemento reale.
-      ghostImageTimeoutRef.current = window.setTimeout(() => {
+      ghostImageTimeoutRef.current = globalThis.setTimeout(() => {
         setIsDragging(true); // Attiva la grafica
         ghostImageTimeoutRef.current = null;
       }, 0);

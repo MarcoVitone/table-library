@@ -1,6 +1,6 @@
 import type { DragEvent, ElementType, FC, ReactNode, Ref } from "react";
 import { useCallback, useMemo, useEffect } from "react";
-import { ArrowUpward, VisibilityOff } from "@mui/icons-material";
+import { ArrowUpward, DragIndicator, VisibilityOff } from "@mui/icons-material";
 import { IconButton, useTheme } from "@mui/material";
 import { animated } from "@react-spring/web";
 import type {
@@ -66,6 +66,7 @@ interface IBaseCellProps extends ICellProps {
 
   // Drag & Drop
   draggable?: boolean;
+  dragHandleVisibility?: "always" | "hover";
   onDragStart?: (e: DragEvent<HTMLTableCellElement>) => void;
   onDragOver?: (e: DragEvent<HTMLTableCellElement>) => void;
   onDrop?: (e: DragEvent<HTMLTableCellElement>) => void;
@@ -120,6 +121,7 @@ const BaseCell: FC<IBaseCellProps> = ({
   onDrop,
   onDragEnter,
   onDragLeave,
+  dragHandleVisibility = "always",
   ...rest
 }) => {
   const type = variant || area;
@@ -136,6 +138,39 @@ const BaseCell: FC<IBaseCellProps> = ({
     columnId: data?.column?.id || "",
     enabled: (draggable && (type === "header" || area === "header")) || false, // Abilita solo se header
   });
+
+  const {
+    draggable: isDomDraggable,
+    onDragStart: onDragStartHandle,
+    onDragEnd,
+    ...targetProps // Il resto (onDrop, onDragOver...) va sulla CELLA (Target)
+  } = dragProps;
+
+  const handleStyle = useMemo(() => {
+    const baseStyle = {
+      position: "absolute" as const,
+      right: "8px", // Tutto a destra (con un minimo di margine)
+      top: "50%",
+      transform: "translateY(-50%)", // Centrato verticalmente
+      cursor: "grab",
+      color: palette.neutral?.light || "#999",
+      display: "flex",
+      alignItems: "center",
+      zIndex: 10, // Sopra il contenuto ma sotto eventuali tooltip/modali
+      transition: "opacity 0.2s ease-in-out",
+    };
+
+    if (dragHandleVisibility === "hover") {
+      return {
+        ...baseStyle,
+        opacity: 0, // Invisibile di default
+        // L'hover viene gestito tramite CSS nel componente genitore o inline qui sotto
+        // Nota: Per semplicità usiamo una classe CSS o la logica 'group-hover' di emotion
+      };
+    }
+
+    return { ...baseStyle, opacity: 1 };
+  }, [dragHandleVisibility, palette.neutral?.light]);
 
   const isSelected = !!rowStatus && rowStatus.isSelected;
 
@@ -293,6 +328,7 @@ const BaseCell: FC<IBaseCellProps> = ({
           isOver && !isDraggingColumn
             ? `3px solid ${palette.primary.main}`
             : undefined,
+        position: "relative", // Necessario per il posizionamento absolute dell'icona
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
       }}
       data-query-param={queryParam}
@@ -316,6 +352,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       {...dragProps}
+      {...targetProps}
       {...rest}
     >
       {sortable ? (
@@ -347,6 +384,22 @@ const BaseCell: FC<IBaseCellProps> = ({
         </div>
       ) : (
         children
+      )}
+      {/* --- ICONA DRAG HANDLE (Esclusiva per il trascinamento) --- */}
+      {(type === "header" || area === "header") && draggable && (
+        <span
+          className="drag-handle" // Classe per il selector CSS dell'hover
+          // 2. APPLICA DRAG SOURCE PROPS QUI
+          draggable={isDomDraggable}
+          onDragStart={onDragStartHandle}
+          onDragEnd={onDragEnd}
+          // Previeni che il click sull'icona triggeri il sort o altro
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          style={handleStyle}
+        >
+          <DragIndicator fontSize="small" />
+        </span>
       )}
       {(type === "header" || area === "header") && enableHiding && (
         <IconButton

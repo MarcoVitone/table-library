@@ -36,6 +36,7 @@ import type {
   TRouterType,
   IBorderConfig,
   ICell,
+  ITableLayout,
 } from "../../defines/common.types";
 import {
   AutocompleteCell,
@@ -136,6 +137,7 @@ interface IDynamicTableProps<T>
   enableColumnReorder?: boolean; // Abilita il Drag & Drop
   enableColumnHiding?: boolean; // Abilita l'icona "occhio sbarrato" nell'header
   enableColumnConfig?: boolean; // Abilita il bottone "Settings" per la modale
+  dragHandleVisibility?: "always" | "hover";
 }
 
 const DynamicTable = <T extends object>({
@@ -157,6 +159,7 @@ const DynamicTable = <T extends object>({
   enableColumnReorder = false,
   enableColumnHiding = false,
   enableColumnConfig = false,
+  dragHandleVisibility = "always",
   ...tableProps
 }: IDynamicTableProps<T>) => {
   const {
@@ -205,6 +208,7 @@ const DynamicTable = <T extends object>({
   const [stickyWidths, setStickyWidths] = useState<Record<string, number>>({});
 
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
+  const [layoutIds, setLayoutIds] = useState<string[]>([]);
 
   // Use controlled values if provided, otherwise use internal state
   const isControlled = !!controlled;
@@ -233,6 +237,47 @@ const DynamicTable = <T extends object>({
     // Client-side pagination
     return data.slice(offset, offset + limit);
   }, [data, offset, limit, paginationEnabled, serverSide?.enabled]);
+
+  const frozenColumnCount = useMemo(() => {
+    return columns.filter((c) => c.fixed).length;
+  }, [columns]);
+
+  const orderedColumns = useMemo(() => {
+    // Se non abbiamo ancora un layout (primo render), usiamo l'ordine originale
+    if (layoutIds.length === 0) return columns;
+
+    // Creiamo una mappa per accesso veloce
+    const colMap = new Map(columns.map((c) => [c.id, c]));
+
+    // Ricostruiamo l'array nell'ordine corretto
+    const ordered = layoutIds
+      .map((id) => colMap.get(id))
+      .filter((c): c is IColumnConfig<T> => !!c); // Filtra eventuali undefined
+
+    // Aggiungiamo in coda eventuali colonne nuove che non sono ancora nel layoutIds
+    const orderedIds = new Set(layoutIds);
+    const remaining = columns.filter((c) => !orderedIds.has(c.id));
+
+    return [...ordered, ...remaining];
+  }, [columns, layoutIds]);
+
+  const stickyOffsets = useMemo(() => {
+    const offsets: Record<string, string> = {};
+    let accumulator = 0;
+
+    // Iteriamo le colonne NELL'ORDINE VISUALE CORRENTE
+    orderedColumns.forEach((col, index) => {
+      // Una colonna è 'fixed' se si trova nelle prime 'frozenColumnCount' posizioni
+      const isFixed = index < frozenColumnCount;
+
+      if (isFixed) {
+        offsets[col.id] = `${accumulator}px`;
+        // Aggiungiamo la larghezza (reale o 0) all'accumulatore
+        accumulator += stickyWidths[col.id] || 0;
+      }
+    });
+    return offsets;
+  }, [orderedColumns, frozenColumnCount, stickyWidths]);
 
   const handlePageChange = (page: number) => {
     if (isControlled) {
@@ -302,6 +347,20 @@ const DynamicTable = <T extends object>({
     []
   );
 
+  const handleLayoutChange = useCallback(
+    (newLayout: ITableLayout) => {
+      if (newLayout.columnsLayout) {
+        // Aggiorniamo il nostro stato locale con il nuovo ordine
+        setLayoutIds(newLayout.columnsLayout.map((c) => c.id));
+      }
+      // Se l'utente aveva passato un onLayoutChange, lo chiamiamo comunque
+      if (tableProps.onLayoutChange) {
+        tableProps.onLayoutChange(newLayout);
+      }
+    },
+    [tableProps]
+  );
+
   const getComponentByType = (type: string = "text") => {
     switch (type) {
       case "action":
@@ -364,23 +423,6 @@ const DynamicTable = <T extends object>({
     return <Component />;
   };
 
-  const stickyOffsets = useMemo(() => {
-    const offsets: Record<string, string> = {};
-    let accumulator = 0;
-
-    for (const col of columns) {
-      if (col.fixed) {
-        // Registra l'offset corrente per questa colonna
-        offsets[col.id] = `${accumulator}px`;
-
-        // Aggiungi la sua larghezza per la prossima colonna
-        // Se non abbiamo ancora la misura (primo render), aggiungiamo 0
-        accumulator += stickyWidths[col.id] || 0;
-      }
-    }
-    return offsets;
-  }, [columns, stickyWidths]);
-
   const tableExtensions = (
     <>
       {/* TOOLBAR */}
@@ -439,13 +481,14 @@ const DynamicTable = <T extends object>({
           onRowSelectionChange={onRowSelectionChange}
           onRowDoubleClick={onRowDoubleClick}
           before={<>{tableExtensions}</>}
+          onLayoutChange={handleLayoutChange}
           {...passedTableProps}
         >
-          {columns.map((col) => {
+          {orderedColumns.map((col, index) => {
             const CellComponent = getComponentByType(col.type);
             const HeaderComponent =
               col.type === "checkbox" ? CheckboxCell : BaseCell;
-            const fixed = col.fixed || false;
+            const fixed = index < frozenColumnCount;
             const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
             const isColumnResizable =
               col.isResizable ?? globalResizable ?? false;
@@ -483,6 +526,7 @@ const DynamicTable = <T extends object>({
                       isResizable: isColumnResizable,
                       draggable: isDraggable,
                       enableHiding: isHideable,
+                      dragHandleVisibility,
                     } as Partial<IBaseCellProps>,
                   ]}
                 />

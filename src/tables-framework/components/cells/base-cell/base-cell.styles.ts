@@ -181,6 +181,9 @@ const BaseCellComponent = styled(
       "&:hover .sort-icon": {
         opacity: 1,
       },
+      "&:hover .drag-handle": {
+        opacity: 1,
+      },
       ...(isSelected ? selectedStyles : {}),
     });
   }
