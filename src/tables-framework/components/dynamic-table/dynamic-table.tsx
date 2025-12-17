@@ -160,6 +160,7 @@ const DynamicTable = <T extends object>({
   enableColumnHiding = false,
   enableColumnConfig = false,
   dragHandleVisibility = "always",
+  onLayoutChange: externalOnLayoutChange,
   ...tableProps
 }: IDynamicTableProps<T>) => {
   const {
@@ -354,11 +355,9 @@ const DynamicTable = <T extends object>({
         setLayoutIds(newLayout.columnsLayout.map((c) => c.id));
       }
       // Se l'utente aveva passato un onLayoutChange, lo chiamiamo comunque
-      if (tableProps.onLayoutChange) {
-        tableProps.onLayoutChange(newLayout);
-      }
+      if (externalOnLayoutChange) externalOnLayoutChange(newLayout);
     },
-    [tableProps]
+    [externalOnLayoutChange]
   );
 
   const getComponentByType = (type: string = "text") => {

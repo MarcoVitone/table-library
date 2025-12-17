@@ -113,7 +113,6 @@ const BaseCellComponent = styled(
     borderLeft,
     stickyLeft,
     isDragging,
-    draggable,
   }) => {
     const defaultBorderColor = convertHexToRGBA(
       theme?.palette?.primary?.dark,
@@ -172,8 +171,6 @@ const BaseCellComponent = styled(
       zIndex: fixed && isSticky ? 40 : fixed ? 30 : isSticky ? 10 : undefined,
       boxShadow: undefined,
       opacity: isDragging ? 0.5 : 1,
-      cursor: draggable ? "grab" : "inherit",
-      // boxShadow: shadows.length ? shadows.join(", ") : "none",
       "& .sort-icon": {
         opacity: isSortActive ? 1 : 0,
         transition: "opacity 0.2s",

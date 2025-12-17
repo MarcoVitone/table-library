@@ -1,4 +1,4 @@
-import type { DragEvent, ElementType, FC, ReactNode, Ref } from "react";
+import type { ElementType, FC, ReactNode, Ref } from "react";
 import { useCallback, useMemo, useEffect } from "react";
 import { ArrowUpward, DragIndicator, VisibilityOff } from "@mui/icons-material";
 import { IconButton, useTheme } from "@mui/material";
@@ -67,11 +67,6 @@ interface IBaseCellProps extends ICellProps {
   // Drag & Drop
   draggable?: boolean;
   dragHandleVisibility?: "always" | "hover";
-  onDragStart?: (e: DragEvent<HTMLTableCellElement>) => void;
-  onDragOver?: (e: DragEvent<HTMLTableCellElement>) => void;
-  onDrop?: (e: DragEvent<HTMLTableCellElement>) => void;
-  onDragEnter?: (e: DragEvent<HTMLTableCellElement>) => void;
-  onDragLeave?: (e: DragEvent<HTMLTableCellElement>) => void;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -116,11 +111,6 @@ const BaseCell: FC<IBaseCellProps> = ({
   enableHiding,
   onHide,
   draggable,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onDragEnter,
-  onDragLeave,
   dragHandleVisibility = "always",
   ...rest
 }) => {
@@ -136,39 +126,33 @@ const BaseCell: FC<IBaseCellProps> = ({
     isOver,
   } = useColumnDrag({
     columnId: data?.column?.id || "",
-    enabled: (draggable && (type === "header" || area === "header")) || false, // Abilita solo se header
+    enabled: (draggable && (type === "header" || area === "header")) || false,
   });
 
   const {
     draggable: isDomDraggable,
-    onDragStart: onDragStartHandle,
-    onDragEnd,
-    ...targetProps // Il resto (onDrop, onDragOver...) va sulla CELLA (Target)
+    onDragStart: handleDragStart,
+    onDragEnd: handleDragEnd,
+    ...targetProps
   } = dragProps;
 
   const handleStyle = useMemo(() => {
     const baseStyle = {
       position: "absolute" as const,
-      right: "8px", // Tutto a destra (con un minimo di margine)
+      right: "4px",
       top: "50%",
-      transform: "translateY(-50%)", // Centrato verticalmente
+      transform: "translateY(-50%)",
       cursor: "grab",
       color: palette.neutral?.light || "#999",
       display: "flex",
       alignItems: "center",
-      zIndex: 10, // Sopra il contenuto ma sotto eventuali tooltip/modali
+      zIndex: 10,
       transition: "opacity 0.2s ease-in-out",
     };
 
     if (dragHandleVisibility === "hover") {
-      return {
-        ...baseStyle,
-        opacity: 0, // Invisibile di default
-        // L'hover viene gestito tramite CSS nel componente genitore o inline qui sotto
-        // Nota: Per semplicità usiamo una classe CSS o la logica 'group-hover' di emotion
-      };
+      return { ...baseStyle, opacity: 0 };
     }
-
     return { ...baseStyle, opacity: 1 };
   }, [dragHandleVisibility, palette.neutral?.light]);
 
@@ -181,9 +165,7 @@ const BaseCell: FC<IBaseCellProps> = ({
   const dir = useMemo<-1 | 0 | 1>(() => {
     if (sorting && sortable) {
       for (const sort of sorting) {
-        if (sort.key === dataKey) {
-          return sort.dir === "asc" ? 1 : -1;
-        }
+        if (sort.key === dataKey) return sort.dir === "asc" ? 1 : -1;
       }
     }
     return 0;
@@ -202,24 +184,16 @@ const BaseCell: FC<IBaseCellProps> = ({
     }
   }, [dir]);
 
-  const [rotation, api] = useSpring({
-    rotate: angle,
-  });
+  const [rotation, api] = useSpring({ rotate: angle });
 
   useEffect(() => {
-    if (sortable) {
-      api.start({ rotate: angle });
-    }
+    if (sortable) api.start({ rotate: angle });
   }, [angle, api, sortable]);
 
   const handleSortClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-
-      if (!sortable || !setSorting || !dataKey) {
-        return;
-      }
-
+      if (!sortable || !setSorting || !dataKey) return;
       if (dir === 0) {
         setSorting([
           {
@@ -256,14 +230,8 @@ const BaseCell: FC<IBaseCellProps> = ({
   const handleResizeEnd = useCallback(
     (newWidth: number) => {
       if (data?.column?.id && setColumnLayout) {
-        // Aggiorna lo stato globale della tabella con la nuova larghezza
         setColumnLayout(
-          {
-            props: {
-              width: newWidth, // Salva la larghezza in pixel
-              isHidden: data.column.props.isHidden,
-            },
-          },
+          { props: { width: newWidth, isHidden: data.column.props.isHidden } },
           data.column.id
         );
       }
@@ -273,18 +241,13 @@ const BaseCell: FC<IBaseCellProps> = ({
 
   const handleHideColumn = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation(); // Evita di triggerare il sort o il drag
-
+      e.stopPropagation();
       if (data?.column?.id && setColumnLayout) {
-        // Aggiorna lo stato globale impostando isHidden a true
         setColumnLayout(
-          {
-            props: { isHidden: true, width: data.column.props.width },
-          },
+          { props: { isHidden: true, width: data.column.props.width } },
           data.column.id
         );
       }
-
       if (onHide) onHide();
     },
     [data?.column?.id, setColumnLayout, onHide]
@@ -328,7 +291,6 @@ const BaseCell: FC<IBaseCellProps> = ({
           isOver && !isDraggingColumn
             ? `3px solid ${palette.primary.main}`
             : undefined,
-        position: "relative", // Necessario per il posizionamento absolute dell'icona
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
       }}
       data-query-param={queryParam}
@@ -346,11 +308,6 @@ const BaseCell: FC<IBaseCellProps> = ({
       borderLeft={borderLeft}
       stickyLeft={stickyLeft}
       draggable={draggable}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
       {...dragProps}
       {...targetProps}
       {...rest}
@@ -363,6 +320,10 @@ const BaseCell: FC<IBaseCellProps> = ({
             justifyContent,
             gap: "4px",
             width: "100%",
+            paddingRight:
+              draggable && (type === "header" || area === "header")
+                ? "24px"
+                : "0",
           }}
         >
           {children}
@@ -388,12 +349,10 @@ const BaseCell: FC<IBaseCellProps> = ({
       {/* --- ICONA DRAG HANDLE (Esclusiva per il trascinamento) --- */}
       {(type === "header" || area === "header") && draggable && (
         <span
-          className="drag-handle" // Classe per il selector CSS dell'hover
-          // 2. APPLICA DRAG SOURCE PROPS QUI
+          className="drag-handle"
           draggable={isDomDraggable}
-          onDragStart={onDragStartHandle}
-          onDragEnd={onDragEnd}
-          // Previeni che il click sull'icona triggeri il sort o altro
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           style={handleStyle}
