@@ -72,6 +72,9 @@ const TableParser = <T,>({
     setFiltering,
     pagination,
     setPagination,
+    density,
+    setDensity,
+    resetLayout,
   } = useLayout({
     externalLayout,
     onLayoutChange,
@@ -130,6 +133,9 @@ const TableParser = <T,>({
       setFiltering,
       pagination,
       setPagination,
+      density,
+      setDensity,
+      resetLayout,
       exportCSV,
       exportJSON,
     };
@@ -143,6 +149,9 @@ const TableParser = <T,>({
     setFiltering,
     pagination,
     setPagination,
+    density,
+    setDensity,
+    resetLayout,
     exportCSV,
     exportJSON,
   ]);

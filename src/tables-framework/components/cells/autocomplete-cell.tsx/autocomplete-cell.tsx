@@ -53,7 +53,8 @@ const AutocompleteCell: FC<IAutocompleteCellProps> = ({
           options={options}
           getOptionLabel={
             getOptionLabel ||
-            ((option) => (typeof option === "string" ? option : String(option)))
+            ((option) =>
+              typeof option === "string" ? option : String(option?.label))
           }
           isOptionEqualToValue={isOptionEqualToValue}
           disablePortal={false}

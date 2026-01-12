@@ -62,6 +62,7 @@ interface IColumn {
     isHidden: boolean;
     isResizable: boolean;
     width: string | number | null;
+    savedWidth?: string | number | null;
   };
   link?: ILinkConfig<ILinkObject>;
 }
@@ -135,6 +136,7 @@ interface IColumnLayout {
   props: {
     isHidden: boolean | undefined;
     width: string | number | null | undefined;
+    savedWidth?: string | number | null;
   };
 }
 
@@ -162,6 +164,7 @@ interface ITableLayout {
   sorting?: TSorting;
   filtering?: TFiltering;
   pagination?: IPagination;
+  density?: TDensity;
 }
 
 // *** JSX ***
@@ -289,6 +292,7 @@ export type {
   TAlignment,
   TDirection,
   TtextTransform,
+  TDensity,
 };
 
 type TDirection = "row" | "row-reverse";
@@ -296,6 +300,8 @@ type TDirection = "row" | "row-reverse";
 type TAlignment = "left" | "right" | "center";
 
 type TtextTransform = "capitalize" | "uppercase" | "lowercase" | "none";
+
+type TDensity = "compact" | "standard" | "comfortable";
 
 type TBorderStyle =
   | "solid"

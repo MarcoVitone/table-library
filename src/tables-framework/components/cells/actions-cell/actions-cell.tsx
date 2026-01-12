@@ -47,8 +47,11 @@ const ActionsCell: FC<IActionsCellProps> = ({
     <BaseCell data={data} {...rest}>
       <span
         style={{
-          display: "flex",
+          display: "inline-flex",
           gap: 4,
+          whiteSpace: "nowrap",
+          width: "max-content",
+          alignItems: "center",
         }}
       >
         {actions.map(

@@ -5,6 +5,7 @@ import type {
 } from "../../../../defines/common.types";
 
 interface IColumnProps {
+  id?: string;
   suffix?: string;
   isHidden?: boolean;
   isResizable?: boolean;

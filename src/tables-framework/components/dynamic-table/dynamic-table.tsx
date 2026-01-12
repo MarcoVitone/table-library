@@ -33,10 +33,11 @@ import type {
   ILinkObject,
   IRowNavigationConfig,
   IUnknownProps,
-  TRouterType,
   IBorderConfig,
   ICell,
   ITableLayout,
+  IColumnLayout,
+  TDensity,
 } from "../../defines/common.types";
 import {
   AutocompleteCell,
@@ -45,8 +46,7 @@ import {
 import type { TStatusConfig } from "../cells/status-cell/status-constants";
 import { TableToolbar } from "../table-sub-components/table-toolbar/table-toolbar";
 import { ColumnsConfigModal } from "../modals/columns-config-modal/columns-config-modal";
-
-export type { ILinkConfig, IRowNavigationConfig, TRouterType, IBorderConfig };
+import { BaseTable } from "../areas/base-table/base-table";
 
 type TUserBaseCellProps = Partial<Omit<IBaseCellProps, keyof ICellProps>>;
 
@@ -138,6 +138,8 @@ interface IDynamicTableProps<T>
   enableColumnHiding?: boolean; // Abilita l'icona "occhio sbarrato" nell'header
   enableColumnConfig?: boolean; // Abilita il bottone "Settings" per la modale
   dragHandleVisibility?: "always" | "hover";
+  density?: TDensity;
+  enableDensity?: boolean;
 }
 
 const DynamicTable = <T extends object>({
@@ -159,7 +161,9 @@ const DynamicTable = <T extends object>({
   enableColumnReorder = false,
   enableColumnHiding = false,
   enableColumnConfig = false,
+  enableDensity = false,
   dragHandleVisibility = "always",
+  density: externalDensity,
   onLayoutChange: externalOnLayoutChange,
   ...tableProps
 }: IDynamicTableProps<T>) => {
@@ -189,6 +193,8 @@ const DynamicTable = <T extends object>({
   const {
     initialLimit: persistedLimit,
     initialPage: persistedPage,
+    initialColumnsLayout: persistedLayout,
+    initialDensity: persistedDensity,
     persistState,
   } = usePaginationPersistence({
     enabled: persistence?.enabled ?? false,
@@ -196,6 +202,8 @@ const DynamicTable = <T extends object>({
     storage: persistence?.storage,
     persistLimit: persistence?.persistLimit,
     persistPage: persistence?.persistPage,
+    persistLayout: persistence?.persistLayout,
+    persistDensity: persistence?.persistDensity,
   });
 
   // Internal state (used when not in controlled mode)
@@ -209,7 +217,12 @@ const DynamicTable = <T extends object>({
   const [stickyWidths, setStickyWidths] = useState<Record<string, number>>({});
 
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
-  const [layoutIds, setLayoutIds] = useState<string[]>([]);
+  const [internalColumnsLayout, setInternalColumnsLayout] = useState<
+    IColumnLayout[]
+  >(() => persistedLayout || []);
+  const [internalDensity, setInternalDensity] = useState<TDensity>(
+    () => persistedDensity || "standard"
+  );
 
   // Use controlled values if provided, otherwise use internal state
   const isControlled = !!controlled;
@@ -245,22 +258,22 @@ const DynamicTable = <T extends object>({
 
   const orderedColumns = useMemo(() => {
     // Se non abbiamo ancora un layout (primo render), usiamo l'ordine originale
-    if (layoutIds.length === 0) return columns;
+    if (internalColumnsLayout.length === 0) return columns;
 
     // Creiamo una mappa per accesso veloce
     const colMap = new Map(columns.map((c) => [c.id, c]));
 
     // Ricostruiamo l'array nell'ordine corretto
-    const ordered = layoutIds
-      .map((id) => colMap.get(id))
+    const ordered = internalColumnsLayout
+      .map((l) => colMap.get(l.id))
       .filter((c): c is IColumnConfig<T> => !!c); // Filtra eventuali undefined
 
     // Aggiungiamo in coda eventuali colonne nuove che non sono ancora nel layoutIds
-    const orderedIds = new Set(layoutIds);
+    const orderedIds = new Set(internalColumnsLayout.map((l) => l.id));
     const remaining = columns.filter((c) => !orderedIds.has(c.id));
 
     return [...ordered, ...remaining];
-  }, [columns, layoutIds]);
+  }, [columns, internalColumnsLayout]);
 
   const stickyOffsets = useMemo(() => {
     const offsets: Record<string, string> = {};
@@ -352,13 +365,26 @@ const DynamicTable = <T extends object>({
     (newLayout: ITableLayout) => {
       if (newLayout.columnsLayout) {
         // Aggiorniamo il nostro stato locale con il nuovo ordine
-        setLayoutIds(newLayout.columnsLayout.map((c) => c.id));
+        setInternalColumnsLayout(newLayout.columnsLayout);
+
+        // Phase 3: Persist layout
+        if (persistence?.enabled) {
+          persistState({ columnsLayout: newLayout.columnsLayout });
+        }
       }
       // Se l'utente aveva passato un onLayoutChange, lo chiamiamo comunque
       if (externalOnLayoutChange) externalOnLayoutChange(newLayout);
     },
-    [externalOnLayoutChange]
+    [externalOnLayoutChange, persistence?.enabled, persistState]
   );
+
+  const handleResetLayout = useCallback(() => {
+    setInternalColumnsLayout([]);
+    setInternalDensity("standard");
+    if (persistence?.enabled) {
+      persistState({ columnsLayout: [], density: "standard" });
+    }
+  }, [persistence?.enabled, persistState]);
 
   const getComponentByType = (type: string = "text") => {
     switch (type) {
@@ -425,10 +451,12 @@ const DynamicTable = <T extends object>({
   const tableExtensions = (
     <>
       {/* TOOLBAR */}
-      {enableColumnConfig && (
+      {(enableColumnConfig || enableDensity) && (
         <TableToolbar
-          showConfigButton={true}
+          showConfigButton={enableColumnConfig}
+          enableDensity={enableDensity}
           onOpenConfig={() => setIsConfigModalOpen(true)}
+          onResetLayout={handleResetLayout}
         />
       )}
 
@@ -437,10 +465,33 @@ const DynamicTable = <T extends object>({
         <ColumnsConfigModal
           open={isConfigModalOpen}
           onClose={() => setIsConfigModalOpen(false)}
-          columns={columns}
+          columns={orderedColumns}
         />
       )}
     </>
+  );
+
+  // Componente per avvolgere la tabella nello scroll, permettendo al 'before' (toolbar) di restare fisso
+  const ScrollableTable = useCallback(
+    ({ children }: { children: ReactNode }) => (
+      <div
+        style={{
+          overflowX: "auto",
+          overflowY: maxHeight ? "auto" : undefined,
+          maxHeight,
+          ...(externalBorderColor
+            ? {
+                border: `1px solid ${externalBorderColor}`,
+                boxSizing: "border-box",
+                borderRadius: "8px",
+              }
+            : {}),
+        }}
+      >
+        <BaseTable>{children}</BaseTable>
+      </div>
+    ),
+    [maxHeight, externalBorderColor]
   );
 
   return (
@@ -459,124 +510,131 @@ const DynamicTable = <T extends object>({
           endMessage={infiniteScrollConfig.endMessage}
         />
       )}
-      {/* Horizontal scroll wrapper */}
-      <div
-        style={{
-          overflowX: "auto",
-          overflowY: maxHeight ? "auto" : undefined,
-          maxHeight,
-          ...(externalBorderColor
-            ? {
-                border: `1px solid ${externalBorderColor}`,
-                boxSizing: "border-box",
-                borderRadius: "8px",
-              }
-            : {}),
+
+      <Table
+        table={ScrollableTable}
+        stickyHeader={stickyHeader}
+        data={paginatedData}
+        onRowSelectionChange={onRowSelectionChange}
+        onRowDoubleClick={onRowDoubleClick}
+        before={<>{tableExtensions}</>}
+        layout={{ columnsLayout: internalColumnsLayout }}
+        onLayoutChange={handleLayoutChange}
+        parserAPI={{
+          resetLayout: handleResetLayout,
+          density: externalDensity || internalDensity,
+          setDensity: (d) => {
+            const nextDensity =
+              typeof d === "function" ? d(internalDensity) : d;
+            setInternalDensity(nextDensity);
+            if (persistence?.enabled) {
+              persistState({ density: nextDensity });
+            }
+          },
         }}
+        {...passedTableProps}
       >
-        <Table
-          stickyHeader={stickyHeader}
-          data={paginatedData}
-          onRowSelectionChange={onRowSelectionChange}
-          onRowDoubleClick={onRowDoubleClick}
-          before={<>{tableExtensions}</>}
-          onLayoutChange={handleLayoutChange}
-          {...passedTableProps}
-        >
-          {orderedColumns.map((col, index) => {
-            const CellComponent = getComponentByType(col.type);
-            const HeaderComponent =
-              col.type === "checkbox" ? CheckboxCell : BaseCell;
-            const fixed = index < frozenColumnCount;
-            const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
-            const isColumnResizable =
-              col.isResizable ?? globalResizable ?? false;
-            const isDraggable = enableColumnReorder && col.draggable !== false;
-            const isHideable = enableColumnHiding && col.hideable !== false;
-            return (
-              <Column
-                key={col.id}
-                width={col.width}
-                link={col.link as ILinkConfig<ILinkObject>}
-              >
-                <HeaderCell
-                  label={col.label}
-                  cell={[
-                    HeaderComponent,
-                    {
-                      ...col.headerProps,
-                      showHeaderCheckbox: col.headerProps?.showHeaderCheckbox,
-                      onHeaderClick: col.onHeaderClick
-                        ? () => col.onHeaderClick?.(col.dataKey || col.id)
+        {orderedColumns.map((col, index) => {
+          const CellComponent = getComponentByType(col.type);
+          const HeaderComponent =
+            col.type === "checkbox" ? CheckboxCell : BaseCell;
+          const fixed = index < frozenColumnCount;
+          const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
+          const isCheckbox = col.type === "checkbox";
+          const isColumnResizable = isCheckbox
+            ? false
+            : col.isResizable ?? globalResizable ?? false;
+          const isDraggable =
+            !isCheckbox && enableColumnReorder && col.draggable !== false;
+          const isHideable = isCheckbox
+            ? false
+            : enableColumnHiding && col.hideable !== false;
+          return (
+            <Column
+              key={col.id}
+              id={col.id}
+              width={col.width}
+              isHidden={
+                internalColumnsLayout.find((l) => l.id === col.id)?.props
+                  ?.isHidden
+              }
+              link={col.link as ILinkConfig<ILinkObject>}
+            >
+              <HeaderCell
+                label={col.label}
+                cell={[
+                  HeaderComponent,
+                  {
+                    ...col.headerProps,
+                    showHeaderCheckbox: col.headerProps?.showHeaderCheckbox,
+                    onHeaderClick: col.onHeaderClick
+                      ? () => col.onHeaderClick?.(col.dataKey || col.id)
+                      : undefined,
+                    queryParam: col.queryParam,
+                    fixed,
+                    // Pass headerBorder config to both right/bottom for a grid effect if valid
+                    borderRight: col.headerProps?.borderRight ?? headerBorder,
+                    borderBottom: col.headerProps?.borderBottom ?? headerBorder,
+                    borderTop: col.headerProps?.borderTop, // Opt-in only
+                    borderLeft: col.headerProps?.borderLeft, // Opt-in only
+                    stickyLeft: stickyLeftValue,
+                    measuredRef: fixed
+                      ? (el: HTMLTableCellElement) => measureColumn(col.id, el)
+                      : undefined,
+                    isResizable: isColumnResizable,
+                    draggable: isDraggable,
+                    enableHiding: isHideable,
+                    dragHandleVisibility,
+                  } as Partial<IBaseCellProps>,
+                ]}
+              />
+              <BodyCell
+                dataKey={col.dataKey || col.id}
+                cell={[
+                  CellComponent,
+                  {
+                    ...col.bodyProps,
+                    fixed,
+                    rowSelectedColor,
+                    component: col.component,
+                    // Pass bodyBorder config to both right/bottom for a grid effect if valid
+                    borderRight: col.bodyProps?.borderRight ?? bodyBorder,
+                    borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
+                    borderTop: col.bodyProps?.borderTop, // Opt-in only
+                    borderLeft: col.bodyProps?.borderLeft, // Opt-in only
+                    inputType: col.inputType,
+                    inputHeight: col.inputHeight,
+                    inputWidth: col.inputWidth,
+                    currencySymbol: col.currencySymbol,
+                    symbolPosition: col.symbolPosition,
+                    decimals: col.decimals,
+                    statusConfig: col.statusConfig,
+                    renderStatus: col.renderStatus,
+                    padding:
+                      col.type === "input" ? "0.1rem 0.25rem" : undefined,
+                    options: col.autocompleteOptions,
+                    getOptionLabel: col.getOptionLabel,
+                    isOptionEqualToValue: col.isOptionEqualToValue,
+                    onCellChange:
+                      col.type === "input" ||
+                      col.type === "autocomplete" ||
+                      col.type === "custom"
+                        ? (val: string | number | boolean, cellData: ICell) =>
+                            handleCellChange(
+                              cellData.row.source.id,
+                              col.dataKey || col.id,
+                              val
+                            )
                         : undefined,
-                      queryParam: col.queryParam,
-                      fixed,
-                      // Pass headerBorder config to both right/bottom for a grid effect if valid
-                      borderRight: col.headerProps?.borderRight ?? headerBorder,
-                      borderBottom:
-                        col.headerProps?.borderBottom ?? headerBorder,
-                      borderTop: col.headerProps?.borderTop, // Opt-in only
-                      borderLeft: col.headerProps?.borderLeft, // Opt-in only
-                      stickyLeft: stickyLeftValue,
-                      measuredRef: fixed
-                        ? (el: HTMLTableCellElement) =>
-                            measureColumn(col.id, el)
-                        : undefined,
-                      isResizable: isColumnResizable,
-                      draggable: isDraggable,
-                      enableHiding: isHideable,
-                      dragHandleVisibility,
-                    } as Partial<IBaseCellProps>,
-                  ]}
-                />
-                <BodyCell
-                  dataKey={col.dataKey || col.id}
-                  cell={[
-                    CellComponent,
-                    {
-                      ...col.bodyProps,
-                      fixed,
-                      rowSelectedColor,
-                      component: col.component,
-                      // Pass bodyBorder config to both right/bottom for a grid effect if valid
-                      borderRight: col.bodyProps?.borderRight ?? bodyBorder,
-                      borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
-                      borderTop: col.bodyProps?.borderTop, // Opt-in only
-                      borderLeft: col.bodyProps?.borderLeft, // Opt-in only
-                      inputType: col.inputType,
-                      inputHeight: col.inputHeight,
-                      inputWidth: col.inputWidth,
-                      currencySymbol: col.currencySymbol,
-                      symbolPosition: col.symbolPosition,
-                      decimals: col.decimals,
-                      statusConfig: col.statusConfig,
-                      renderStatus: col.renderStatus,
-                      padding:
-                        col.type === "input" ? "0.1rem 0.25rem" : undefined,
-                      options: col.autocompleteOptions,
-                      getOptionLabel: col.getOptionLabel,
-                      isOptionEqualToValue: col.isOptionEqualToValue,
-                      onCellChange:
-                        col.type === "input" ||
-                        col.type === "autocomplete" ||
-                        col.type === "custom"
-                          ? (val: string | number | boolean, cellData: ICell) =>
-                              handleCellChange(
-                                cellData.row.source.id,
-                                col.dataKey || col.id,
-                                val
-                              )
-                          : undefined,
-                      disableClearable: col.disableClearable,
-                      stickyLeft: stickyLeftValue,
-                    } as Partial<IBaseCellProps>,
-                  ]}
-                />
-              </Column>
-            );
-          })}
-        </Table>
-      </div>
+                    disableClearable: col.disableClearable,
+                    stickyLeft: stickyLeftValue,
+                  } as Partial<IBaseCellProps>,
+                ]}
+              />
+            </Column>
+          );
+        })}
+      </Table>
       {renderNode(after)}
       {paginationPosition === "bottom" && paginationComponent}
     </div>

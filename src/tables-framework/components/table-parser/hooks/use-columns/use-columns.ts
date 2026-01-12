@@ -14,35 +14,51 @@ function useColumns({ columns, tableLayout }: IProps): IColumn[] {
 
     const columnsLayout = tableLayout.columnsLayout;
 
-    columns.forEach((column) => {
-      const match = columnsLayout.find((l) => l.id === column.id);
-
-      if (match) {
-        if (match.props.isHidden !== undefined) {
-          column.props.isHidden = match.props.isHidden;
-        }
-
-        if (match.props.width !== undefined) {
-          column.props.width = match.props.width;
-        }
-      } else {
-        console.warn(`COLUMN ${column.id} NOT FOUND IN RECEIVED LAYOUT.`);
-      }
-    });
-
-    const getPos = (c: IColumn): number => {
-      return columnsLayout.findIndex((l) => l.id === c.id);
+    const getPos = (id: string): number => {
+      return columnsLayout.findIndex((l) => l.id === id);
     };
 
     return columns
-      .filter((c) => !c.props.isHidden)
+      .filter((c) => {
+        // Controlla se è nascosta nel layout
+        const layoutCol = columnsLayout.find((l) => l.id === c.id);
+        if (layoutCol && layoutCol.props.isHidden !== undefined) {
+          return !layoutCol.props.isHidden;
+        }
+        return !c.props.isHidden;
+      })
       .sort((a, b) => {
-        return getPos(a) - getPos(b);
+        return getPos(a.id) - getPos(b.id);
       })
       .map((c, newIndex) => {
-        c.posX = newIndex;
+        // --- FIX: CLONE E MAPPA COMPLETA ---
+        // Cloniamo la colonna per evitare mutazioni e garantire il refresh
+        const newCol: IColumn = {
+          ...c,
+          posX: newIndex,
+          props: { ...c.props }, // Clona anche props
+        };
 
-        return c;
+        const match = columnsLayout.find((l) => l.id === c.id);
+
+        if (match) {
+          // Sovrascrivi width se presente nel layout
+          if (match.props.width !== undefined) {
+            newCol.props.width = match.props.width;
+          }
+          // Sovrascrivi isHidden se presente
+          if (match.props.isHidden !== undefined) {
+            newCol.props.isHidden = match.props.isHidden;
+          }
+
+          // --- FIX SALVATAGGIO ---
+          // Copia savedWidth dal layout alla colonna renderizzata
+          if (match.props.savedWidth !== undefined) {
+            newCol.props.savedWidth = match.props.savedWidth;
+          }
+        }
+
+        return newCol;
       });
   }, [columns, tableLayout.columnsLayout]);
 }

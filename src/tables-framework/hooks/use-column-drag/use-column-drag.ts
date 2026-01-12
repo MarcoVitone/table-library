@@ -30,7 +30,7 @@ export const useColumnDrag = ({ columnId, enabled }: IUseColumnDragParams) => {
   }, [columnsLayout]); // <--- ARRAY DIPENDENZE MINIMO (Solo layout)
 
   const handleDragStart = useCallback(
-    (e: DragEvent<HTMLTableCellElement>) => {
+    (e: DragEvent<HTMLElement>) => {
       if (ghostImageTimeoutRef.current)
         clearTimeout(ghostImageTimeoutRef.current);
 
@@ -57,12 +57,12 @@ export const useColumnDrag = ({ columnId, enabled }: IUseColumnDragParams) => {
     }
   }, []);
 
-  const handleDragOver = useCallback((e: DragEvent<HTMLTableCellElement>) => {
+  const handleDragOver = useCallback((e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleDragEnter = useCallback((e: DragEvent<HTMLTableCellElement>) => {
+  const handleDragEnter = useCallback((e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     setIsOver(true); // Attiva il bordo colorato di destinazione
   }, []);
@@ -72,7 +72,7 @@ export const useColumnDrag = ({ columnId, enabled }: IUseColumnDragParams) => {
   }, []);
 
   const handleDrop = useCallback(
-    (e: DragEvent<HTMLTableCellElement>) => {
+    (e: DragEvent<HTMLElement>) => {
       e.preventDefault();
       // Non resettiamo qui, lasciamo che lo faccia l'useEffect su [columnsLayout]
       // o l'handleDragEnd.

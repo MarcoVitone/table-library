@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ILayoutAPI } from "../../../../defines/api.types";
 import type {
   ITableLayout,
@@ -8,6 +8,7 @@ import type {
   TSorting,
   TFiltering,
   IPagination,
+  TDensity,
 } from "../../../../defines/common.types";
 import { useChangeEvent } from "../../../../hooks/use-change-event/use-change-event";
 
@@ -85,6 +86,16 @@ function useLayout({
     };
   }, [externalLayout]);
 
+  const defaultDensity = useCallback<() => TDensity>(() => {
+    if (externalLayout?.density) {
+      return externalLayout.density;
+    }
+
+    setIsStale(true);
+
+    return "standard";
+  }, [externalLayout]);
+
   const [columnsLayout, setColumnsLayout] =
     useState<IColumnLayout[]>(defaultColumnsLayout);
   const [sorting, setSorting] = useState<TSorting>(defaultSorting);
@@ -93,14 +104,52 @@ function useLayout({
 
   const [pagination, setPagination] = useState<IPagination>(defaultPagination);
 
+  const [density, setDensity] = useState<TDensity>(defaultDensity);
+
+  // Synchronize internal state with external props when they change
+  useEffect(() => {
+    setColumnsLayout(defaultColumnsLayout());
+  }, [defaultColumnsLayout]);
+
+  useEffect(() => {
+    setSorting(defaultSorting());
+  }, [defaultSorting]);
+
+  useEffect(() => {
+    setFiltering(defaultFiltering());
+  }, [defaultFiltering]);
+
+  useEffect(() => {
+    setPagination(defaultPagination());
+  }, [defaultPagination]);
+
+  useEffect(() => {
+    setDensity(defaultDensity());
+  }, [defaultDensity]);
+
+  const resetLayout = useCallback(() => {
+    setColumnsLayout(defaultColumnsLayout());
+    setSorting(defaultSorting());
+    setFiltering(defaultFiltering());
+    setPagination(defaultPagination());
+    setDensity(defaultDensity());
+  }, [
+    defaultColumnsLayout,
+    defaultSorting,
+    defaultFiltering,
+    defaultPagination,
+    defaultDensity,
+  ]);
+
   const tableLayout = useMemo<ITableLayout>(() => {
     return {
       columnsLayout,
       sorting,
       filtering,
       pagination,
+      density,
     };
-  }, [columnsLayout, sorting, filtering, pagination]);
+  }, [columnsLayout, sorting, filtering, pagination, density]);
 
   const onLayoutChangeHandler = useCallback(
     (e: ITableLayout) => {
@@ -125,6 +174,9 @@ function useLayout({
     setFiltering,
     pagination,
     setPagination,
+    density,
+    setDensity,
+    resetLayout,
   };
 }
 

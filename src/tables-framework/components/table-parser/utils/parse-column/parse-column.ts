@@ -100,11 +100,13 @@ function parseColumn(
     }
   });
 
-  const prefix = [...groups.map((g) => g.groupKey), output.dataKey].join(".");
+  const prefix = props.id
+    ? props.id
+    : [...groups.map((g) => g.groupKey), output.dataKey].join(".");
 
   const id = prefix + (props.suffix ? `.${props.suffix}` : "");
 
-  if (ids.has(prefix) && !props.suffix) {
+  if (ids.has(prefix) && !props.suffix && !props.id) {
     console.warn(
       `FOUND REPEATED COLUMN AT SAME LEVEL. IF THIS IS INTENDED, SPECIFY A UNIQUE suffix TO DIFFERENTIATE THEM. SKIPPING COLUMN`
     );
@@ -113,7 +115,9 @@ function parseColumn(
       `COLUMN ID CONFLICT. MAKE SURE suffix IS UNIQUE FOR EACH REPEATED COLUMN AT A SAME LEVEL. SKIPPING COLUMN`
     );
   } else {
-    ids.add(prefix);
+    if (!props.id) {
+      ids.add(prefix);
+    }
     ids.add(id);
 
     output.id = id;

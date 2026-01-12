@@ -1,19 +1,24 @@
 import type { ElementType, FC, ReactNode, Ref } from "react";
-import { useCallback, useMemo, useEffect } from "react";
-import { ArrowUpward, DragIndicator, VisibilityOff } from "@mui/icons-material";
-import { IconButton, useTheme } from "@mui/material";
-import { animated } from "@react-spring/web";
+import { useCallback, useMemo, useRef } from "react";
+import { ArrowUpward } from "@mui/icons-material";
+import { useTheme } from "@mui/material";
 import type {
   IBorderConfig,
   ICellProps,
   TAlignment,
   TtextTransform,
+  TDensity,
 } from "../../../defines/common.types.ts";
-import { useSpring } from "../../../hooks/use-spring/use-spring.ts";
+
 import { useTable } from "../../../hooks/use-table/use-table.ts";
 import { BaseCellComponent } from "./base-cell.styles.ts";
+import { useCellCollapse, useCellSorting } from "./base-cell.hooks.ts";
 import { ColumnResizer } from "../../table-sub-components/column-resizer/column-resizer.tsx";
 import { useColumnDrag } from "../../../hooks/use-column-drag/use-column-drag.ts";
+import { DraggableButton } from "../../table-sub-components/draggable-button/draggable-button.tsx";
+import { HideButton } from "../../table-sub-components/hide-button/hide-button.tsx";
+import SortIcon from "../../table-sub-components/sort-icon/sort-icon.tsx";
+import CollapsedComponent from "../../table-sub-components/collapsed-component/collapsed-component.tsx";
 
 type TVariant = "header" | "body" | "footer";
 
@@ -60,6 +65,7 @@ interface IBaseCellProps extends ICellProps {
   stickyLeft?: string;
   measuredRef?: Ref<HTMLTableCellElement>;
   isResizable?: boolean;
+  minWidth?: string | number;
   // Hiding
   enableHiding?: boolean;
   onHide?: () => void;
@@ -67,6 +73,7 @@ interface IBaseCellProps extends ICellProps {
   // Drag & Drop
   draggable?: boolean;
   dragHandleVisibility?: "always" | "hover";
+  density?: TDensity;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -108,17 +115,27 @@ const BaseCell: FC<IBaseCellProps> = ({
   stickyLeft,
   measuredRef,
   isResizable,
+  minWidth: minWidthProp,
   enableHiding,
-  onHide,
   draggable,
   dragHandleVisibility = "always",
   ...rest
 }) => {
   const type = variant || area;
-
   const { palette } = useTheme();
-  const { sorting, setSorting, stickyHeader, rowStatus, setColumnLayout } =
-    useTable(data);
+  const innerRef = useRef<HTMLTableCellElement>(null);
+  const columnProps = data?.column;
+  const currentWidth = columnProps?.props?.width;
+  const savedWidth = columnProps?.props?.savedWidth;
+
+  const {
+    sorting,
+    setSorting,
+    stickyHeader,
+    rowStatus,
+    setColumnLayout,
+    density,
+  } = useTable(data);
 
   const {
     dragProps,
@@ -128,6 +145,43 @@ const BaseCell: FC<IBaseCellProps> = ({
     columnId: data?.column?.id || "",
     enabled: (draggable && (type === "header" || area === "header")) || false,
   });
+
+  const { isCollapsed, handleExpandColumn, handleCollapseColumn } =
+    useCellCollapse({
+      data,
+      setColumnLayout,
+      currentWidth: currentWidth ?? undefined,
+      savedWidth: savedWidth ?? undefined,
+      innerRef,
+    });
+
+  const handleHeaderClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isCollapsed) {
+        handleExpandColumn(e);
+      } else if (onHeaderClick) {
+        onHeaderClick(e);
+      }
+    },
+    [isCollapsed, handleExpandColumn, onHeaderClick]
+  );
+
+  const combinedRef = useCallback(
+    (node: HTMLTableCellElement | null) => {
+      // Aggiorna il ref interno
+      innerRef.current = node;
+
+      // Aggiorna il ref del genitore (measuredRef)
+      if (measuredRef) {
+        if (typeof measuredRef === "function") {
+          measuredRef(node);
+        } else {
+          measuredRef.current = node;
+        }
+      }
+    },
+    [measuredRef]
+  );
 
   const {
     draggable: isDomDraggable,
@@ -156,20 +210,42 @@ const BaseCell: FC<IBaseCellProps> = ({
     return { ...baseStyle, opacity: 1 };
   }, [dragHandleVisibility, palette.neutral?.light]);
 
-  const isSelected = !!rowStatus && rowStatus.isSelected;
+  const hideButtonStyle = useMemo(() => {
+    const baseStyle = {
+      position: "absolute" as const,
+      right: draggable ? "30px" : "4px", // Position left of drag handle (if present)
+      top: "50%",
+      transform: "translateY(-50%)",
+      zIndex: 10,
+    };
+    return baseStyle;
+  }, [draggable]);
 
-  const dataKey = useMemo(() => {
-    return data?.column?.dataKey;
-  }, [data?.column?.dataKey]);
+  const contentWrapperStyle = useMemo(() => {
+    // Add padding for HideButton if it's visible (header/enabled/!collapsed)
+    // SortIcon handles padding for DraggableButton independently.
+    const needsHidePadding =
+      (type === "header" || area === "header") && enableHiding && !isCollapsed;
+    return {
+      width: "100%",
+      paddingRight: needsHidePadding ? "30px" : "0",
+      boxSizing: "border-box" as const,
+      display: "flex",
+      alignItems: "center",
+    };
+  }, [type, area, enableHiding, isCollapsed]);
+
+  const isSelected = !!rowStatus && rowStatus.isSelected;
 
   const dir = useMemo<-1 | 0 | 1>(() => {
     if (sorting && sortable) {
       for (const sort of sorting) {
-        if (sort.key === dataKey) return sort.dir === "asc" ? 1 : -1;
+        if (sort.key === data?.column?.dataKey)
+          return sort.dir === "asc" ? 1 : -1;
       }
     }
     return 0;
-  }, [dataKey, sorting, sortable]);
+  }, [data?.column?.dataKey, sorting, sortable]);
 
   const angle = useMemo(() => {
     switch (dir) {
@@ -184,48 +260,15 @@ const BaseCell: FC<IBaseCellProps> = ({
     }
   }, [dir]);
 
-  const [rotation, api] = useSpring({ rotate: angle });
-
-  useEffect(() => {
-    if (sortable) api.start({ rotate: angle });
-  }, [angle, api, sortable]);
-
-  const handleSortClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (!sortable || !setSorting || !dataKey) return;
-      if (dir === 0) {
-        setSorting([
-          {
-            key: sortParam ?? dataKey,
-            dir: "asc",
-            isServerSide: isServerSideSort,
-          },
-        ]);
-        onSortClick?.(dataKey, "ASC");
-      } else if (dir === 1) {
-        setSorting([
-          {
-            key: sortParam ?? dataKey,
-            dir: "desc",
-            isServerSide: isServerSideSort,
-          },
-        ]);
-        onSortClick?.(dataKey, "DESC");
-      } else {
-        setSorting([]);
-      }
-    },
-    [
-      dataKey,
-      dir,
-      sortable,
-      setSorting,
-      isServerSideSort,
-      onSortClick,
-      sortParam,
-    ]
-  );
+  const { handleSortClick } = useCellSorting({
+    data,
+    setSorting,
+    sortable,
+    isServerSideSort,
+    sortParam,
+    onSortClick,
+    dir,
+  });
 
   const handleResizeEnd = useCallback(
     (newWidth: number) => {
@@ -239,29 +282,57 @@ const BaseCell: FC<IBaseCellProps> = ({
     [data?.column?.id, data?.column?.props?.isHidden, setColumnLayout]
   );
 
-  const handleHideColumn = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (data?.column?.id && setColumnLayout) {
-        setColumnLayout(
-          { props: { isHidden: true, width: data.column.props.width } },
-          data.column.id
-        );
-      }
-      if (onHide) onHide();
-    },
-    [data?.column?.id, setColumnLayout, onHide]
-  );
-
   const justifyContent = useMemo(() => {
     if (textAlignment === "center") return "center";
     if (textAlignment === "right") return "flex-end";
     return "flex-start";
   }, [textAlignment]);
 
+  const cellContent = useMemo(() => {
+    if (isCollapsed) {
+      return <CollapsedComponent />;
+    } else if (sortable) {
+      return (
+        <SortIcon
+          draggable={draggable}
+          type={type}
+          area={area}
+          handleSortClick={handleSortClick}
+          angle={angle}
+          palette={palette}
+          sortIcon={sortIcon}
+          justifyContent={justifyContent}
+        >
+          {children}
+        </SortIcon>
+      );
+    } else {
+      return children;
+    }
+  }, [
+    isCollapsed,
+    sortable,
+    draggable,
+    type,
+    area,
+    handleSortClick,
+    palette,
+    sortIcon,
+    justifyContent,
+    children,
+    angle,
+  ]);
+
+  let cellBackgroundColor: string | undefined;
+  if (isCollapsed) {
+    cellBackgroundColor = palette.neutral?.ultraLight || "#999";
+  } else if (isDraggingColumn) {
+    cellBackgroundColor = "#f0f0f0";
+  }
+
   return (
     <BaseCellComponent
-      ref={measuredRef}
+      ref={combinedRef}
       colSpan={colSpan}
       noLeft={!!noLeftBorder}
       noRight={!!noRightBorder}
@@ -275,15 +346,19 @@ const BaseCell: FC<IBaseCellProps> = ({
       backgroundColor={backgroundColor}
       fontSize={fontSize}
       padding={padding}
+      density={density || "standard"}
       overFlow={overFlow}
       textOverflow={textOverflow}
       isSorted={dir !== 0 && !!backgroundColorSort}
       backgroundColorSort={backgroundColorSort}
       isSortActive={dir !== 0}
-      onClick={onHeaderClick}
+      onClick={handleHeaderClick}
       style={{
+        width: currentWidth || "auto",
+        minWidth: minWidthProp || currentWidth || "max-content",
+        maxWidth: ellipsis ? currentWidth || "auto" : "none",
         opacity: isDraggingColumn ? 0.5 : 1,
-        backgroundColor: isDraggingColumn ? "#f0f0f0" : undefined,
+        backgroundColor: cellBackgroundColor,
         border: isDraggingColumn
           ? `2px dashed ${palette.neutral?.light || "#999"}`
           : undefined,
@@ -291,6 +366,7 @@ const BaseCell: FC<IBaseCellProps> = ({
           isOver && !isDraggingColumn
             ? `3px solid ${palette.primary.main}`
             : undefined,
+        padding: isCollapsed ? "0" : padding,
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
       }}
       data-query-param={queryParam}
@@ -312,72 +388,32 @@ const BaseCell: FC<IBaseCellProps> = ({
       {...targetProps}
       {...rest}
     >
-      {sortable ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent,
-            gap: "4px",
-            width: "100%",
-            paddingRight:
-              draggable && (type === "header" || area === "header")
-                ? "24px"
-                : "0",
-          }}
-        >
-          {children}
-          <animated.span
-            className="sort-icon"
-            style={rotation}
-            onClick={handleSortClick}
-          >
-            <span
-              style={{
-                color: palette.primary.main,
-                display: "flex",
-                cursor: "pointer",
-              }}
-            >
-              {sortIcon}
-            </span>
-          </animated.span>
-        </div>
-      ) : (
-        children
-      )}
-      {/* --- ICONA DRAG HANDLE (Esclusiva per il trascinamento) --- */}
-      {(type === "header" || area === "header") && draggable && (
-        <span
-          className="drag-handle"
-          draggable={isDomDraggable}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-          style={handleStyle}
-        >
-          <DragIndicator fontSize="small" />
-        </span>
-      )}
-      {(type === "header" || area === "header") && enableHiding && (
-        <IconButton
-          size="small"
-          onClick={handleHideColumn}
-          sx={{
-            padding: "2px",
-            marginLeft: "4px",
-            opacity: 0.5, // Leggermente trasparente di default
-            "&:hover": { opacity: 1, color: palette.error.main },
-          }}
-          title="Nascondi colonna"
-        >
-          <VisibilityOff fontSize="inherit" style={{ fontSize: "1rem" }} />
-        </IconButton>
-      )}
-      {(type === "header" || area === "header") && isResizable && (
-        <ColumnResizer onResizeEnd={handleResizeEnd} />
-      )}
+      <div style={contentWrapperStyle}>{cellContent}</div>
+      {(type === "header" || area === "header") &&
+        draggable &&
+        !isCollapsed && (
+          <DraggableButton
+            isDomDraggable={isDomDraggable}
+            handleDragStart={handleDragStart}
+            handleDragEnd={handleDragEnd}
+            handleStyle={handleStyle}
+          />
+        )}
+      {(type === "header" || area === "header") &&
+        enableHiding &&
+        !isCollapsed && (
+          <div style={hideButtonStyle}>
+            <HideButton
+              handleCollapseColumn={handleCollapseColumn}
+              palette={palette}
+              title="Collassa colonna"
+            />
+          </div>
+        )}
+
+      {(type === "header" || area === "header") &&
+        isResizable &&
+        !isCollapsed && <ColumnResizer onResizeEnd={handleResizeEnd} />}
     </BaseCellComponent>
   );
 };

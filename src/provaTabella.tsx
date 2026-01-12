@@ -210,24 +210,27 @@ const ProvaTabella = () => {
     );
   };
 
-  const MY_USER_STATUS_CONFIG: TStatusConfig = {
-    1: {
-      backgroundColor: "rgba(0, 128, 0, 0.1)",
-      textColor: "green",
-      iconColor: "green",
-    },
-    2: {
-      backgroundColor: "rgba(255, 165, 0, 0.1)",
-      textColor: "orange",
-      iconColor: "orange",
-    },
-    3: {
-      backgroundColor: "rgba(0, 247, 255, 0.1)",
-      textColor: "blue",
-      iconColor: "blue",
-      iconChip: <Check />,
-    },
-  };
+  const MY_USER_STATUS_CONFIG: TStatusConfig = useMemo(
+    () => ({
+      1: {
+        backgroundColor: "rgba(0, 128, 0, 0.1)",
+        textColor: "green",
+        iconColor: "green",
+      },
+      2: {
+        backgroundColor: "rgba(255, 165, 0, 0.1)",
+        textColor: "orange",
+        iconColor: "orange",
+      },
+      3: {
+        backgroundColor: "rgba(0, 247, 255, 0.1)",
+        textColor: "blue",
+        iconColor: "blue",
+        iconChip: <Check />,
+      },
+    }),
+    []
+  );
 
   const columns: IColumnConfig<IMockUser>[] = useMemo(
     () => [
@@ -337,7 +340,8 @@ const ProvaTabella = () => {
         autocompleteOptions: MOCK_USERS.map((user) => user.role).filter(
           (value, index, self) => self.indexOf(value) === index
         ),
-        getOptionLabel: (option) => String(option),
+        getOptionLabel: (option) =>
+          typeof option === "string" ? option : String(option?.label),
         isOptionEqualToValue: (option, value) => option === value,
         disableClearable: true,
         // headerProps mostra label in maiuscolo e margini
@@ -599,7 +603,7 @@ const ProvaTabella = () => {
               variant: "contained",
               onPrompt: () =>
                 Promise.resolve(
-                  window.confirm("Confermi l'eliminazione dell'utente?")
+                  globalThis.confirm("Confermi l'eliminazione dell'utente?")
                 ),
               onAction: (item: IMockUser) => {
                 console.log("Eliminazione utente", item);
@@ -612,7 +616,7 @@ const ProvaTabella = () => {
         },
       },
     ],
-    []
+    [MY_USER_STATUS_CONFIG]
   );
 
   return (
@@ -622,6 +626,8 @@ const ProvaTabella = () => {
       before={<TableControls filters={filters} onFiltersChange={setFilters} />}
       empty={<EmptyBody content="Nessun utente trovato" />}
       maxHeight={500}
+      enableDensity={true}
+      enableColumnConfig={true}
       headerBorder={{
         show: true,
         color: defaultTheme.palette.secondary.dark,
@@ -682,7 +688,6 @@ const ProvaTabella = () => {
       isResizable={true}
       enableColumnHiding={true}
       enableColumnReorder={true}
-      enableColumnConfig={true}
     />
   );
 };
