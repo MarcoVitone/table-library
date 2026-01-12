@@ -5,7 +5,6 @@ import {
   isValidElement,
   useMemo,
   useEffect,
-  useRef,
 } from "react";
 import type {
   TTableParserAPI,
@@ -43,8 +42,6 @@ const defaultAPI = {
   source: null,
   stickyHeader: true,
   enableColumnFilters: false,
-  enableVirtualization: false,
-  scrollContainerRef: undefined,
 };
 
 const TableContext = createContext<TTableRendererAPI>(defaultAPI);
@@ -66,8 +63,6 @@ interface ITableRendererProps<T = unknown> {
   onRowDoubleClick?: IRowNavigationConfig<T>;
   stickyHeader?: boolean;
   enableColumnFilters?: boolean;
-  enableVirtualization?: boolean;
-  estimateRowHeight?: number;
 }
 
 const TableRenderer = <T,>({
@@ -87,10 +82,7 @@ const TableRenderer = <T,>({
   onRowDoubleClick,
   stickyHeader = true,
   enableColumnFilters = false,
-  enableVirtualization = false,
-  estimateRowHeight = 40,
 }: ITableRendererProps<T>) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
     rowStatusMapper,
@@ -175,9 +167,6 @@ const TableRenderer = <T,>({
       source,
       stickyHeader,
       enableColumnFilters,
-      enableVirtualization,
-      scrollContainerRef: enableVirtualization ? scrollContainerRef : undefined,
-      estimateRowHeight,
     };
   }, [
     parserAPI,
@@ -186,13 +175,11 @@ const TableRenderer = <T,>({
     source,
     stickyHeader,
     enableColumnFilters,
-    enableVirtualization,
-    estimateRowHeight,
   ]);
 
   return (
     <TableContext.Provider value={rendererAPI}>
-      <Container ref={enableVirtualization ? scrollContainerRef : undefined}>
+      <Container>
         {beforeNode}
 
         <TableElement>
@@ -201,15 +188,7 @@ const TableRenderer = <T,>({
           {!body.length && emptyNode ? (
             emptyNode
           ) : (
-            <BodyElement
-              rows={enableVirtualization ? source.body.rows : undefined}
-              enableVirtualization={enableVirtualization}
-              estimateRowHeight={estimateRowHeight}
-              parentRef={enableVirtualization ? scrollContainerRef : undefined}
-              onRowDoubleClick={onRowDoubleClick}
-            >
-              {enableVirtualization ? null : body}
-            </BodyElement>
+            <BodyElement>{body}</BodyElement>
           )}
 
           {showFooter && <FooterElement>{footer}</FooterElement>}
