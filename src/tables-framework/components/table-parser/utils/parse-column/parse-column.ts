@@ -53,6 +53,7 @@ function parseColumn(
       isHidden: resolve(props.isHidden, false),
       isResizable: resolve(props.isResizable, true),
       width: resolve(props.width, null),
+      filterConfig: props.filterConfig,
     },
     link: props.link,
   };

@@ -63,8 +63,29 @@ interface IColumn {
     isResizable: boolean;
     width: string | number | null;
     savedWidth?: string | number | null;
+    filterConfig?: IFilterConfig;
   };
   link?: ILinkConfig<ILinkObject>;
+}
+
+export type TFilterType =
+  | "text"
+  | "date"
+  | "select"
+  | "multi-select"
+  | "number";
+
+export interface IFilterOption {
+  value: string | number | boolean;
+  label: string;
+}
+
+export interface IFilterConfig {
+  type: TFilterType;
+  options?: IFilterOption[];
+  placeholder?: string;
+  queryParam?: string;
+  filterLabel?: string;
 }
 
 export type TRouterType = "native" | "react-router" | "nextjs" | "custom";
@@ -146,8 +167,18 @@ type TSorting = ISorting[];
 
 interface IFilter {
   key: string;
-  op: "eq" | "ne" | "gt" | "lt" | "gte" | "lte" | "match" | "exists" | "regexp";
-  val: string | number | RegExp | boolean;
+  op:
+    | "eq"
+    | "ne"
+    | "gt"
+    | "lt"
+    | "gte"
+    | "lte"
+    | "match"
+    | "exists"
+    | "regexp"
+    | "in";
+  val: string | number | RegExp | boolean | (string | number | boolean)[];
 }
 
 type TFiltering = IFilter[];

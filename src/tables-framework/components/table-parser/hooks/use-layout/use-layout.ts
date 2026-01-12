@@ -16,12 +16,14 @@ interface IProps {
   externalLayout: ITableLayout | undefined;
   onLayoutChange: ((newLayout: ITableLayout) => void) | undefined;
   parsedColumns: IColumn[];
+  enableColumnFilters?: boolean;
 }
 
 function useLayout({
   externalLayout = undefined,
   onLayoutChange = undefined,
   parsedColumns,
+  enableColumnFilters = false,
 }: IProps): TNonNullable<ILayoutAPI> {
   const [isStale, setIsStale] = useState<boolean>(false);
 
@@ -177,6 +179,7 @@ function useLayout({
     density,
     setDensity,
     resetLayout,
+    enableColumnFilters,
   };
 }
 

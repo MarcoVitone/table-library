@@ -19,6 +19,7 @@ import { DraggableButton } from "../../table-sub-components/draggable-button/dra
 import { HideButton } from "../../table-sub-components/hide-button/hide-button.tsx";
 import SortIcon from "../../table-sub-components/sort-icon/sort-icon.tsx";
 import CollapsedComponent from "../../table-sub-components/collapsed-component/collapsed-component.tsx";
+import { FilterMenu } from "../../table-sub-components/filter-menu/filter-menu.tsx";
 
 type TVariant = "header" | "body" | "footer";
 
@@ -135,6 +136,7 @@ const BaseCell: FC<IBaseCellProps> = ({
     rowStatus,
     setColumnLayout,
     density,
+    enableColumnFilters,
   } = useTable(data);
 
   const {
@@ -288,6 +290,24 @@ const BaseCell: FC<IBaseCellProps> = ({
     return "flex-start";
   }, [textAlignment]);
 
+  const filterMenu = useMemo(() => {
+    const config = data?.column?.props?.filterConfig;
+    if (
+      (type === "header" || area === "header") &&
+      enableColumnFilters &&
+      config &&
+      data?.column?.dataKey &&
+      !isCollapsed
+    ) {
+      return (
+        <div style={{ marginLeft: "4px" }}>
+          <FilterMenu dataKey={data.column.dataKey} config={config} />
+        </div>
+      );
+    }
+    return null;
+  }, [type, area, enableColumnFilters, data?.column, isCollapsed]);
+
   const cellContent = useMemo(() => {
     if (isCollapsed) {
       return <CollapsedComponent />;
@@ -304,10 +324,16 @@ const BaseCell: FC<IBaseCellProps> = ({
           justifyContent={justifyContent}
         >
           {children}
+          {filterMenu}
         </SortIcon>
       );
     } else {
-      return children;
+      return (
+        <>
+          {children}
+          {filterMenu}
+        </>
+      );
     }
   }, [
     isCollapsed,
@@ -321,6 +347,7 @@ const BaseCell: FC<IBaseCellProps> = ({
     justifyContent,
     children,
     angle,
+    filterMenu,
   ]);
 
   let cellBackgroundColor: string | undefined;

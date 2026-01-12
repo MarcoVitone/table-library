@@ -41,6 +41,7 @@ interface ITableParserProps<T = unknown> extends TBase<T> {
   children?: TJSX;
   onRowSelectionChange?: (data: T[]) => void;
   onRowDoubleClick?: IRowNavigationConfig<T>;
+  enableColumnFilters?: boolean;
 }
 
 const TableParser = <T,>({
@@ -55,6 +56,7 @@ const TableParser = <T,>({
   children = null,
   onRowSelectionChange,
   onRowDoubleClick,
+  enableColumnFilters = false,
   ...rest
 }: ITableParserProps<T>) => {
   const parsedColumns = useParser({
@@ -79,6 +81,7 @@ const TableParser = <T,>({
     externalLayout,
     onLayoutChange,
     parsedColumns,
+    enableColumnFilters,
   });
 
   const resolvedColumns = useColumns({
@@ -138,6 +141,7 @@ const TableParser = <T,>({
       resetLayout,
       exportCSV,
       exportJSON,
+      enableColumnFilters,
     };
   }, [
     tableLayout,
@@ -154,6 +158,7 @@ const TableParser = <T,>({
     resetLayout,
     exportCSV,
     exportJSON,
+    enableColumnFilters,
   ]);
 
   return (
@@ -161,6 +166,7 @@ const TableParser = <T,>({
       {...rest}
       source={source}
       parserAPI={parserAPI}
+      enableColumnFilters={enableColumnFilters}
       onRowSelectionChange={onRowSelectionChange}
       onRowDoubleClick={onRowDoubleClick}
     />

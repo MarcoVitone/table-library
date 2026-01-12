@@ -49,7 +49,7 @@ function useData({ columns, tableLayout, data, idKey }: IProps): IColumn[] {
             default:
               break;
           }
-          if (typeof content === "undefined" || content === null) return true;
+          if (content === undefined || content === null) return true;
           switch (op) {
             case "gt":
               return content > val;
@@ -68,6 +68,16 @@ function useData({ columns, tableLayout, data, idKey }: IProps): IColumn[] {
                 return StringUtils.serialize(content)
                   .toLowerCase()
                   .includes(val);
+              return false;
+            case "in":
+              if (Array.isArray(val)) {
+                return (
+                  (typeof content === "string" ||
+                    typeof content === "number" ||
+                    typeof content === "boolean") &&
+                  val.includes(content)
+                );
+              }
               return false;
             default:
               return true;

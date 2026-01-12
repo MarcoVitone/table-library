@@ -35,6 +35,7 @@ function useTable(data?: ICell | IRow): TFullTableAPI {
     setRowsStatus,
     source,
     stickyHeader,
+    enableColumnFilters,
   } = useContext(TableContext);
 
   const columnLayout = useMemo<IColumnLayout | null>(() => {
@@ -194,6 +195,7 @@ function useTable(data?: ICell | IRow): TFullTableAPI {
     selectAllRows,
     source,
     stickyHeader,
+    enableColumnFilters,
   };
 }
 

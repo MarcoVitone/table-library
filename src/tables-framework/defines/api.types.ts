@@ -39,6 +39,7 @@ interface ILayoutAPI {
   setDensity: TSetDensity | null;
   resetLayout: TResetLayout | null;
   stickyHeader?: boolean;
+  enableColumnFilters?: boolean;
 }
 
 // *** EXPORT API ***
@@ -99,6 +100,7 @@ interface IHookAPI {
   setDensity: TSetDensity;
   resetLayout: TResetLayout;
   stickyHeader?: boolean;
+  enableColumnFilters?: boolean;
 }
 
 // *** FULL API ***

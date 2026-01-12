@@ -262,6 +262,7 @@ const ProvaTabella = () => {
         dataKey: "firstName",
         type: "text",
         fixed: true,
+        filterConfig: { type: "text", placeholder: "Cerca nome..." },
         // headerProps abilita l'ordinamento client-side e lo sfondo per la colonna attiva
         headerProps: {
           textAlignment: "left",
@@ -291,6 +292,7 @@ const ProvaTabella = () => {
         label: "Cognome",
         dataKey: "lastName",
         type: "text",
+        filterConfig: { type: "text", placeholder: "Cerca cognome..." },
         // headerProps controlla aspetto e spaziature dell'intestazione
         headerProps: {
           textAlignment: "left",
@@ -344,6 +346,15 @@ const ProvaTabella = () => {
           typeof option === "string" ? option : String(option?.label),
         isOptionEqualToValue: (option, value) => option === value,
         disableClearable: true,
+        filterConfig: {
+          type: "select",
+          options: [
+            { label: "Admin", value: "Admin" },
+            { label: "Manager", value: "Manager" },
+            { label: "Editor", value: "Editor" },
+            { label: "User", value: "User" },
+          ],
+        },
         // headerProps mostra label in maiuscolo e margini
         headerProps: {
           textAlignment: "left",
@@ -461,6 +472,7 @@ const ProvaTabella = () => {
         label: "Progetti",
         dataKey: "projects",
         type: "number",
+        filterConfig: { type: "number", placeholder: "Min progetti..." },
         width: "6rem",
         // headerProps gestisce l'allineamento per i conteggi
         headerProps: {
@@ -493,6 +505,7 @@ const ProvaTabella = () => {
         dataKey: "age",
         type: "number",
         width: "5rem",
+        filterConfig: { type: "number", placeholder: "Filtra età..." },
         // headerProps abilita l'ordinamento e definisce padding dell'intestazione
         headerProps: {
           textAlignment: "center",
@@ -521,6 +534,7 @@ const ProvaTabella = () => {
         dataKey: "lastLogin",
         type: "date",
         width: "9rem",
+        filterConfig: { type: "date", filterLabel: "Data accesso" },
         // headerProps definisce stile e abilita sort per le date
         headerProps: {
           textAlignment: "center",
@@ -628,6 +642,7 @@ const ProvaTabella = () => {
       maxHeight={500}
       enableDensity={true}
       enableColumnConfig={true}
+      enableColumnFilters={true}
       headerBorder={{
         show: true,
         color: defaultTheme.palette.secondary.dark,

@@ -41,6 +41,7 @@ const defaultAPI = {
   setRowsStatus: null,
   source: null,
   stickyHeader: true,
+  enableColumnFilters: false,
 };
 
 const TableContext = createContext<TTableRendererAPI>(defaultAPI);
@@ -61,6 +62,7 @@ interface ITableRendererProps<T = unknown> {
   onRowSelectionChange?: (data: T[]) => void;
   onRowDoubleClick?: IRowNavigationConfig<T>;
   stickyHeader?: boolean;
+  enableColumnFilters?: boolean;
 }
 
 const TableRenderer = <T,>({
@@ -79,6 +81,7 @@ const TableRenderer = <T,>({
   onRowSelectionChange,
   onRowDoubleClick,
   stickyHeader = true,
+  enableColumnFilters = false,
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -163,8 +166,16 @@ const TableRenderer = <T,>({
       setRowsStatus,
       source,
       stickyHeader,
+      enableColumnFilters,
     };
-  }, [parserAPI, rowsStatus, setRowsStatus, source, stickyHeader]);
+  }, [
+    parserAPI,
+    rowsStatus,
+    setRowsStatus,
+    source,
+    stickyHeader,
+    enableColumnFilters,
+  ]);
 
   return (
     <TableContext.Provider value={rendererAPI}>

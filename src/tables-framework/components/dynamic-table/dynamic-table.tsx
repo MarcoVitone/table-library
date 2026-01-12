@@ -38,6 +38,7 @@ import type {
   ITableLayout,
   IColumnLayout,
   TDensity,
+  IFilterConfig,
 } from "../../defines/common.types";
 import {
   AutocompleteCell,
@@ -93,6 +94,7 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   isResizable?: boolean;
   hideable?: boolean; // Se false, l'icona "nascondi" non apparirà per questa colonna
   draggable?: boolean; // Se false, questa colonna non può essere spostata
+  filterConfig?: IFilterConfig;
 }
 
 export interface IPaginationConfig extends IPaginationCustomization {
@@ -140,6 +142,7 @@ interface IDynamicTableProps<T>
   dragHandleVisibility?: "always" | "hover";
   density?: TDensity;
   enableDensity?: boolean;
+  enableColumnFilters?: boolean;
 }
 
 const DynamicTable = <T extends object>({
@@ -162,6 +165,7 @@ const DynamicTable = <T extends object>({
   enableColumnHiding = false,
   enableColumnConfig = false,
   enableDensity = false,
+  enableColumnFilters = false,
   dragHandleVisibility = "always",
   density: externalDensity,
   onLayoutChange: externalOnLayoutChange,
@@ -520,6 +524,7 @@ const DynamicTable = <T extends object>({
         before={<>{tableExtensions}</>}
         layout={{ columnsLayout: internalColumnsLayout }}
         onLayoutChange={handleLayoutChange}
+        enableColumnFilters={enableColumnFilters}
         parserAPI={{
           resetLayout: handleResetLayout,
           density: externalDensity || internalDensity,
@@ -558,6 +563,7 @@ const DynamicTable = <T extends object>({
                 internalColumnsLayout.find((l) => l.id === col.id)?.props
                   ?.isHidden
               }
+              filterConfig={col.filterConfig}
               link={col.link as ILinkConfig<ILinkObject>}
             >
               <HeaderCell

@@ -189,6 +189,13 @@ const BaseCellComponent = styled(
         opacity: 0,
         transition: "opacity 0.2s",
       },
+      "& .filter-icon": {
+        opacity: 0,
+        transition: "opacity 0.2s",
+      },
+      "& .filter-icon.active, & .filter-icon.open": {
+        opacity: 1,
+      },
       "&:hover .sort-icon": {
         opacity: 1,
       },
@@ -196,6 +203,9 @@ const BaseCellComponent = styled(
         opacity: 1,
       },
       "&:hover .hide-button": {
+        opacity: 1,
+      },
+      "&:hover .filter-icon": {
         opacity: 1,
       },
       ...(isSelected ? selectedStyles : {}),

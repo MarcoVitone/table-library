@@ -32,7 +32,7 @@ const SortIcon = ({
         alignItems: "center",
         justifyContent,
         gap: "4px",
-        width: "100%",
+        flex: 1,
         paddingRight:
           draggable && (type === "header" || area === "header") ? "24px" : "0",
       }}

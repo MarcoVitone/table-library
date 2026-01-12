@@ -2,6 +2,7 @@ import type { FC, ReactNode } from "react";
 import type {
   ILinkConfig,
   ILinkObject,
+  IFilterConfig,
 } from "../../../../defines/common.types";
 
 interface IColumnProps {
@@ -10,6 +11,7 @@ interface IColumnProps {
   isHidden?: boolean;
   isResizable?: boolean;
   width?: string | number;
+  filterConfig?: IFilterConfig;
   // link config
   link?: ILinkConfig<ILinkObject>;
   children: ReactNode;
