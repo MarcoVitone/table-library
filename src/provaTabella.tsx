@@ -633,16 +633,26 @@ const ProvaTabella = () => {
     [MY_USER_STATUS_CONFIG]
   );
 
+  // GENERATE LARGE DATASET FOR VIRTUALIZATION TEST
+  const BIG_DATA = useMemo(() => {
+    return Array.from({ length: 2000 }).map((_, i) => ({
+      ...MOCK_USERS[i % MOCK_USERS.length],
+      id: String(i + 1), // Cast to string
+      firstName: `${MOCK_USERS[i % MOCK_USERS.length].firstName} (${i + 1})`,
+    }));
+  }, []);
+
   return (
     <DynamicTable
-      data={visibleUsers}
+      data={BIG_DATA}
       columns={columns}
       before={<TableControls filters={filters} onFiltersChange={setFilters} />}
       empty={<EmptyBody content="Nessun utente trovato" />}
-      maxHeight={500}
+      maxHeight={600}
       enableDensity={true}
       enableColumnConfig={true}
       enableColumnFilters={true}
+      enableVirtualization={true} // ENABLED VIRTUALIZATION
       headerBorder={{
         show: true,
         color: defaultTheme.palette.secondary.dark,
@@ -657,7 +667,6 @@ const ProvaTabella = () => {
       }}
       onDataChange={(newData, updatedRow) => {
         console.log("Data changed:", newData, updatedRow);
-        setVisibleUsers(newData);
       }}
       onRowSelectionChange={(data) => {
         console.log("Selected Elements:", data);
@@ -668,31 +677,10 @@ const ProvaTabella = () => {
         onNavigate: (path) => console.log("Navigating to:", path),
       }}
       pagination={{
-        enabled: true,
-        position: "top",
-        alignment: "right",
-        limitOptions: [5, 10, 15, 25, 50],
-        onPaginationChange: ({ limit, offset }) => {
-          console.log({ limit, offset });
-        },
-        persistence: {
-          enabled: true,
-          key: "users-table",
-          storage: "localStorage",
-          persistLimit: true,
-          persistPage: true,
-        },
-        visibility: {
-          showGoToPage: true,
-          showPageNumbers: true,
-          showFirstLast: true,
-          showPrevNext: true,
-          showPageSizeSelector: true,
-          showInfo: true,
-        },
+        enabled: false, // DISABLED PAGINATION
       }}
       infiniteScroll={{
-        enabled: true,
+        enabled: false, // DISABLED INFINITE SCROLL
         hasMore,
         loadMore,
         isLoading: isLoadingMore,

@@ -42,6 +42,8 @@ interface ITableParserProps<T = unknown> extends TBase<T> {
   onRowSelectionChange?: (data: T[]) => void;
   onRowDoubleClick?: IRowNavigationConfig<T>;
   enableColumnFilters?: boolean;
+  enableVirtualization?: boolean;
+  estimateRowHeight?: number;
 }
 
 const TableParser = <T,>({
@@ -57,6 +59,8 @@ const TableParser = <T,>({
   onRowSelectionChange,
   onRowDoubleClick,
   enableColumnFilters = false,
+  enableVirtualization = false,
+  estimateRowHeight = 40,
   ...rest
 }: ITableParserProps<T>) => {
   const parsedColumns = useParser({
@@ -142,6 +146,7 @@ const TableParser = <T,>({
       exportCSV,
       exportJSON,
       enableColumnFilters,
+      enableVirtualization,
     };
   }, [
     tableLayout,
@@ -159,6 +164,7 @@ const TableParser = <T,>({
     exportCSV,
     exportJSON,
     enableColumnFilters,
+    enableVirtualization,
   ]);
 
   return (
@@ -169,6 +175,8 @@ const TableParser = <T,>({
       enableColumnFilters={enableColumnFilters}
       onRowSelectionChange={onRowSelectionChange}
       onRowDoubleClick={onRowDoubleClick}
+      enableVirtualization={enableVirtualization}
+      estimateRowHeight={estimateRowHeight}
     />
   );
 };

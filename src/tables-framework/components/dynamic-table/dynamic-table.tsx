@@ -143,6 +143,8 @@ interface IDynamicTableProps<T>
   density?: TDensity;
   enableDensity?: boolean;
   enableColumnFilters?: boolean;
+  enableVirtualization?: boolean;
+  estimateRowHeight?: number;
 }
 
 const DynamicTable = <T extends object>({
@@ -166,6 +168,8 @@ const DynamicTable = <T extends object>({
   enableColumnConfig = false,
   enableDensity = false,
   enableColumnFilters = false,
+  enableVirtualization = false,
+  estimateRowHeight = 40,
   dragHandleVisibility = "always",
   density: externalDensity,
   onLayoutChange: externalOnLayoutChange,
@@ -525,6 +529,8 @@ const DynamicTable = <T extends object>({
         layout={{ columnsLayout: internalColumnsLayout }}
         onLayoutChange={handleLayoutChange}
         enableColumnFilters={enableColumnFilters}
+        enableVirtualization={enableVirtualization}
+        estimateRowHeight={estimateRowHeight}
         parserAPI={{
           resetLayout: handleResetLayout,
           density: externalDensity || internalDensity,

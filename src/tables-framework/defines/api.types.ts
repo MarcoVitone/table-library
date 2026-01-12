@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import type { TFunction } from "i18next";
 import type {
   TColumnsLayout,
@@ -40,6 +41,7 @@ interface ILayoutAPI {
   resetLayout: TResetLayout | null;
   stickyHeader?: boolean;
   enableColumnFilters?: boolean;
+  enableVirtualization?: boolean;
 }
 
 // *** EXPORT API ***
@@ -101,11 +103,18 @@ interface IHookAPI {
   resetLayout: TResetLayout;
   stickyHeader?: boolean;
   enableColumnFilters?: boolean;
+  enableVirtualization?: boolean;
+  scrollContainerRef?: RefObject<HTMLDivElement | null>;
 }
 
 // *** FULL API ***
 type TTableParserAPI = ILayoutAPI & IExportAPI;
-type TTableRendererAPI = TTableParserAPI & IStatusAPI & ISourceAPI;
+type TTableRendererAPI = TTableParserAPI &
+  IStatusAPI &
+  ISourceAPI & {
+    scrollContainerRef?: RefObject<HTMLDivElement | null>;
+    estimateRowHeight?: number;
+  };
 type TFullTableAPI = TTableRendererAPI & IHookAPI;
 
 export type {
