@@ -608,31 +608,63 @@ const DynamicTable = <T extends object>({
                     borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
                     borderTop: col.bodyProps?.borderTop, // Opt-in only
                     borderLeft: col.bodyProps?.borderLeft, // Opt-in only
-                    inputType: col.inputType,
-                    inputHeight: col.inputHeight,
-                    inputWidth: col.inputWidth,
-                    currencySymbol: col.currencySymbol,
-                    symbolPosition: col.symbolPosition,
-                    decimals: col.decimals,
-                    statusConfig: col.statusConfig,
-                    renderStatus: col.renderStatus,
-                    padding:
-                      col.type === "input" ? "0.1rem 0.25rem" : undefined,
-                    options: col.autocompleteOptions,
-                    getOptionLabel: col.getOptionLabel,
-                    isOptionEqualToValue: col.isOptionEqualToValue,
-                    onCellChange:
-                      col.type === "input" ||
-                      col.type === "autocomplete" ||
-                      col.type === "custom"
-                        ? (val: string | number | boolean, cellData: ICell) =>
-                            handleCellChange(
-                              cellData.row.source.id,
-                              col.dataKey || col.id,
-                              val
-                            )
-                        : undefined,
-                    disableClearable: col.disableClearable,
+
+                    // Condition props based on column type (to avoid React warnings on DOM elements)
+                    ...(col.type === "input" && {
+                      inputType: col.inputType,
+                      inputHeight: col.inputHeight,
+                      inputWidth: col.inputWidth,
+                      padding: "0.1rem 0.25rem",
+                      onCellChange: (
+                        val: string | number | boolean,
+                        cellData: ICell
+                      ) =>
+                        handleCellChange(
+                          cellData.row.source.id,
+                          col.dataKey || col.id,
+                          val
+                        ),
+                    }),
+
+                    ...(col.type === "currency" && {
+                      currencySymbol: col.currencySymbol,
+                      symbolPosition: col.symbolPosition,
+                      decimals: col.decimals,
+                    }),
+
+                    ...(col.type === "status" && {
+                      statusConfig: col.statusConfig,
+                      renderStatus: col.renderStatus,
+                    }),
+
+                    ...(col.type === "autocomplete" && {
+                      options: col.autocompleteOptions,
+                      getOptionLabel: col.getOptionLabel,
+                      isOptionEqualToValue: col.isOptionEqualToValue,
+                      disableClearable: col.disableClearable,
+                      onCellChange: (
+                        val: string | number | boolean,
+                        cellData: ICell
+                      ) =>
+                        handleCellChange(
+                          cellData.row.source.id,
+                          col.dataKey || col.id,
+                          val
+                        ),
+                    }),
+
+                    ...(col.type === "custom" && {
+                      onCellChange: (
+                        val: string | number | boolean,
+                        cellData: ICell
+                      ) =>
+                        handleCellChange(
+                          cellData.row.source.id,
+                          col.dataKey || col.id,
+                          val
+                        ),
+                    }),
+
                     stickyLeft: stickyLeftValue,
                   } as Partial<IBaseCellProps>,
                 ]}

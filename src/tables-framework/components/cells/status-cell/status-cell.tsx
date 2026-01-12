@@ -13,6 +13,7 @@ interface IStatusCellProps extends IBaseCellProps {
     rowData: Record<string, unknown>
   ) => string | number;
   fallbackStyle?: IStatusStyle;
+  renderStatus?: (value: unknown, color?: string) => ReactNode;
 }
 
 const getNestedValue = (
@@ -48,6 +49,7 @@ const StatusCell: FC<IStatusCellProps> = ({
   getLabel,
   getStatusKey,
   fallbackStyle,
+  renderStatus,
   ...rest
 }) => {
   const rawValue = data.value;
@@ -87,7 +89,9 @@ const StatusCell: FC<IStatusCellProps> = ({
     label = String(rawValue ?? "");
   }
 
-  if (style) {
+  if (renderStatus) {
+    content = renderStatus(rawValue, activeStyle?.backgroundColor);
+  } else if (style) {
     // Caso A: Abbiamo trovato una configurazione per questo stato
     content = (
       <TableStatusChip

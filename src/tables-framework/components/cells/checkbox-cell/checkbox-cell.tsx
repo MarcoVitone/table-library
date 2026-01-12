@@ -12,6 +12,7 @@ interface ICheckboxCellProps extends IBaseCellProps {
   onChange?: TTableCheckboxProps["onChange"];
   disabled?: TTableCheckboxProps["disabled"];
   showHeaderCheckbox?: boolean;
+  onCellChange?: () => void;
 }
 
 const CheckboxCell: FC<ICheckboxCellProps> = ({
@@ -20,6 +21,9 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
   area,
   data,
   showHeaderCheckbox = true,
+  // Intercepting onCellChange to avoid passing it to DOM if it bubbles here
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onCellChange,
   ...rest
 }) => {
   const {

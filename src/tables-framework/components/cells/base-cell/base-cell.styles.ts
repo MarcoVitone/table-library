@@ -81,7 +81,21 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "stickyLeft" &&
     prop !== "isDragging" &&
     prop !== "draggable" &&
-    prop !== "density",
+    prop !== "draggable" &&
+    prop !== "density" &&
+    // Props non-DOM da escludere
+    prop !== "inputType" &&
+    prop !== "inputHeight" &&
+    prop !== "inputWidth" &&
+    prop !== "currencySymbol" &&
+    prop !== "symbolPosition" &&
+    prop !== "statusConfig" &&
+    prop !== "renderStatus" &&
+    prop !== "decimals" &&
+    prop !== "getOptionLabel" &&
+    prop !== "isOptionEqualToValue" &&
+    prop !== "disableClearable" &&
+    prop !== "onCellChange",
 };
 
 const BaseCellComponent = styled(
