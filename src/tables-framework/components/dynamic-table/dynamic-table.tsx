@@ -37,7 +37,6 @@ import type {
   ICell,
   ITableLayout,
   IColumnLayout,
-  TDensity,
   IFilterConfig,
 } from "../../defines/common.types";
 import {
@@ -140,7 +139,6 @@ interface IDynamicTableProps<T>
   enableColumnHiding?: boolean; // Abilita l'icona "occhio sbarrato" nell'header
   enableColumnConfig?: boolean; // Abilita il bottone "Settings" per la modale
   dragHandleVisibility?: "always" | "hover";
-  density?: TDensity;
   enableDensity?: boolean;
   enableColumnFilters?: boolean;
 }
@@ -164,10 +162,8 @@ const DynamicTable = <T extends object>({
   enableColumnReorder = false,
   enableColumnHiding = false,
   enableColumnConfig = false,
-  enableDensity = false,
   enableColumnFilters = false,
   dragHandleVisibility = "always",
-  density: externalDensity,
   onLayoutChange: externalOnLayoutChange,
   ...tableProps
 }: IDynamicTableProps<T>) => {
@@ -198,7 +194,6 @@ const DynamicTable = <T extends object>({
     initialLimit: persistedLimit,
     initialPage: persistedPage,
     initialColumnsLayout: persistedLayout,
-    initialDensity: persistedDensity,
     persistState,
   } = usePaginationPersistence({
     enabled: persistence?.enabled ?? false,
@@ -207,7 +202,6 @@ const DynamicTable = <T extends object>({
     persistLimit: persistence?.persistLimit,
     persistPage: persistence?.persistPage,
     persistLayout: persistence?.persistLayout,
-    persistDensity: persistence?.persistDensity,
   });
 
   // Internal state (used when not in controlled mode)
@@ -224,9 +218,6 @@ const DynamicTable = <T extends object>({
   const [internalColumnsLayout, setInternalColumnsLayout] = useState<
     IColumnLayout[]
   >(() => persistedLayout || []);
-  const [internalDensity, setInternalDensity] = useState<TDensity>(
-    () => persistedDensity || "standard"
-  );
 
   // Use controlled values if provided, otherwise use internal state
   const isControlled = !!controlled;
@@ -383,10 +374,8 @@ const DynamicTable = <T extends object>({
   );
 
   const handleResetLayout = useCallback(() => {
-    setInternalColumnsLayout([]);
-    setInternalDensity("standard");
     if (persistence?.enabled) {
-      persistState({ columnsLayout: [], density: "standard" });
+      persistState({ columnsLayout: [] });
     }
   }, [persistence?.enabled, persistState]);
 
@@ -455,10 +444,9 @@ const DynamicTable = <T extends object>({
   const tableExtensions = (
     <>
       {/* TOOLBAR */}
-      {(enableColumnConfig || enableDensity) && (
+      {enableColumnConfig && (
         <TableToolbar
           showConfigButton={enableColumnConfig}
-          enableDensity={enableDensity}
           onOpenConfig={() => setIsConfigModalOpen(true)}
           onResetLayout={handleResetLayout}
         />
@@ -527,15 +515,6 @@ const DynamicTable = <T extends object>({
         enableColumnFilters={enableColumnFilters}
         parserAPI={{
           resetLayout: handleResetLayout,
-          density: externalDensity || internalDensity,
-          setDensity: (d) => {
-            const nextDensity =
-              typeof d === "function" ? d(internalDensity) : d;
-            setInternalDensity(nextDensity);
-            if (persistence?.enabled) {
-              persistState({ density: nextDensity });
-            }
-          },
         }}
         {...passedTableProps}
       >

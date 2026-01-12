@@ -10,7 +10,6 @@ import type {
   IColumnLayout,
   IRowStatus,
   IRow,
-  TDensity,
 } from "./common.types";
 
 type TChanger<T> = T | ((prevState: T) => T);
@@ -22,7 +21,6 @@ type TSetColumnsLayout = (changer: TChanger<TColumnsLayout>) => void;
 type TSetSorting = (changer: TChanger<TSorting>) => void;
 type TSetFiltering = (changer: TChanger<TFiltering>) => void;
 type TSetPagination = (changer: TChanger<IPagination>) => void;
-type TSetDensity = (changer: TChanger<TDensity>) => void;
 type TResetLayout = () => void;
 
 interface ILayoutAPI {
@@ -35,8 +33,6 @@ interface ILayoutAPI {
   setFiltering: TSetFiltering | null;
   pagination: IPagination | null;
   setPagination: TSetPagination | null;
-  density: TDensity | null;
-  setDensity: TSetDensity | null;
   resetLayout: TResetLayout | null;
   stickyHeader?: boolean;
   enableColumnFilters?: boolean;
@@ -96,8 +92,6 @@ interface IHookAPI {
   selectedRows: IRow[] | null;
   clearSelectedRows: TClearSelectedRows;
   selectAllRows: TSelectAllRows;
-  density: TDensity | null;
-  setDensity: TSetDensity;
   resetLayout: TResetLayout;
   stickyHeader?: boolean;
   enableColumnFilters?: boolean;
@@ -125,7 +119,6 @@ export type {
   TSetColumnsLayout,
   TSetFiltering,
   TSetPagination,
-  TSetDensity,
   TSetRowStatus,
   TSetRowsStatus,
   TSetSorting,

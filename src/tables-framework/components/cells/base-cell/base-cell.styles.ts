@@ -4,7 +4,6 @@ import type {
   TAlignment,
   TtextTransform,
   IBorderConfig,
-  TDensity,
 } from "../../../defines/common.types.ts";
 import type { IStyleFromProps } from "../../../theme/common.types.ts";
 import { convertHexToRGBA } from "../../../utils/index.ts";
@@ -42,7 +41,6 @@ interface IBaseCellProps {
   stickyLeft?: string;
   isDragging?: boolean;
   draggable?: boolean;
-  density?: TDensity;
 }
 
 const stylesFromProps: IStyleFromProps = {
@@ -130,7 +128,6 @@ const BaseCellComponent = styled(
     borderLeft,
     stickyLeft,
     isDragging,
-    density,
   }) => {
     const defaultBorderColor = convertHexToRGBA(
       theme?.palette?.primary?.dark,
@@ -165,13 +162,7 @@ const BaseCellComponent = styled(
             borderBottom.color || finalBorderColor
           }`
         : "none",
-      padding:
-        padding ||
-        (density === "compact"
-          ? "0.1rem 0.3rem"
-          : density === "comfortable"
-          ? "1rem 1.25rem"
-          : "0.5rem 0.75rem"),
+      padding: padding || "0.5rem 0.75rem",
       color: fontColor || theme.palette.primary.dark,
       backgroundColor: isSorted
         ? backgroundColorSort

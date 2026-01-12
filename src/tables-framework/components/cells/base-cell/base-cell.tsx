@@ -7,7 +7,6 @@ import type {
   ICellProps,
   TAlignment,
   TtextTransform,
-  TDensity,
 } from "../../../defines/common.types.ts";
 
 import { useTable } from "../../../hooks/use-table/use-table.ts";
@@ -74,7 +73,6 @@ interface IBaseCellProps extends ICellProps {
   // Drag & Drop
   draggable?: boolean;
   dragHandleVisibility?: "always" | "hover";
-  density?: TDensity;
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
@@ -135,7 +133,6 @@ const BaseCell: FC<IBaseCellProps> = ({
     stickyHeader,
     rowStatus,
     setColumnLayout,
-    density,
     enableColumnFilters,
   } = useTable(data);
 
@@ -373,7 +370,6 @@ const BaseCell: FC<IBaseCellProps> = ({
       backgroundColor={backgroundColor}
       fontSize={fontSize}
       padding={padding}
-      density={density || "standard"}
       overFlow={overFlow}
       textOverflow={textOverflow}
       isSorted={dir !== 0 && !!backgroundColorSort}

@@ -8,7 +8,6 @@ import type {
   TSorting,
   TFiltering,
   IPagination,
-  TDensity,
 } from "../../../../defines/common.types";
 import { useChangeEvent } from "../../../../hooks/use-change-event/use-change-event";
 
@@ -88,16 +87,6 @@ function useLayout({
     };
   }, [externalLayout]);
 
-  const defaultDensity = useCallback<() => TDensity>(() => {
-    if (externalLayout?.density) {
-      return externalLayout.density;
-    }
-
-    setIsStale(true);
-
-    return "standard";
-  }, [externalLayout]);
-
   const [columnsLayout, setColumnsLayout] =
     useState<IColumnLayout[]>(defaultColumnsLayout);
   const [sorting, setSorting] = useState<TSorting>(defaultSorting);
@@ -105,8 +94,6 @@ function useLayout({
   const [filtering, setFiltering] = useState<TFiltering>(defaultFiltering);
 
   const [pagination, setPagination] = useState<IPagination>(defaultPagination);
-
-  const [density, setDensity] = useState<TDensity>(defaultDensity);
 
   // Synchronize internal state with external props when they change
   useEffect(() => {
@@ -125,22 +112,16 @@ function useLayout({
     setPagination(defaultPagination());
   }, [defaultPagination]);
 
-  useEffect(() => {
-    setDensity(defaultDensity());
-  }, [defaultDensity]);
-
   const resetLayout = useCallback(() => {
     setColumnsLayout(defaultColumnsLayout());
     setSorting(defaultSorting());
     setFiltering(defaultFiltering());
     setPagination(defaultPagination());
-    setDensity(defaultDensity());
   }, [
     defaultColumnsLayout,
     defaultSorting,
     defaultFiltering,
     defaultPagination,
-    defaultDensity,
   ]);
 
   const tableLayout = useMemo<ITableLayout>(() => {
@@ -149,9 +130,8 @@ function useLayout({
       sorting,
       filtering,
       pagination,
-      density,
     };
-  }, [columnsLayout, sorting, filtering, pagination, density]);
+  }, [columnsLayout, sorting, filtering, pagination]);
 
   const onLayoutChangeHandler = useCallback(
     (e: ITableLayout) => {
@@ -176,8 +156,6 @@ function useLayout({
     setFiltering,
     pagination,
     setPagination,
-    density,
-    setDensity,
     resetLayout,
     enableColumnFilters,
   };

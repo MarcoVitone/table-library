@@ -195,7 +195,6 @@ interface ITableLayout {
   sorting?: TSorting;
   filtering?: TFiltering;
   pagination?: IPagination;
-  density?: TDensity;
 }
 
 // *** JSX ***
@@ -323,7 +322,6 @@ export type {
   TAlignment,
   TDirection,
   TtextTransform,
-  TDensity,
 };
 
 type TDirection = "row" | "row-reverse";
@@ -331,8 +329,6 @@ type TDirection = "row" | "row-reverse";
 type TAlignment = "left" | "right" | "center";
 
 type TtextTransform = "capitalize" | "uppercase" | "lowercase" | "none";
-
-type TDensity = "compact" | "standard" | "comfortable";
 
 type TBorderStyle =
   | "solid"
