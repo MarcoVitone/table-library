@@ -32,8 +32,6 @@ const defaultAPI = {
   setFiltering: null,
   pagination: null,
   setPagination: null,
-  density: null,
-  setDensity: null,
   resetLayout: null,
   exportCSV: null,
   exportJSON: null,

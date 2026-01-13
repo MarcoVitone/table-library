@@ -139,7 +139,6 @@ interface IDynamicTableProps<T>
   enableColumnHiding?: boolean; // Abilita l'icona "occhio sbarrato" nell'header
   enableColumnConfig?: boolean; // Abilita il bottone "Settings" per la modale
   dragHandleVisibility?: "always" | "hover";
-  enableDensity?: boolean;
   enableColumnFilters?: boolean;
 }
 

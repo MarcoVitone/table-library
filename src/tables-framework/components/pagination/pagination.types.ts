@@ -193,7 +193,6 @@ interface IPaginationPersistence {
   persistLimit?: boolean; // default: true
   persistPage?: boolean; // default: false
   persistLayout?: boolean; // default: true
-  persistDensity?: boolean; // default: true
 }
 
 // Infinite Scroll configuration

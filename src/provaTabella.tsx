@@ -640,7 +640,6 @@ const ProvaTabella = () => {
       before={<TableControls filters={filters} onFiltersChange={setFilters} />}
       empty={<EmptyBody content="Nessun utente trovato" />}
       maxHeight={500}
-      enableDensity={true}
       enableColumnConfig={true}
       enableColumnFilters={true}
       headerBorder={{

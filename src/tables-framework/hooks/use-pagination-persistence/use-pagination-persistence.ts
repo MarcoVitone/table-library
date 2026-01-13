@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import type { TPersistenceStorage } from "../../components/pagination/pagination.types";
-import type { IColumnLayout, TDensity } from "../../defines/common.types";
+import type { IColumnLayout } from "../../defines/common.types";
 
 interface IUsePaginationPersistenceOptions {
   enabled: boolean;
@@ -9,26 +9,22 @@ interface IUsePaginationPersistenceOptions {
   persistLimit?: boolean;
   persistPage?: boolean;
   persistLayout?: boolean;
-  persistDensity?: boolean;
 }
 
 interface IPersistedState {
   limit?: number;
   page?: number;
   columnsLayout?: IColumnLayout[];
-  density?: TDensity;
 }
 
 interface IUsePaginationPersistenceReturn {
   initialLimit: number | undefined;
   initialPage: number | undefined;
   initialColumnsLayout: IColumnLayout[] | undefined;
-  initialDensity: TDensity | undefined;
   persistState: (state: {
     limit?: number;
     page?: number;
     columnsLayout?: IColumnLayout[];
-    density?: TDensity;
   }) => void;
   clearState: () => void;
 }
@@ -51,7 +47,6 @@ const usePaginationPersistence = (
     persistLimit = true,
     persistPage = false,
     persistLayout = true,
-    persistDensity = true,
   } = options;
 
   const storageKey = `pagination_${key}`;
@@ -71,7 +66,6 @@ const usePaginationPersistence = (
           limit: persistLimit ? parsed.limit : undefined,
           page: persistPage ? parsed.page : undefined,
           columnsLayout: persistLayout ? parsed.columnsLayout : undefined,
-          density: persistDensity ? parsed.density : undefined,
         };
       }
     } catch {
@@ -87,7 +81,6 @@ const usePaginationPersistence = (
       limit?: number;
       page?: number;
       columnsLayout?: IColumnLayout[];
-      density?: TDensity;
     }) => {
       if (!enabled) return;
 
@@ -109,24 +102,13 @@ const usePaginationPersistence = (
         if (persistLayout && state.columnsLayout !== undefined) {
           toStore.columnsLayout = state.columnsLayout;
         }
-        if (persistDensity && state.density !== undefined) {
-          toStore.density = state.density;
-        }
 
         storageInstance.setItem(storageKey, JSON.stringify(toStore));
       } catch {
         // Storage full or unavailable, or JSON error, ignore
       }
     },
-    [
-      enabled,
-      storage,
-      storageKey,
-      persistLimit,
-      persistPage,
-      persistLayout,
-      persistDensity,
-    ]
+    [enabled, storage, storageKey, persistLimit, persistPage, persistLayout]
   );
 
   // Clear state from storage
@@ -147,7 +129,6 @@ const usePaginationPersistence = (
     initialLimit: initialState.limit,
     initialPage: initialState.page,
     initialColumnsLayout: initialState.columnsLayout,
-    initialDensity: initialState.density,
     persistState,
     clearState,
   };

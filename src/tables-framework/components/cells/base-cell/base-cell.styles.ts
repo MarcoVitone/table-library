@@ -80,7 +80,6 @@ const stylesFromProps: IStyleFromProps = {
     prop !== "isDragging" &&
     prop !== "draggable" &&
     prop !== "draggable" &&
-    prop !== "density" &&
     // Props non-DOM da escludere
     prop !== "inputType" &&
     prop !== "inputHeight" &&
