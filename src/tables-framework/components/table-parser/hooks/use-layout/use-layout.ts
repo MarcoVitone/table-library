@@ -11,6 +11,13 @@ import type {
 } from "@/tables-framework/defines/common.types";
 import { useChangeEvent } from "@/tables-framework/hooks/use-change-event/use-change-event";
 
+const DEFAULT_SORTING: TSorting = [];
+const DEFAULT_FILTERING: TFiltering = [];
+const DEFAULT_PAGINATION: IPagination = {
+  limit: null,
+  offset: 0,
+};
+
 interface IProps {
   externalLayout: ITableLayout | undefined;
   onLayoutChange: ((newLayout: ITableLayout) => void) | undefined;
@@ -61,7 +68,7 @@ function useLayout({
 
     setIsStale(true);
 
-    return [];
+    return DEFAULT_SORTING;
   }, [externalLayout]);
 
   const defaultFiltering = useCallback<() => TFiltering>(() => {
@@ -71,7 +78,7 @@ function useLayout({
 
     setIsStale(true);
 
-    return [];
+    return DEFAULT_FILTERING;
   }, [externalLayout]);
 
   const defaultPagination = useCallback<() => IPagination>(() => {
@@ -81,10 +88,7 @@ function useLayout({
 
     setIsStale(true);
 
-    return {
-      limit: null,
-      offset: 0,
-    };
+    return DEFAULT_PAGINATION;
   }, [externalLayout]);
 
   const [columnsLayout, setColumnsLayout] =

@@ -32,10 +32,6 @@ const InputCell: FC<IInputCellProps> = ({
     (data?.value as string | number) ?? ""
   );
 
-  // useEffect(() => {
-  //   setValue((data?.value as string | number) ?? "");
-  // }, [data?.value]);
-
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };

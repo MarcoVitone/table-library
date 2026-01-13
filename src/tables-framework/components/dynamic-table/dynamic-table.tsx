@@ -173,8 +173,8 @@ const DynamicTable = <T extends object>({
     enabled: paginationEnabled = false,
     position: paginationPosition = "bottom",
     alignment: paginationAlignment = "right",
-    limit: initialLimit = 50,
     limitOptions = [5, 10, 25, 50],
+    limit: initialLimit = limitOptions[0] || 50,
     onPaginationChange,
     paginationComponent: customPaginationComponent,
     // Customization options
@@ -361,18 +361,31 @@ const DynamicTable = <T extends object>({
   const handleLayoutChange = useCallback(
     (newLayout: ITableLayout) => {
       if (newLayout.columnsLayout) {
-        // Aggiorniamo il nostro stato locale con il nuovo ordine
-        setInternalColumnsLayout(newLayout.columnsLayout);
+        // Prevent infinite loops by checking if the layout actually changed
+        // Simple deep comparison using JSON.stringify for now
+        const isDifferent =
+          JSON.stringify(newLayout.columnsLayout) !==
+          JSON.stringify(internalColumnsLayout);
 
-        // Phase 3: Persist layout
-        if (persistence?.enabled) {
-          persistState({ columnsLayout: newLayout.columnsLayout });
+        if (isDifferent) {
+          // Aggiorniamo il nostro stato locale con il nuovo ordine
+          setInternalColumnsLayout(newLayout.columnsLayout);
+
+          // Phase 3: Persist layout
+          if (persistence?.enabled) {
+            persistState({ columnsLayout: newLayout.columnsLayout });
+          }
         }
       }
       // Se l'utente aveva passato un onLayoutChange, lo chiamiamo comunque
       if (externalOnLayoutChange) externalOnLayoutChange(newLayout);
     },
-    [externalOnLayoutChange, persistence?.enabled, persistState]
+    [
+      externalOnLayoutChange,
+      persistence?.enabled,
+      persistState,
+      internalColumnsLayout,
+    ]
   );
 
   const handleResetLayout = useCallback(() => {
@@ -472,10 +485,12 @@ const DynamicTable = <T extends object>({
           overflowX: "auto",
           overflowY: maxHeight ? "auto" : undefined,
           maxHeight,
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
           ...(externalBorderColor
             ? {
                 border: `1px solid ${externalBorderColor}`,
-                boxSizing: "border-box",
                 borderRadius: "8px",
               }
             : {}),
@@ -486,6 +501,154 @@ const DynamicTable = <T extends object>({
     ),
     [maxHeight, externalBorderColor]
   );
+
+  const tableChildren = useMemo(() => {
+    return orderedColumns.map((col, index) => {
+      const CellComponent = getComponentByType(col.type);
+      const HeaderComponent = col.type === "checkbox" ? CheckboxCell : BaseCell;
+      const fixed = index < frozenColumnCount;
+      const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
+      const isCheckbox = col.type === "checkbox";
+      const isColumnResizable = isCheckbox
+        ? false
+        : col.isResizable ?? globalResizable ?? false;
+      const isDraggable =
+        !isCheckbox && enableColumnReorder && col.draggable !== false;
+      const isHideable = isCheckbox
+        ? false
+        : enableColumnHiding && col.hideable !== false;
+      return (
+        <Column
+          key={col.id}
+          id={col.id}
+          width={col.width}
+          isHidden={
+            internalColumnsLayout.find((l) => l.id === col.id)?.props?.isHidden
+          }
+          filterConfig={col.filterConfig}
+          link={col.link as ILinkConfig<ILinkObject>}
+        >
+          <HeaderCell
+            label={col.label}
+            cell={[
+              HeaderComponent,
+              {
+                ...col.headerProps,
+                showHeaderCheckbox: col.headerProps?.showHeaderCheckbox,
+                onHeaderClick: col.onHeaderClick
+                  ? () => col.onHeaderClick?.(col.dataKey || col.id)
+                  : undefined,
+                queryParam: col.queryParam,
+                fixed,
+                // Pass headerBorder config to both right/bottom for a grid effect if valid
+                borderRight: col.headerProps?.borderRight ?? headerBorder,
+                borderBottom: col.headerProps?.borderBottom ?? headerBorder,
+                borderTop: col.headerProps?.borderTop, // Opt-in only
+                borderLeft: col.headerProps?.borderLeft, // Opt-in only
+                stickyLeft: stickyLeftValue,
+                measuredRef: fixed
+                  ? (el: HTMLTableCellElement) => measureColumn(col.id, el)
+                  : undefined,
+                isResizable: isColumnResizable,
+                draggable: isDraggable,
+                enableHiding: isHideable,
+                dragHandleVisibility,
+              } as Partial<IBaseCellProps>,
+            ]}
+          />
+          <BodyCell
+            dataKey={col.dataKey || col.id}
+            cell={[
+              CellComponent,
+              {
+                ...col.bodyProps,
+                fixed,
+                rowSelectedColor,
+                component: col.component,
+                // Pass bodyBorder config to both right/bottom for a grid effect if valid
+                borderRight: col.bodyProps?.borderRight ?? bodyBorder,
+                borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
+                borderTop: col.bodyProps?.borderTop, // Opt-in only
+                borderLeft: col.bodyProps?.borderLeft, // Opt-in only
+
+                // Condition props based on column type (to avoid React warnings on DOM elements)
+                ...(col.type === "input" && {
+                  inputType: col.inputType,
+                  inputHeight: col.inputHeight,
+                  inputWidth: col.inputWidth,
+                  padding: "0.1rem 0.25rem",
+                  onCellChange: (
+                    val: string | number | boolean,
+                    cellData: ICell
+                  ) =>
+                    handleCellChange(
+                      cellData.row.source.id,
+                      col.dataKey || col.id,
+                      val
+                    ),
+                }),
+
+                ...(col.type === "currency" && {
+                  currencySymbol: col.currencySymbol,
+                  symbolPosition: col.symbolPosition,
+                  decimals: col.decimals,
+                }),
+
+                ...(col.type === "status" && {
+                  statusConfig: col.statusConfig,
+                  renderStatus: col.renderStatus,
+                }),
+
+                ...(col.type === "autocomplete" && {
+                  options: col.autocompleteOptions,
+                  getOptionLabel: col.getOptionLabel,
+                  isOptionEqualToValue: col.isOptionEqualToValue,
+                  disableClearable: col.disableClearable,
+                  onCellChange: (
+                    val: string | number | boolean,
+                    cellData: ICell
+                  ) =>
+                    handleCellChange(
+                      cellData.row.source.id,
+                      col.dataKey || col.id,
+                      val
+                    ),
+                }),
+
+                ...(col.type === "custom" && {
+                  onCellChange: (
+                    val: string | number | boolean,
+                    cellData: ICell
+                  ) =>
+                    handleCellChange(
+                      cellData.row.source.id,
+                      col.dataKey || col.id,
+                      val
+                    ),
+                }),
+
+                stickyLeft: stickyLeftValue,
+              } as Partial<IBaseCellProps>,
+            ]}
+          />
+        </Column>
+      );
+    });
+  }, [
+    orderedColumns,
+    frozenColumnCount,
+    stickyOffsets,
+    headerBorder,
+    bodyBorder,
+    rowSelectedColor,
+    globalResizable,
+    enableColumnReorder,
+    enableColumnHiding,
+    dragHandleVisibility,
+    handleCellChange,
+    measureColumn,
+    internalColumnsLayout,
+  ]);
 
   return (
     <div>
@@ -511,7 +674,10 @@ const DynamicTable = <T extends object>({
         onRowSelectionChange={onRowSelectionChange}
         onRowDoubleClick={onRowDoubleClick}
         before={<>{tableExtensions}</>}
-        layout={{ columnsLayout: internalColumnsLayout }}
+        layout={useMemo(
+          () => ({ columnsLayout: internalColumnsLayout }),
+          [internalColumnsLayout]
+        )}
         onLayoutChange={handleLayoutChange}
         enableColumnFilters={enableColumnFilters}
         parserAPI={{
@@ -519,139 +685,7 @@ const DynamicTable = <T extends object>({
         }}
         {...passedTableProps}
       >
-        {orderedColumns.map((col, index) => {
-          const CellComponent = getComponentByType(col.type);
-          const HeaderComponent =
-            col.type === "checkbox" ? CheckboxCell : BaseCell;
-          const fixed = index < frozenColumnCount;
-          const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
-          const isCheckbox = col.type === "checkbox";
-          const isColumnResizable = isCheckbox
-            ? false
-            : col.isResizable ?? globalResizable ?? false;
-          const isDraggable =
-            !isCheckbox && enableColumnReorder && col.draggable !== false;
-          const isHideable = isCheckbox
-            ? false
-            : enableColumnHiding && col.hideable !== false;
-          return (
-            <Column
-              key={col.id}
-              id={col.id}
-              width={col.width}
-              isHidden={
-                internalColumnsLayout.find((l) => l.id === col.id)?.props
-                  ?.isHidden
-              }
-              filterConfig={col.filterConfig}
-              link={col.link as ILinkConfig<ILinkObject>}
-            >
-              <HeaderCell
-                label={col.label}
-                cell={[
-                  HeaderComponent,
-                  {
-                    ...col.headerProps,
-                    showHeaderCheckbox: col.headerProps?.showHeaderCheckbox,
-                    onHeaderClick: col.onHeaderClick
-                      ? () => col.onHeaderClick?.(col.dataKey || col.id)
-                      : undefined,
-                    queryParam: col.queryParam,
-                    fixed,
-                    // Pass headerBorder config to both right/bottom for a grid effect if valid
-                    borderRight: col.headerProps?.borderRight ?? headerBorder,
-                    borderBottom: col.headerProps?.borderBottom ?? headerBorder,
-                    borderTop: col.headerProps?.borderTop, // Opt-in only
-                    borderLeft: col.headerProps?.borderLeft, // Opt-in only
-                    stickyLeft: stickyLeftValue,
-                    measuredRef: fixed
-                      ? (el: HTMLTableCellElement) => measureColumn(col.id, el)
-                      : undefined,
-                    isResizable: isColumnResizable,
-                    draggable: isDraggable,
-                    enableHiding: isHideable,
-                    dragHandleVisibility,
-                  } as Partial<IBaseCellProps>,
-                ]}
-              />
-              <BodyCell
-                dataKey={col.dataKey || col.id}
-                cell={[
-                  CellComponent,
-                  {
-                    ...col.bodyProps,
-                    fixed,
-                    rowSelectedColor,
-                    component: col.component,
-                    // Pass bodyBorder config to both right/bottom for a grid effect if valid
-                    borderRight: col.bodyProps?.borderRight ?? bodyBorder,
-                    borderBottom: col.bodyProps?.borderBottom ?? bodyBorder,
-                    borderTop: col.bodyProps?.borderTop, // Opt-in only
-                    borderLeft: col.bodyProps?.borderLeft, // Opt-in only
-
-                    // Condition props based on column type (to avoid React warnings on DOM elements)
-                    ...(col.type === "input" && {
-                      inputType: col.inputType,
-                      inputHeight: col.inputHeight,
-                      inputWidth: col.inputWidth,
-                      padding: "0.1rem 0.25rem",
-                      onCellChange: (
-                        val: string | number | boolean,
-                        cellData: ICell
-                      ) =>
-                        handleCellChange(
-                          cellData.row.source.id,
-                          col.dataKey || col.id,
-                          val
-                        ),
-                    }),
-
-                    ...(col.type === "currency" && {
-                      currencySymbol: col.currencySymbol,
-                      symbolPosition: col.symbolPosition,
-                      decimals: col.decimals,
-                    }),
-
-                    ...(col.type === "status" && {
-                      statusConfig: col.statusConfig,
-                      renderStatus: col.renderStatus,
-                    }),
-
-                    ...(col.type === "autocomplete" && {
-                      options: col.autocompleteOptions,
-                      getOptionLabel: col.getOptionLabel,
-                      isOptionEqualToValue: col.isOptionEqualToValue,
-                      disableClearable: col.disableClearable,
-                      onCellChange: (
-                        val: string | number | boolean,
-                        cellData: ICell
-                      ) =>
-                        handleCellChange(
-                          cellData.row.source.id,
-                          col.dataKey || col.id,
-                          val
-                        ),
-                    }),
-
-                    ...(col.type === "custom" && {
-                      onCellChange: (
-                        val: string | number | boolean,
-                        cellData: ICell
-                      ) =>
-                        handleCellChange(
-                          cellData.row.source.id,
-                          col.dataKey || col.id,
-                          val
-                        ),
-                    }),
-
-                    stickyLeft: stickyLeftValue,
-                  } as Partial<IBaseCellProps>,
-                ]}
-              />
-            </Column>
-          );
-        })}
+        {tableChildren}
       </Table>
       {renderNode(after)}
       {paginationPosition === "bottom" && paginationComponent}

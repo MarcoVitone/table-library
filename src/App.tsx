@@ -1,8 +1,8 @@
 import "./App.css";
-import ProvaTabella from "@/provaTabella";
+import DemoApp from "@/demo/index";
 
 function App() {
-  return <ProvaTabella />;
+  return <DemoApp />;
 }
 
 export default App;

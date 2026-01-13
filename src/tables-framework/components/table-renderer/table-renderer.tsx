@@ -5,6 +5,7 @@ import {
   isValidElement,
   useMemo,
   useEffect,
+  useRef,
 } from "react";
 import type {
   TTableParserAPI,
@@ -86,18 +87,37 @@ const TableRenderer = <T,>({
     rowStatusMapper,
   });
 
+  /* --- FIX: PREVENT INFINITE SELECTION LOOP --- */
+  const prevSelectedIds = useRef<string>("");
+
   useEffect(() => {
     if (onRowSelectionChange && rowsStatus) {
-      const selectedData = Object.entries(rowsStatus)
-        .filter(([, status]) => status.isSelected)
-        .map(([id]) => {
-          const row = source.body.rows.find((r) => r.id === id);
-          return row?.source?.full; // Assuming full data object is what user wants
-        })
-        .filter((item) => !!item);
-      onRowSelectionChange(selectedData as T[]);
+      // 1. Calculate currently selected IDs
+      const currentSelectedEntry = Object.entries(rowsStatus).filter(
+        ([, status]) => status.isSelected
+      );
+
+      const currentSelectedIds = currentSelectedEntry
+        .map(([id]) => id)
+        .sort()
+        .join(",");
+
+      // 2. Compare with previous (to prevent loop if rowsStatus triggers effect but selection is same)
+      if (currentSelectedIds !== prevSelectedIds.current) {
+        prevSelectedIds.current = currentSelectedIds;
+
+        const selectedData = currentSelectedEntry
+          .map(([id]) => {
+            const row = source.body.rows.find((r) => r.id === id);
+            return row?.source?.full; // Assuming full data object is what user wants
+          })
+          .filter((item) => !!item);
+
+        onRowSelectionChange(selectedData as T[]);
+      }
     }
   }, [rowsStatus, onRowSelectionChange, source.body.rows]);
+  /* --- END FIX --- */
 
   const header = useMemo(
     () => renderRows(source.header.rows, onRowDoubleClick),
