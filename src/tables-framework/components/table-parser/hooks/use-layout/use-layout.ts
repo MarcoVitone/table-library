@@ -34,7 +34,7 @@ function useLayout({
   const [isStale, setIsStale] = useState<boolean>(false);
 
   const defaultColumnsLayout = useCallback<() => IColumnLayout[]>(() => {
-    if (externalLayout?.columnsLayout) {
+    if (externalLayout?.columnsLayout?.length) {
       if (externalLayout.columnsLayout.length === parsedColumns.length) {
         // CHECK IF THERE IS A COLUMN IN LAYOUT THAT WAS NOT INCLUDED INSIDE THE JSX TREE
 
