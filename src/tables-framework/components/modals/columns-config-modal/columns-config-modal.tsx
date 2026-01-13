@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useMemo, type ReactElement } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -10,29 +10,31 @@ import {
   ListItemText,
   Switch,
   IconButton,
-  Typography,
   Stack,
   Box,
 } from "@mui/material";
 import { Close, ArrowUpward, ArrowDownward } from "@mui/icons-material";
+import type { Dispatch, SetStateAction } from "react";
+import type { IColumnLayout } from "@/tables-framework/defines/common.types";
 import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
-import { useTable } from "@/tables-framework/hooks/use-table/use-table";
-import { useMemo } from "react";
 
 interface IColumnsConfigModalProps<T> {
   open: boolean;
   onClose: () => void;
-  columns: IColumnConfig<T>[]; // Tutte le definizioni delle colonne
+  columns: IColumnConfig<T>[];
+  layout: IColumnLayout[];
+  onLayoutChange: Dispatch<SetStateAction<IColumnLayout[]>>;
+  onReset: () => void;
 }
 
-// Rimuovi 'FC' e usa la sintassi per arrow function generica: <T,>
 const ColumnsConfigModal = <T,>({
   open,
   onClose,
   columns,
+  layout: columnsLayout,
+  onLayoutChange: setColumnsLayout,
+  onReset: resetLayout,
 }: IColumnsConfigModalProps<T>): ReactElement => {
-  const { columnsLayout, setColumnsLayout, resetLayout } = useTable();
-
   // La lista delle colonne segue l'ordine passato come prop (già ordinato dal DynamicTable)
   const orderedCols = useMemo(() => {
     return columns.filter((c) => c.type !== "checkbox");
@@ -110,7 +112,7 @@ const ColumnsConfigModal = <T,>({
           alignItems: "center",
         }}
       >
-        <Typography variant="h6">Configura Colonne</Typography>
+        Configura Colonne
         <IconButton onClick={onClose} size="small">
           <Close />
         </IconButton>

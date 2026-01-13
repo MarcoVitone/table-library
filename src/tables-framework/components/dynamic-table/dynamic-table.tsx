@@ -389,6 +389,7 @@ const DynamicTable = <T extends object>({
   );
 
   const handleResetLayout = useCallback(() => {
+    setInternalColumnsLayout([]);
     if (persistence?.enabled) {
       persistState({ columnsLayout: [] });
     }
@@ -472,6 +473,9 @@ const DynamicTable = <T extends object>({
           open={isConfigModalOpen}
           onClose={() => setIsConfigModalOpen(false)}
           columns={orderedColumns}
+          layout={internalColumnsLayout}
+          onLayoutChange={setInternalColumnsLayout}
+          onReset={handleResetLayout}
         />
       )}
     </>
