@@ -696,7 +696,6 @@ const ProvaTabella = () => {
         loadMore,
         isLoading: isLoadingMore,
         threshold: 120,
-        endMessage: "Hai caricato tutti gli utenti disponibili.",
       }}
       rowSelectedColor={"#FF0000"}
       isResizable={true}
