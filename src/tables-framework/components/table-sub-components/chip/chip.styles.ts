@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import type { IStyleFromProps } from "../../../theme/common.types";
+import type { IStyleFromProps } from "@/tables-framework/theme/common.types";
 import type { IChipProps } from "./chip";
 import { Chip as MuiChip } from "@mui/material";
 

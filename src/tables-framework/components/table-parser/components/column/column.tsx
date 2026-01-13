@@ -3,7 +3,7 @@ import type {
   ILinkConfig,
   ILinkObject,
   IFilterConfig,
-} from "../../../../defines/common.types";
+} from "@/tables-framework/defines/common.types";
 
 interface IColumnProps {
   id?: string;

@@ -1,7 +1,10 @@
 import { css, styled } from "@mui/material/styles";
-import { BaseCell } from "../base-cell/base-cell.jsx";
-import type { IStyleFromProps } from "../../../theme/common.types.js";
-import type { TAlignment, TDirection } from "../../../defines/common.types.ts";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.jsx";
+import type { IStyleFromProps } from "@/tables-framework/theme/common.types.js";
+import type {
+  TAlignment,
+  TDirection,
+} from "@/tables-framework/defines/common.types.ts";
 
 interface ISortingBaseCell {
   direction: TDirection;

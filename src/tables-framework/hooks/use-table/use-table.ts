@@ -1,19 +1,19 @@
 import { useContext, useMemo, useCallback } from "react";
-import { TableContext } from "../../components/table-renderer/table-renderer";
+import { TableContext } from "@/tables-framework/components/table-renderer/table-renderer";
 import type {
   TFullTableAPI,
   TSetColumnLayout,
   TSetRowStatus,
   TClearSelectedRows,
   TSelectAllRows,
-} from "../../defines/api.types";
+} from "@/tables-framework/defines/api.types";
 import type {
   ICell,
   IRow,
   IColumnLayout,
   IRowStatus,
   TRowsStatus,
-} from "../../defines/common.types";
+} from "@/tables-framework/defines/common.types";
 
 function useTable(data?: ICell | IRow): TFullTableAPI {
   const {

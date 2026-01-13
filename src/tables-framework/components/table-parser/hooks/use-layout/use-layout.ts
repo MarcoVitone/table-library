@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ILayoutAPI } from "../../../../defines/api.types";
+import type { ILayoutAPI } from "@/tables-framework/defines/api.types";
 import type {
   ITableLayout,
   IColumn,
@@ -8,8 +8,8 @@ import type {
   TSorting,
   TFiltering,
   IPagination,
-} from "../../../../defines/common.types";
-import { useChangeEvent } from "../../../../hooks/use-change-event/use-change-event";
+} from "@/tables-framework/defines/common.types";
+import { useChangeEvent } from "@/tables-framework/hooks/use-change-event/use-change-event";
 
 interface IProps {
   externalLayout: ITableLayout | undefined;

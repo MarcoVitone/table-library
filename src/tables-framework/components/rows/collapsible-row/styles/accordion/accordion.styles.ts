@@ -1,6 +1,6 @@
 import { Accordion } from "@mui/material";
 import { css, styled } from "@mui/material/styles";
-import type { IStyleFromProps } from "../../../../../theme/common.types";
+import type { IStyleFromProps } from "@/tables-framework/theme/common.types";
 
 interface ICustomAccordionProps {
   isNewRow?: boolean;

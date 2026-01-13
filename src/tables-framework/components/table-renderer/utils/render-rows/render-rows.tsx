@@ -3,8 +3,8 @@ import type {
   ILinkObject,
   IRow,
   IRowNavigationConfig,
-} from "../../../../defines/common.types";
-import { LinkWrapper } from "../../../link-wrapper/link-wrapper";
+} from "@/tables-framework/defines/common.types";
+import { LinkWrapper } from "@/tables-framework/components/link-wrapper/link-wrapper";
 
 function renderRows<T>(
   rows: IRow[],

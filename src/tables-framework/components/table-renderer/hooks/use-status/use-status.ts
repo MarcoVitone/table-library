@@ -1,13 +1,13 @@
 import { useCallback, useState } from "react";
-import type { IStatusAPI } from "../../../../defines/api.types.ts";
+import type { IStatusAPI } from "@/tables-framework/defines/api.types.ts";
 import type {
   IDatum,
   IRow,
   IRowStatus,
   TNonNullable,
   TRowsStatus,
-} from "../../../../defines/common.types.ts";
-import { useChangeEvent } from "../../../../hooks/use-change-event/use-change-event.tsx";
+} from "@/tables-framework/defines/common.types.ts";
+import { useChangeEvent } from "@/tables-framework/hooks/use-change-event/use-change-event.tsx";
 
 type TRowStatusMapper = (data: IDatum) => Partial<IRowStatus>;
 

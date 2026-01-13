@@ -1,9 +1,9 @@
 import { type SyntheticEvent, type FC, useState } from "react";
 import { Autocomplete, TextField, type InputProps } from "@mui/material";
-import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
-import { BaseCell } from "../base-cell/base-cell.tsx";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { InputContainer } from "./autocomplete-cell.styles.tsx";
-import type { ICell } from "../../../defines/common.types.ts";
+import type { ICell } from "@/tables-framework/defines/common.types.ts";
 
 // Definiamo un tipo generico per le opzioni (stringa o oggetto)
 export type TAutocompleteOption = string | Record<string, unknown>;

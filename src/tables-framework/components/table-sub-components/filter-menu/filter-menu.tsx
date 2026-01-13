@@ -17,8 +17,8 @@ import type {
   IFilter,
   TFiltering,
   IFilterOption,
-} from "../../../defines/common.types.ts";
-import { useTable } from "../../../hooks/use-table/use-table.ts";
+} from "@/tables-framework/defines/common.types.ts";
+import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 
 interface IFilterMenuProps {
   dataKey: string;

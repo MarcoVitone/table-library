@@ -1,7 +1,7 @@
 import type { FC, ReactNode } from "react";
-import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
-import { BaseCell } from "../base-cell/base-cell.tsx";
-import { TableStatusChip } from "../../table-sub-components/chip/chip.tsx";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { TableStatusChip } from "@/tables-framework/components/table-sub-components/chip/chip.tsx";
 import { type IStatusStyle, type TStatusConfig } from "./status-constants.ts";
 
 interface IStatusCellProps extends IBaseCellProps {

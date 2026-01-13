@@ -1,12 +1,12 @@
 import type { ChangeEvent, FC } from "react";
 import { useCallback, useMemo } from "react";
-import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
-import { BaseCell } from "../base-cell/base-cell.tsx";
-import { useTable } from "../../../hooks/use-table/use-table.ts";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 import {
   type TTableCheckboxProps,
   TableCheckbox,
-} from "../../table-sub-components/check-box/check-box.tsx";
+} from "@/tables-framework/components/table-sub-components/check-box/check-box.tsx";
 
 interface ICheckboxCellProps extends IBaseCellProps {
   onChange?: TTableCheckboxProps["onChange"];

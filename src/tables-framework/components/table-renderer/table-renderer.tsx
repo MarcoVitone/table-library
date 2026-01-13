@@ -9,18 +9,18 @@ import {
 import type {
   TTableParserAPI,
   TTableRendererAPI,
-} from "../../defines/api.types.ts";
+} from "@/tables-framework/defines/api.types.ts";
 import type {
   IRowNavigationConfig,
   ISource,
-} from "../../defines/common.types.ts";
-import { BaseBody } from "../areas/base-body/base-body.tsx";
-import { BaseFooter } from "../areas/base-footer/base-footer.tsx";
-import { BaseHeader } from "../areas/base-header/base-header.tsx";
+} from "@/tables-framework/defines/common.types.ts";
+import { BaseBody } from "@/tables-framework/components/areas/base-body/base-body.tsx";
+import { BaseFooter } from "@/tables-framework/components/areas/base-footer/base-footer.tsx";
+import { BaseHeader } from "@/tables-framework/components/areas/base-header/base-header.tsx";
 import type { TRowStatusMapper } from "./hooks/use-status/use-status.ts";
 import { useStatus } from "./hooks/use-status/use-status.ts";
 import { renderRows } from "./utils/render-rows/render-rows.tsx";
-import { BaseTable } from "../areas/base-table/base-table.tsx";
+import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table.tsx";
 
 const defaultAPI = {
   tableLayout: null,

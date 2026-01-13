@@ -1,7 +1,7 @@
 import type {
   TCellCombo,
   TRowCombo,
-} from "../../../../defines/common.types.ts";
+} from "@/tables-framework/defines/common.types.ts";
 
 type TElementCombo = TCellCombo | TRowCombo;
 

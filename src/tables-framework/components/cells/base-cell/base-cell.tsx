@@ -7,18 +7,18 @@ import type {
   ICellProps,
   TAlignment,
   TtextTransform,
-} from "../../../defines/common.types.ts";
+} from "@/tables-framework/defines/common.types.ts";
 
-import { useTable } from "../../../hooks/use-table/use-table.ts";
+import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 import { BaseCellComponent } from "./base-cell.styles.ts";
 import { useCellCollapse, useCellSorting } from "./base-cell.hooks.ts";
-import { ColumnResizer } from "../../table-sub-components/column-resizer/column-resizer.tsx";
-import { useColumnDrag } from "../../../hooks/use-column-drag/use-column-drag.ts";
-import { DraggableButton } from "../../table-sub-components/draggable-button/draggable-button.tsx";
-import { HideButton } from "../../table-sub-components/hide-button/hide-button.tsx";
-import SortIcon from "../../table-sub-components/sort-icon/sort-icon.tsx";
-import CollapsedComponent from "../../table-sub-components/collapsed-component/collapsed-component.tsx";
-import { FilterMenu } from "../../table-sub-components/filter-menu/filter-menu.tsx";
+import { ColumnResizer } from "@/tables-framework/components/table-sub-components/column-resizer/column-resizer.tsx";
+import { useColumnDrag } from "@/tables-framework/hooks/use-column-drag/use-column-drag.ts";
+import { DraggableButton } from "@/tables-framework/components/table-sub-components/draggable-button/draggable-button.tsx";
+import { HideButton } from "@/tables-framework/components/table-sub-components/hide-button/hide-button.tsx";
+import SortIcon from "@/tables-framework/components/table-sub-components/sort-icon/sort-icon.tsx";
+import CollapsedComponent from "@/tables-framework/components/table-sub-components/collapsed-component/collapsed-component.tsx";
+import { FilterMenu } from "@/tables-framework/components/table-sub-components/filter-menu/filter-menu.tsx";
 
 type TVariant = "header" | "body" | "footer";
 

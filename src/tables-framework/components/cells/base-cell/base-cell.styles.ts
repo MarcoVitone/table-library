@@ -4,9 +4,9 @@ import type {
   TAlignment,
   TtextTransform,
   IBorderConfig,
-} from "../../../defines/common.types.ts";
-import type { IStyleFromProps } from "../../../theme/common.types.ts";
-import { convertHexToRGBA } from "../../../utils/index.ts";
+} from "@/tables-framework/defines/common.types.ts";
+import type { IStyleFromProps } from "@/tables-framework/theme/common.types.ts";
+import { convertHexToRGBA } from "@/tables-framework/utils/index.ts";
 
 interface IBaseCellProps {
   noLeft?: boolean;

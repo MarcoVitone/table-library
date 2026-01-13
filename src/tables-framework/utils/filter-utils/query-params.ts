@@ -1,4 +1,4 @@
-import type { TSortDirection } from "../../components/cells/sorting-cell/sorting-cell";
+import type { TSortDirection } from "@/tables-framework/components/cells/sorting-cell/sorting-cell";
 
 interface IQueryParams {
   offset?: number;

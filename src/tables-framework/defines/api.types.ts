@@ -10,7 +10,7 @@ import type {
   IColumnLayout,
   IRowStatus,
   IRow,
-} from "./common.types";
+} from "@/tables-framework/defines/common.types";
 
 type TChanger<T> = T | ((prevState: T) => T);
 type TPartialChanger<T> = Partial<T> | ((prevState: T) => Partial<T>);

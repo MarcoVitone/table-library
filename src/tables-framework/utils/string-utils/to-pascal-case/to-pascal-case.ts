@@ -6,7 +6,7 @@ function toPascalCase(str: string): string {
   return str
     .replaceAll(
       /([a-z\d])([a-z\d]*)/gi,
-      (g0, g1: string, g2: string) => g1.toUpperCase() + g2.toLowerCase()
+      (_g0, g1: string, g2: string) => g1.toUpperCase() + g2.toLowerCase()
     )
     .replaceAll(/[^a-z\d]/gi, "");
 }

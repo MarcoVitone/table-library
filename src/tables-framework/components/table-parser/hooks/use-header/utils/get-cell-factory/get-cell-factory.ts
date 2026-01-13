@@ -4,8 +4,8 @@ import type {
   IColumn,
   TCellCombo,
   ICell,
-} from "../../../../../../defines/common.types";
-import { ArrayUtils } from "../../../../../../utils";
+} from "@/tables-framework/defines/common.types";
+import { ArrayUtils } from "@/tables-framework/utils";
 
 interface IParams {
   base: string | null;

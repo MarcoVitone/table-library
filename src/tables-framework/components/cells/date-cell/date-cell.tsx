@@ -2,10 +2,10 @@ import { format as formatFn } from "date-fns";
 import type { FC } from "react";
 
 import { toZonedTime } from "date-fns-tz";
-import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
-import { BaseCell } from "../base-cell/base-cell.tsx";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { DateTypography } from "./date-cell.style.ts";
-import { useTimezone } from "../../../hooks/use-timezone/use-timezone.tsx";
+import { useTimezone } from "@/tables-framework/hooks/use-timezone/use-timezone.tsx";
 
 interface IDateCellProps extends IBaseCellProps {
   format?: string;

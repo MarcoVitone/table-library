@@ -1,5 +1,5 @@
 import { css, styled } from "@mui/material/styles";
-import { BaseRow } from "../base-row/base-row.jsx";
+import { BaseRow } from "@/tables-framework/components/rows/base-row/base-row.jsx";
 
 const ColBaseRow = styled(BaseRow)(() =>
   css({

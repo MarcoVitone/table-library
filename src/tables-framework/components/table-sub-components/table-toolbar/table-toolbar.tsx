@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { IconButton, Tooltip } from "@mui/material";
 import { ViewColumn, RestartAlt } from "@mui/icons-material";
-import { FlexBox } from "../flex-box/flex-box";
+import { FlexBox } from "@/tables-framework/components/table-sub-components/flex-box/flex-box";
 
 interface ITableToolbarProps {
   onOpenConfig: () => void;

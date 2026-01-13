@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from "react";
-import type { IBaseBodyProps } from "../base-body/base-body.tsx";
-import { BaseBody } from "../base-body/base-body.jsx";
+import type { IBaseBodyProps } from "@/tables-framework/components/areas/base-body/base-body.tsx";
+import { BaseBody } from "@/tables-framework/components/areas/base-body/base-body.jsx";
 import { TableData, TableRow } from "./empty-body.style.js";
 
 type TBase = Omit<IBaseBodyProps, "children">;

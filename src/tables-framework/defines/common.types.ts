@@ -4,8 +4,8 @@ import type {
   ReactElement,
   ReactNode,
 } from "react";
-import type { IColumnProps } from "../components/table-parser/components/column/column.tsx";
-import type { IColumnGroupProps } from "../components/table-parser/components/column-group/column-group.tsx";
+import type { IColumnProps } from "@/tables-framework/components/table-parser/components/column/column.tsx";
+import type { IColumnGroupProps } from "@/tables-framework/components/table-parser/components/column-group/column-group.tsx";
 import type { CSSProperties } from "@mui/material";
 
 // *** CORE ***

@@ -1,7 +1,7 @@
 import type {
   IUnknownProps,
   TSingleCell,
-} from "../../../../defines/common.types";
+} from "@/tables-framework/defines/common.types";
 
 interface IBodyCellProps<T = IUnknownProps> {
   dataKey: string;

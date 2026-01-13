@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from "react";
-import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
-import { BaseCell } from "../base-cell/base-cell.tsx";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import {
   CurrencyContainer,
   SymbolWrapper,

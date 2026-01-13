@@ -1,9 +1,9 @@
 import { Button, IconButton } from "@mui/material";
 import type { ButtonProps } from "@mui/material";
 import type { FC, ReactNode } from "react";
-import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
-import { BaseCell } from "../base-cell/base-cell.tsx";
-import { useTable } from "../../../hooks/use-table/use-table.ts";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 
 interface IContext {
   isSelected: boolean | undefined;

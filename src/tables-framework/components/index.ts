@@ -1,4 +1,4 @@
-export * from "../hooks/use-table/use-table";
+export * from "@/tables-framework/hooks/use-table/use-table";
 export * from "./areas/base-body/base-body";
 export * from "./areas/base-footer/base-footer";
 export * from "./areas/base-header/base-header";

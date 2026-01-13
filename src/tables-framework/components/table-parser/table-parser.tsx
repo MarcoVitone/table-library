@@ -7,9 +7,9 @@ import type {
   TCellCombo,
   TJSX,
   TRowCombo,
-} from "../../defines/common.types.ts";
-import type { ITableRendererProps } from "../table-renderer/table-renderer.tsx";
-import { TableRenderer } from "../table-renderer/table-renderer.tsx";
+} from "@/tables-framework/defines/common.types.ts";
+import type { ITableRendererProps } from "@/tables-framework/components/table-renderer/table-renderer.tsx";
+import { TableRenderer } from "@/tables-framework/components/table-renderer/table-renderer.tsx";
 import { useBody } from "./hooks/use-body/use-body.ts";
 import { useColumns } from "./hooks/use-columns/use-columns.ts";
 import { useData } from "./hooks/use-data/use-data.ts";

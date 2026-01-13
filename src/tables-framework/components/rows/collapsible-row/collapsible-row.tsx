@@ -3,14 +3,14 @@ import React, { useCallback, useMemo } from "react";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import type { AccordionProps } from "@mui/material";
 import { AccordionDetails, useTheme } from "@mui/material";
-import type { IRowProps } from "../../../defines/common.types.ts";
+import type { IRowProps } from "@/tables-framework/defines/common.types.ts";
 import { ColBaseRow } from "./collapsible-row.styles.ts";
 import { CustomAccordion } from "./styles/accordion/accordion.styles.ts";
 import {
   CustomAccordionSummary,
   CustomBar,
 } from "./styles/accordion-summary/accordion-summary.styles.ts";
-import { FlexBox } from "../../table-sub-components/flex-box/flex-box.tsx";
+import { FlexBox } from "@/tables-framework/components/table-sub-components/flex-box/flex-box.tsx";
 
 interface ICollapsibleRowProps extends IRowProps {
   onClick?: AccordionProps["onChange"];

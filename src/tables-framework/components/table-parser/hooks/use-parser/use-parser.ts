@@ -10,14 +10,17 @@ import type {
   IColumnGroup,
   TJSX,
   IColumn,
-} from "../../../../defines/common.types";
-import { ObjectUtils } from "../../../../utils";
+} from "@/tables-framework/defines/common.types";
+import { ObjectUtils } from "@/tables-framework/utils";
 import {
   ColumnGroup,
   type IColumnGroupProps,
-} from "../../components/column-group/column-group";
-import { Column, type IColumnProps } from "../../components/column/column";
-import { parseColumn } from "../../utils/parse-column/parse-column";
+} from "@/tables-framework/components/table-parser/components/column-group/column-group";
+import {
+  Column,
+  type IColumnProps,
+} from "@/tables-framework/components/table-parser/components/column/column";
+import { parseColumn } from "@/tables-framework/components/table-parser/utils/parse-column/parse-column";
 
 interface IRecursionCtx {
   groups: IColumnGroup[];

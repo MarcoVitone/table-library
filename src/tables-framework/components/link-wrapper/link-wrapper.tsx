@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
-import type { ILinkConfig, ILinkObject } from "../../defines/common.types";
+import type {
+  ILinkConfig,
+  ILinkObject,
+} from "@/tables-framework/defines/common.types";
 
 interface ILinkWrapperProps {
   config?: ILinkConfig<ILinkObject>;

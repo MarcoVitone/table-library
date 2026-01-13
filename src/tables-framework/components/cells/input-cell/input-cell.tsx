@@ -1,9 +1,9 @@
 import type { ChangeEvent, FC, KeyboardEvent } from "react";
 import { useState } from "react";
-import type { IBaseCellProps } from "../base-cell/base-cell.tsx";
-import { BaseCell } from "../base-cell/base-cell.tsx";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { InputComponent, InputContainer } from "./input-cell.styles.ts";
-import type { ICell } from "../../../defines/common.types.ts";
+import type { ICell } from "@/tables-framework/defines/common.types.ts";
 
 export type TInputType =
   | "text"

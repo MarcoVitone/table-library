@@ -6,8 +6,8 @@ import type {
   TRowCombo,
   IRowGroup,
   IRow,
-} from "../../../../defines/common.types";
-import { ArrayUtils } from "../../../../utils";
+} from "@/tables-framework/defines/common.types";
+import { ArrayUtils } from "@/tables-framework/utils";
 
 interface IProps {
   columns: IColumn[];

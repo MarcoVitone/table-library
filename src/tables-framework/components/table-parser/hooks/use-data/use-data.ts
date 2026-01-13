@@ -5,8 +5,12 @@ import type {
   IDatum,
   IDataSource,
   IFlatDatum,
-} from "../../../../defines/common.types";
-import { ObjectUtils, StringUtils, FilterUtils } from "../../../../utils";
+} from "@/tables-framework/defines/common.types";
+import {
+  ObjectUtils,
+  StringUtils,
+  FilterUtils,
+} from "@/tables-framework/utils";
 
 interface IProps {
   columns: IColumn[];

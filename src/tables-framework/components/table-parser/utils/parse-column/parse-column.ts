@@ -1,19 +1,22 @@
 import { type ReactElement, Children, isValidElement } from "react";
-import type { IColumnGroup, IColumn } from "../../../../defines/common.types";
-import { resolveSingleElement } from "../../../../utils/resolve-single-element/resolve-single-element";
+import type {
+  IColumnGroup,
+  IColumn,
+} from "@/tables-framework/defines/common.types";
+import { resolveSingleElement } from "@/tables-framework/utils/resolve-single-element/resolve-single-element";
 import {
   BodyCell,
   type IBodyCellProps,
-} from "../../components/body-cell/body-cell";
-import type { IColumnProps } from "../../components/column/column";
+} from "@/tables-framework/components/table-parser/components/body-cell/body-cell";
+import type { IColumnProps } from "@/tables-framework/components/table-parser/components/column/column";
 import {
   FooterCell,
   type IFooterCellProps,
-} from "../../components/footer-cell/footer-cell";
+} from "@/tables-framework/components/table-parser/components/footer-cell/footer-cell";
 import {
   HeaderCell,
   type IHeaderCellProps,
-} from "../../components/header-cell/header-cell";
+} from "@/tables-framework/components/table-parser/components/header-cell/header-cell";
 
 function resolve<T>(val: T | undefined, def: T): T {
   if (typeof val !== "undefined") {

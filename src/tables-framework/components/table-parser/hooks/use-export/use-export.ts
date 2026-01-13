@@ -4,15 +4,15 @@ import type {
   IExportAPI,
   TExportCSV,
   TExportJSON,
-} from "../../../../defines/api.types";
+} from "@/tables-framework/defines/api.types";
 import type {
   ISource,
   TNonNullable,
   ICell,
   IRow,
   IDatum,
-} from "../../../../defines/common.types";
-import { StringUtils, ObjectUtils } from "../../../../utils";
+} from "@/tables-framework/defines/common.types";
+import { StringUtils, ObjectUtils } from "@/tables-framework/utils";
 
 type TGetCSV = (
   lt?: "\r\n" | "\n",

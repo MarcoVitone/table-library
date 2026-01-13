@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from "react";
 import type { DragEvent } from "react";
-import { useTable } from "../use-table/use-table";
+import { useTable } from "@/tables-framework/hooks/use-table/use-table";
 
 interface IUseColumnDragParams {
   columnId: string;

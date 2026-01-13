@@ -15,8 +15,8 @@ import {
   Box,
 } from "@mui/material";
 import { Close, ArrowUpward, ArrowDownward } from "@mui/icons-material";
-import type { IColumnConfig } from "../../dynamic-table/dynamic-table";
-import { useTable } from "../../../hooks/use-table/use-table";
+import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { useTable } from "@/tables-framework/hooks/use-table/use-table";
 import { useMemo } from "react";
 
 interface IColumnsConfigModalProps<T> {

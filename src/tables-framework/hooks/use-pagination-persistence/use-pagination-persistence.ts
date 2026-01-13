@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import type { TPersistenceStorage } from "../../components/pagination/pagination.types";
-import type { IColumnLayout } from "../../defines/common.types";
+import type { TPersistenceStorage } from "@/tables-framework/components/pagination/pagination.types";
+import type { IColumnLayout } from "@/tables-framework/defines/common.types";
 
 interface IUsePaginationPersistenceOptions {
   enabled: boolean;

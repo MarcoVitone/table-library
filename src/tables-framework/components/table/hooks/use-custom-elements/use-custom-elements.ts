@@ -3,8 +3,8 @@ import type {
   IOutput,
   TDef,
   TSrc,
-} from "../../../../utils/resolve-multiple-elements/resolve-multiple-elements.ts";
-import { resolveMultipleElements } from "../../../../utils/resolve-multiple-elements/resolve-multiple-elements.ts";
+} from "@/tables-framework/utils/resolve-multiple-elements/resolve-multiple-elements.ts";
+import { resolveMultipleElements } from "@/tables-framework/utils/resolve-multiple-elements/resolve-multiple-elements.ts";
 
 function useCustomElements(elems: TSrc, def: TDef): IOutput {
   const { header, body, footer } = useMemo(() => {

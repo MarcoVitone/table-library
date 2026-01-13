@@ -1,4 +1,4 @@
-import { getEntries } from "../get-entries/get-entries.js";
+import { getEntries } from "@/tables-framework/utils/object-utils/get-entries/get-entries.js";
 
 interface IObj {
   [key: string | number | symbol]: unknown;

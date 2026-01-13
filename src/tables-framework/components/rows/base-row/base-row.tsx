@@ -1,7 +1,7 @@
 import type { FC } from "react";
-import type { IRowProps } from "../../../defines/common.types.ts";
+import type { IRowProps } from "@/tables-framework/defines/common.types.ts";
 import { BaseTr } from "./base-row.styles.ts";
-import { useTable } from "../../../hooks/use-table/use-table.ts";
+import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 
 interface IBaseRowProps extends IRowProps {
   isStepFour?: boolean;

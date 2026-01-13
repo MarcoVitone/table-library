@@ -1,5 +1,5 @@
 import "./App.css";
-import ProvaTabella from "./provaTabella";
+import ProvaTabella from "@/provaTabella";
 
 function App() {
   return <ProvaTabella />;

@@ -4,7 +4,7 @@ import {
 } from "@mui/material";
 import { css, styled } from "@mui/material/styles";
 import type { TExtendedButtonProps } from "./button.ts";
-import type { IStyleFromProps } from "../../../theme/common.types.ts";
+import type { IStyleFromProps } from "@/tables-framework/theme/common.types.ts";
 
 type TButtonStyleProps = Pick<TExtendedButtonProps, "status" | "variation">;
 

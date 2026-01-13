@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from "react";
 import type { RefObject } from "react";
-import type { ICellProps } from "../../../defines/common.types.ts";
+import type { ICellProps } from "@/tables-framework/defines/common.types.ts";
 import type {
   TSetColumnLayout,
   TSetSorting,
-} from "../../../defines/api.types.ts";
+} from "@/tables-framework/defines/api.types.ts";
 
 export const COLLAPSED_WIDTH = 10;
 

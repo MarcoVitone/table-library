@@ -1,18 +1,18 @@
 import type { ChangeEvent, FC } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Delete, Edit, Visibility } from "@mui/icons-material";
 
-import type { IColumnConfig } from "./tables-framework/components/dynamic-table/dynamic-table";
-import { DynamicTable } from "./tables-framework/components/dynamic-table/dynamic-table";
+import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
 import {
   EmptyBody,
   useTable,
   type IBaseCellProps,
-} from "./tables-framework/components";
-import { MOCK_USERS, type IMockUser } from "./tables-framework/mock-data";
-import { defaultTheme } from "./tables-framework/theme/theme";
-import type { IFilter } from "./tables-framework/defines/common.types";
-import type { TStatusConfig } from "./tables-framework/components/cells/status-cell/status-constants";
+} from "@/tables-framework/components";
+import { MOCK_USERS, type IMockUser } from "@/tables-framework/mock-data";
+import { defaultTheme } from "@/tables-framework/theme/theme";
+import type { IFilter } from "@/tables-framework/defines/common.types";
+import type { TStatusConfig } from "@/tables-framework/components/cells/status-cell/status-constants";
 
 type TFilterState = {
   search: string;
@@ -157,28 +157,7 @@ const ProvaTabella = () => {
     status: "all",
     remoteOnly: false,
   });
-  const [visibleUsers, setVisibleUsers] = useState<IMockUser[]>(
-    MOCK_USERS.slice(0, 10)
-  );
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  const hasMore = visibleUsers.length < MOCK_USERS.length;
-
-  const loadMore = useCallback(() => {
-    if (isLoadingMore || !hasMore) {
-      return;
-    }
-
-    setIsLoadingMore(true);
-    // Simula una chiamata async per mostrare il loader dell'infinite scroll
-    setTimeout(() => {
-      setVisibleUsers((prev) => {
-        const nextLength = Math.min(prev.length + 5, MOCK_USERS.length);
-        return MOCK_USERS.slice(0, nextLength);
-      });
-      setIsLoadingMore(false);
-    }, 350);
-  }, [hasMore, isLoadingMore]);
+  const [users, setUsers] = useState<IMockUser[]>(MOCK_USERS);
 
   // Esempio di componente custom semplice
   const Peppe: FC<IBaseCellProps> = ({ data }) => {
@@ -635,7 +614,7 @@ const ProvaTabella = () => {
 
   return (
     <DynamicTable
-      data={visibleUsers}
+      data={users}
       columns={columns}
       before={<TableControls filters={filters} onFiltersChange={setFilters} />}
       empty={<EmptyBody content="Nessun utente trovato" />}
@@ -656,7 +635,7 @@ const ProvaTabella = () => {
       }}
       onDataChange={(newData, updatedRow) => {
         console.log("Data changed:", newData, updatedRow);
-        setVisibleUsers(newData);
+        setUsers(newData);
       }}
       onRowSelectionChange={(data) => {
         console.log("Selected Elements:", data);
@@ -690,13 +669,13 @@ const ProvaTabella = () => {
           showInfo: true,
         },
       }}
-      infiniteScroll={{
-        enabled: true,
-        hasMore,
-        loadMore,
-        isLoading: isLoadingMore,
-        threshold: 120,
-      }}
+      // infiniteScroll={{
+      //   enabled: true,
+      //   hasMore,
+      //   loadMore,
+      //   isLoading: isLoadingMore,
+      //   threshold: 120,
+      // }}
       rowSelectedColor={"#FF0000"}
       isResizable={true}
       enableColumnHiding={true}

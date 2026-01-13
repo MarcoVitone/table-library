@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import styled from "@emotion/styled";
-import type { IInfiniteScrollConfig } from "../pagination/pagination.types";
+import type { IInfiniteScrollConfig } from "@/tables-framework/components/pagination/pagination.types";
 
 const LoadMoreContainer = styled.div`
   display: flex;

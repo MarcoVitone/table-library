@@ -1,31 +1,34 @@
 import type { ElementType, ReactNode } from "react";
 import { useState, useMemo, isValidElement, useCallback } from "react";
-import type { IBaseCellProps } from "../cells/base-cell/base-cell";
-import { BaseCell } from "../cells/base-cell/base-cell";
-import { ActionsCell } from "../cells/actions-cell/actions-cell";
-import { CheckboxCell } from "../cells/checkbox-cell/checkbox-cell";
-import { NumCell } from "../cells/num-cell/num-cell";
-import { StatusCell } from "../cells/status-cell/status-cell";
-import { DateCell } from "../cells/date-cell/date-cell";
-import { CustomCell } from "../cells/custom-cell/custom-cell";
-import { InputCell, type TInputType } from "../cells/input-cell/input-cell";
+import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell";
+import { ActionsCell } from "@/tables-framework/components/cells/actions-cell/actions-cell";
+import { CheckboxCell } from "@/tables-framework/components/cells/checkbox-cell/checkbox-cell";
+import { NumCell } from "@/tables-framework/components/cells/num-cell/num-cell";
+import { StatusCell } from "@/tables-framework/components/cells/status-cell/status-cell";
+import { DateCell } from "@/tables-framework/components/cells/date-cell/date-cell";
+import { CustomCell } from "@/tables-framework/components/cells/custom-cell/custom-cell";
+import {
+  InputCell,
+  type TInputType,
+} from "@/tables-framework/components/cells/input-cell/input-cell";
 import {
   CurrencyCell,
   type TCurrencySymbolPosition,
-} from "../cells/currency-cell/currency-cell";
-import { Column } from "../table-parser/components/column/column";
-import { HeaderCell } from "../table-parser/components/header-cell/header-cell";
-import { BodyCell } from "../table-parser/components/body-cell/body-cell";
-import type { ITableProps } from "../table/table";
-import type { ITableRendererProps } from "../table-renderer/table-renderer";
-import { Table } from "../table/table";
-import { Pagination } from "../pagination/pagination";
-import { InfiniteScroll } from "../infinite-scroll/infinite-scroll";
+} from "@/tables-framework/components/cells/currency-cell/currency-cell";
+import { Column } from "@/tables-framework/components/table-parser/components/column/column";
+import { HeaderCell } from "@/tables-framework/components/table-parser/components/header-cell/header-cell";
+import { BodyCell } from "@/tables-framework/components/table-parser/components/body-cell/body-cell";
+import type { ITableProps } from "@/tables-framework/components/table/table";
+import type { ITableRendererProps } from "@/tables-framework/components/table-renderer/table-renderer";
+import { Table } from "@/tables-framework/components/table/table";
+import { Pagination } from "@/tables-framework/components/pagination/pagination";
+import { InfiniteScroll } from "@/tables-framework/components/infinite-scroll/infinite-scroll";
 import type {
   IPaginationCustomization,
   IInfiniteScrollConfig,
-} from "../pagination/pagination.types";
-import { usePaginationPersistence } from "../../hooks/use-pagination-persistence/use-pagination-persistence";
+} from "@/tables-framework/components/pagination/pagination.types";
+import { usePaginationPersistence } from "@/tables-framework/hooks/use-pagination-persistence/use-pagination-persistence";
 
 import type {
   ICellProps,
@@ -38,15 +41,15 @@ import type {
   ITableLayout,
   IColumnLayout,
   IFilterConfig,
-} from "../../defines/common.types";
+} from "@/tables-framework/defines/common.types";
 import {
   AutocompleteCell,
   type TAutocompleteOption,
-} from "../cells/autocomplete-cell.tsx/autocomplete-cell";
-import type { TStatusConfig } from "../cells/status-cell/status-constants";
-import { TableToolbar } from "../table-sub-components/table-toolbar/table-toolbar";
-import { ColumnsConfigModal } from "../modals/columns-config-modal/columns-config-modal";
-import { BaseTable } from "../areas/base-table/base-table";
+} from "@/tables-framework/components/cells/autocomplete-cell.tsx/autocomplete-cell";
+import type { TStatusConfig } from "@/tables-framework/components/cells/status-cell/status-constants";
+import { TableToolbar } from "@/tables-framework/components/table-sub-components/table-toolbar/table-toolbar";
+import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns-config-modal/columns-config-modal";
+import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table";
 
 type TUserBaseCellProps = Partial<Omit<IBaseCellProps, keyof ICellProps>>;
 
@@ -404,31 +407,30 @@ const DynamicTable = <T extends object>({
     }
   };
 
-  const paginationComponent =
-    paginationEnabled && customPaginationComponent
-      ? customPaginationComponent || (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            pageSize={limit}
-            totalItems={totalItems}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handleLimitChange}
-            pageSizeOptions={limitOptions}
-            alignment={paginationAlignment}
-            // Customization
-            visibility={visibility}
-            icons={icons}
-            labels={labels}
-            slots={slots}
-            classNames={classNames}
-            // Phase 1 features
-            isLoading={isLoading}
-            responsive={responsive}
-            loadingComponent={serverSide?.loadingComponent}
-          />
-        )
-      : null;
+  const paginationComponent = paginationEnabled
+    ? customPaginationComponent || (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={limit}
+          totalItems={totalItems}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handleLimitChange}
+          pageSizeOptions={limitOptions}
+          alignment={paginationAlignment}
+          // Customization
+          visibility={visibility}
+          icons={icons}
+          labels={labels}
+          slots={slots}
+          classNames={classNames}
+          // Phase 1 features
+          isLoading={isLoading}
+          responsive={responsive}
+          loadingComponent={serverSide?.loadingComponent}
+        />
+      )
+    : null;
 
   const { before, after, ...passedTableProps } =
     tableProps as ITableRendererProps<T>;

@@ -1,5 +1,8 @@
 import { useMemo } from "react";
-import type { IColumn, ITableLayout } from "../../../../defines/common.types";
+import type {
+  IColumn,
+  ITableLayout,
+} from "@/tables-framework/defines/common.types";
 
 interface IProps {
   columns: IColumn[];

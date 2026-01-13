@@ -5,11 +5,11 @@ import type {
   IRowNavigationConfig,
   TSingleCell,
   TSingleRow,
-} from "../../defines/common.types.ts";
-import { BaseCell } from "../cells/base-cell/base-cell.jsx";
-import { BaseRow } from "../rows/base-row/base-row.jsx";
-import type { ITableParserProps } from "../table-parser/table-parser.tsx";
-import { TableParser } from "../table-parser/table-parser.jsx";
+} from "@/tables-framework/defines/common.types.ts";
+import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.jsx";
+import { BaseRow } from "@/tables-framework/components/rows/base-row/base-row.jsx";
+import type { ITableParserProps } from "@/tables-framework/components/table-parser/table-parser.tsx";
+import { TableParser } from "@/tables-framework/components/table-parser/table-parser.jsx";
 import { useCustomElements } from "./hooks/use-custom-elements/use-custom-elements.js";
 
 type TBase<T> = Omit<ITableParserProps<T>, "cells" | "rows">;
