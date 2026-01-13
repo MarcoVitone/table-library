@@ -156,13 +156,20 @@ const BaseCell: FC<IBaseCellProps> = ({
 
   const handleHeaderClick = useCallback(
     (e: React.MouseEvent) => {
-      if (isCollapsed) {
-        handleExpandColumn(e);
-      } else if (onHeaderClick) {
+      if (!isCollapsed && onHeaderClick) {
         onHeaderClick(e);
       }
     },
-    [isCollapsed, handleExpandColumn, onHeaderClick]
+    [isCollapsed, onHeaderClick]
+  );
+
+  const handleHeaderDoubleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isCollapsed) {
+        handleExpandColumn(e);
+      }
+    },
+    [isCollapsed, handleExpandColumn]
   );
 
   const combinedRef = useCallback(
@@ -376,6 +383,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       backgroundColorSort={backgroundColorSort}
       isSortActive={dir !== 0}
       onClick={handleHeaderClick}
+      onDoubleClick={handleHeaderDoubleClick}
       style={{
         width: currentWidth || "auto",
         minWidth: minWidthProp || currentWidth || "max-content",
