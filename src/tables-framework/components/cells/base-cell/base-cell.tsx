@@ -382,12 +382,20 @@ const BaseCell: FC<IBaseCellProps> = ({
         maxWidth: ellipsis ? currentWidth || "auto" : "none",
         opacity: isDraggingColumn ? 0.5 : 1,
         backgroundColor: cellBackgroundColor,
-        border: isDraggingColumn
+        borderTop: isDraggingColumn
+          ? `2px dashed ${palette.neutral?.light || "#999"}`
+          : undefined,
+        borderRight: isDraggingColumn
+          ? `2px dashed ${palette.neutral?.light || "#999"}`
+          : undefined,
+        borderBottom: isDraggingColumn
           ? `2px dashed ${palette.neutral?.light || "#999"}`
           : undefined,
         borderLeft:
           isOver && !isDraggingColumn
             ? `3px solid ${palette.primary.main}`
+            : isDraggingColumn
+            ? `2px dashed ${palette.neutral?.light || "#999"}`
             : undefined,
         padding: isCollapsed ? "0" : padding,
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
