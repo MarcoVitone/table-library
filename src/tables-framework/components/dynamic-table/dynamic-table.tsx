@@ -145,6 +145,19 @@ interface IDynamicTableProps<T>
   enableColumnFilters?: boolean;
 }
 
+const CELL_COMPONENTS: Record<string, ElementType> = {
+  action: ActionsCell,
+  checkbox: CheckboxCell,
+  number: NumCell,
+  status: StatusCell,
+  date: DateCell,
+  custom: CustomCell,
+  input: InputCell,
+  currency: CurrencyCell,
+  autocomplete: AutocompleteCell,
+  text: BaseCell,
+};
+
 const DynamicTable = <T extends object>({
   columns,
   data,
@@ -396,29 +409,7 @@ const DynamicTable = <T extends object>({
   }, [persistence?.enabled, persistState]);
 
   const getComponentByType = (type: string = "text") => {
-    switch (type) {
-      case "action":
-        return ActionsCell;
-      case "checkbox":
-        return CheckboxCell;
-      case "number":
-        return NumCell;
-      case "status":
-        return StatusCell;
-      case "date":
-        return DateCell;
-      case "custom":
-        return CustomCell;
-      case "input":
-        return InputCell;
-      case "currency":
-        return CurrencyCell;
-      case "autocomplete":
-        return AutocompleteCell;
-      case "text":
-      default:
-        return BaseCell;
-    }
+    return CELL_COMPONENTS[type] || BaseCell;
   };
 
   const paginationComponent = paginationEnabled
