@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# Table Library
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A powerful, flexible, and completely data-driven React Table Library. Designed to handle complex scenarios with ease, offering a declarative configuration approach.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dynamic Columns**: Fully configurable columns via JSON-like structure.
+- **Rich Cell Types**: Built-in support for Text, Number, Date, Status, Currency, Autocomplete, and Actions.
+- **Advanced Filtering**: Per-column filtering with multiple operators.
+- **Sorting**: Client-side and server-side support.
+- **Pagination**: Built-in pagination with persistence capabilities (localStorage).
+- **Sticky Headers & Columns**: Native support for freezing columns and headers.
+- **Customizable**: Easy theming and support for custom cell components.
 
-## React Compiler
+## 📚 Documentation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Detailed documentation is available in the `documentation/` folder:
 
-## Expanding the ESLint configuration
+1.  [**Introduction**](./documentation/01_INTRODUCTION.md) - Installation and Quick Start.
+2.  [**DynamicTable Component**](./documentation/02_DYNAMIC_TABLE.md) - Core component API and props.
+3.  [**Column Configuration**](./documentation/03_COLUMN_CONFIGURATION.md) - How to define columns and use different cell types.
+4.  [**Advanced Features**](./documentation/04_ADVANCED_FEATURES.md) - Sorting, Filtering, Pagination, and Column Management.
+5.  [**Hooks**](./documentation/05_HOOKS.md) - Programmatic control via `useTable`.
+6.  [**Theming and Styling**](./documentation/06_THEMING_AND_STYLING.md) - Customizing borders, colors, and layouts.
+7.  [**Practical Examples**](./documentation/07_EXAMPLES.md) - Copy-pasteable code examples.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📦 Quick Start
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```tsx
+import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+const MyTable = () => {
+  const data = [{ id: 1, name: "Hello World" }];
+  const columns = [
+    { id: "name", label: "Title", dataKey: "name", type: "text" },
+  ];
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+  return <DynamicTable data={data} columns={columns} />;
+};
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🛠️ Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+This project uses **React** + **TypeScript** + **Vite**.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```

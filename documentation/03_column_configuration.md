@@ -1,115 +1,179 @@
-# Column Configuration
+# 3. Column Configuration
 
-The `columns` prop in the `DynamicTable` is the central place for defining how your table looks and behaves. Each object in the `columns` array represents one column.
+The `columns` prop is the backbone of the `DynamicTable`. It defines what data to show, how to render it, and how users can interact with it.
 
-## Column Definition Object
+Each object in the array must subscribe to the `IColumnConfig` interface.
+
+## The `IColumnConfig` Interface
+
+Here are the main properties you can configure for a column:
 
 ```typescript
-export interface IColumnConfig {
-  id: string;
-  label: string;
-  dataKey?: string;
-  type?: "text" | "action" | "checkbox" | "date" | "number" | "status";
-  width?: string;
-  headerProps?: TUserBaseCellProps;
-  bodyProps?: TUserBaseCellProps;
-  component?: ElementType;
-  queryParam?: string;
-  onHeaderClick?: (dataKey: string) => void;
+interface IColumnConfig<T> {
+  // Core
+  id: string;               // Unique ID for the column
+  label: string;            // Header label
+  dataKey?: string;         // key in the data object to extract value from
+  width?: string;           // Fixed or min width (e.g. "200px", "10rem")
+
+  // Functionality
+  type?: "text" | "number" | "date" | "status" | "action" | "input" | ...;
+  fixed?: boolean;          // If true, the column is sticky on the left
+  sortable?: boolean;       // Enable sorting (via headerProps)
+  filterConfig?: IFilterConfig; // Enable column-specific filters
+
+  // Customization
+  headerProps?: TUserBaseCellProps; // Props for the header cell
+  bodyProps?: TUserBaseCellProps;   // Props for the body cell
+  component?: ElementType;          // Custom React Component for the cell
 }
 ```
 
-### Key Properties
+## Supported Cell Types
 
-- **`id`**: Unique identifier for the column.
-- **`label`**: The text displayed in the header.
-- **`dataKey`**: The property name in your data object to bind to this column.
-- **`width`**: Defines the column width (e.g., `"20%"`, `"150px"`).
-- **`type`**: Specifies the type of cell to render (see [Cell Types](#cell-types)).
-- **`component`**: Allows rendering a completely custom React component for this column's cells.
+Depending on the `type` property, the column accepts specific additional configurations.
 
-## Cell Types
+### 1. Text (Default)
 
-The framework provides several built-in cell types to handle common data formats.
+Renders a string. Supports links.
 
-### 1. Text Cell (`type: "text"` or undefined)
+- **Config**:
+  ```typescript
+  link?: {
+    types: "native" | "react-router" | "nextjs";
+    to: (row: T) => string;
+    target?: "_blank" | "_self";
+  }
+  ```
 
-The default cell type. Renders the data value directly as a string.
+### 2. Status
 
-### 2. Checkbox Cell (`type: "checkbox"`)
+Renders a colored chip/badge based on a value ID.
 
-Renders a checkbox for row selection.
+- **Config**: `statusConfig: TStatusConfig`
+- **Definition**:
+  ```typescript
+  type TStatusConfig = Record<
+    string | number,
+    {
+      label?: string;
+      backgroundColor: string;
+      textColor: string;
+      iconColor?: string;
+      iconChip?: ReactElement;
+    }
+  >;
+  ```
+- **Example**:
+  ```typescript
+  const statusConfig = {
+    active: {
+      label: "Active",
+      backgroundColor: "#e6fffa",
+      textColor: "#007f5f",
+    },
+    inactive: {
+      label: "Inactive",
+      backgroundColor: "#fff5f5",
+      textColor: "#c53030",
+    },
+  };
+  ```
 
-- **Config**: Usually acts as the first column.
-- **Behavior**:
-  - Header checkbox: Selects/Deselects all rows.
-  - Body checkbox: Selects/Deselects the individual row.
-- **Note**: Requires `onRowSelectionChange` on `DynamicTable` to function.
+### 3. Action
 
-### 3. Sorting Cell
+Renders a set of buttons/icons for operations (Edit, Delete, etc.).
 
-Used in the header to enable sorting.
+- **Pass Actions via `bodyProps`**:
+  ```typescript
+  bodyProps: {
+    actions: [
+      {
+        icon: <EditIcon />,
+        label: "Edit",
+        onAction: (item) => console.log("Edit", item),
+      },
+      {
+        icon: <DeleteIcon />,
+        label: "Delete",
+        component: "button", // Renders a Button instead of IconButton
+        variant: "contained",
+        color: "error",
+        onPrompt: () => confirm("Are you sure?"),
+        onAction: (item) => performDelete(item.id),
+      },
+    ];
+  }
+  ```
 
-- **Icon**: Displays a sort arrow (up/down).
-- **Interaction**: Clicking the header toggles the sort direction.
-- **Props**:
-  - `isServerSide`: Boolean to indicate if sorting triggers a server request.
+### 4. Input
 
-### 4. Status Cell (`type: "status"`)
+Renders an editable input field.
 
-Renders a status badge. Useful for displaying states like "Active", "Pending", "Error".
+- **Config**:
+  - `inputType`: `"text" | "number" | "date" | "email"`
+  - `onCellChange`: `(val, cellConfig) => void`
+- **Example**:
+  ```typescript
+  {
+    type: "input",
+    inputType: "text",
+    onCellChange: (val, cell) => updateData(cell.row.id, val)
+  }
+  ```
 
-### 5. Date Cell (`type: "date"`)
+### 5. Currency
 
-Formats a date string or object into a readable date format.
+Formats numbers as currency.
 
-### 6. Number Cell (`type: "number"`)
+- **Config**:
+  - `currencySymbol`: e.g. `"€"`, `"$"`
+  - `symbolPosition`: `"left" | "right"`
+  - `decimals`: number (default 2)
 
-Formats numeric values.
+### 6. Autocomplete
 
-### 7. Action Cell (`type: "action"`)
+Renders a selectable dropdown (Combobox).
 
-Used for action buttons (e.g., Edit, Delete) for a row.
+- **Config**:
+  - `autocompleteOptions`: Array of strings or objects.
+  - `getOptionLabel`: Function to derive the label from an option.
+  - `isOptionEqualToValue`: Function to compare matching options.
+  - `disableClearable`: Prevent clearing the selection.
 
-## Custom Header Configuration
+### 7. Date
 
-You can customize the header cell by passing props via `headerProps` or providing a custom `onHeaderClick` handler.
+Formats a date string/object (requires `date-fns` integration if utilizing built-in helpers, or passes raw if custom). Defaults to standard locale formatting.
 
-### Sorting in Header
+## Header & Body Props
 
-To enable sorting for a column, you typically don't set a `type` of "sorting" directly in `IColumnConfig`. Instead, the `DynamicTable` logic (or `SortingCell` usage in `headerProps`) handles it. _Note: Clarify implementation details based on `SortingCell` usage._
+`headerProps` and `bodyProps` allow you to inject styles and standard overrides into the underlying `BaseCell`.
 
-_Correction based on code inspection_: The `SortingCell` is a specific cell component. In the standard `DynamicTable` implementation seen, `HeaderCell` seems to handle the composition. If you want a column to be sortable, ensure you are using the correct header component or props.
+Common properties:
 
-**Example: sortable column**
+- `textAlignment`: `"left" | "center" | "right"`
+- `textTransform`: `"uppercase" | "capitalize" | ...`
+- `backgroundColor`
+- `fontColor`
+- `fontSize`
+- `padding`
+- `borderRight`, `borderBottom`: Override global table borders for specific cells/areas.
+
+## Custom Components
+
+If built-in types aren't enough, use `type: "custom"` and provide a `component`.
 
 ```typescript
-{
-  id: "name",
-  label: "Name",
-  dataKey: "name",
-  // Usage depends on table implementation specifics
-}
-```
-
-(Note: The explored code shows `SortingCell` exists but `DynamicTable` uses `HeaderCell` which wraps `cell`. `HeaderCell` logic for auto-enabling sorting wasn't explicitly seen in `DynamicTable` map loop other than passing `headerProps`. You might need to explicitly pass `SortingCell` or props to enable it if it's not automatic.)
-
-## Custom Body Component
-
-For complex requirements, use the `component` property to pass a custom React component.
-
-```tsx
-const CustomUserCell = ({ data }) => (
-  <div style={{ display: 'flex', alignItems: 'center' }}>
-    <img src={data.avatar} alt="avatar" />
-    <span>{data.name}</span>
+const MyCustomCell = ({ data }) => (
+  <div style={{ fontWeight: 'bold' }}>
+    Prefix: {data.value}
   </div>
 );
 
-// In columns config
+// In column config:
 {
-  id: "user",
-  label: "User",
-  component: CustomUserCell
+  id: "customCol",
+  type: "custom",
+  component: MyCustomCell
 }
 ```
