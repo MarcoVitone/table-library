@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
 import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
-import { MOCK_USERS, type IMockUser } from "@/tables-framework/mock-data";
+import { MOCK_USERS, type IMockUser } from "@/demo/mock-data";
 import { defaultTheme } from "@/tables-framework/theme/theme";
 
 export const PaginationTable = () => {

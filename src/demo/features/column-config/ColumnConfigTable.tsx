@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
 import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
-import { MOCK_USERS, type IMockUser } from "@/tables-framework/mock-data";
+import { MOCK_USERS, type IMockUser } from "@/demo/mock-data";
 
 export const ColumnConfigTable = () => {
   // We add all columns to show the config feature fully

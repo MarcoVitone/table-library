@@ -4,7 +4,7 @@ import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynami
 import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
 import { type IBaseCellProps } from "@/tables-framework/components";
 import type { TStatusConfig } from "@/tables-framework/components/cells/status-cell/status-constants";
-import { MOCK_USERS, type IMockUser } from "@/tables-framework/mock-data";
+import { MOCK_USERS, type IMockUser } from "@/demo/mock-data";
 import { defaultTheme } from "@/tables-framework/theme/theme";
 
 // Custom Component for Department
