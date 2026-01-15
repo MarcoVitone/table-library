@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ILayoutAPI } from "@/tables-framework/defines/api.types";
 import type {
   ITableLayout,
@@ -31,102 +31,112 @@ function useLayout({
   parsedColumns,
   enableColumnFilters = false,
 }: IProps): TNonNullable<ILayoutAPI> {
-  const [isStale, setIsStale] = useState<boolean>(false);
+  /* -------------------------------------------------------------------------------------------------
+   * CALCULATE DEFAULTS
+   * -----------------------------------------------------------------------------------------------*/
+  const defaults = useMemo(() => {
+    let isStale = false;
 
-  const defaultColumnsLayout = useCallback<() => IColumnLayout[]>(() => {
+    // --- COLUMNS ---
+    let columnsLayout: IColumnLayout[];
     if (externalLayout?.columnsLayout?.length) {
       if (externalLayout.columnsLayout.length === parsedColumns.length) {
-        // CHECK IF THERE IS A COLUMN IN LAYOUT THAT WAS NOT INCLUDED INSIDE THE JSX TREE
-
         const pass = externalLayout.columnsLayout.every(({ id }) => {
           return parsedColumns.find((c) => c.id === id);
         });
 
         if (pass) {
-          return externalLayout.columnsLayout;
+          columnsLayout = externalLayout.columnsLayout;
+        } else {
+          console.warn(`LAYOUT MISMATCH. DISCARDING`);
+          isStale = true;
+          columnsLayout = parsedColumns.map((c) => ({
+            id: c.id,
+            props: { isHidden: undefined, width: undefined },
+          }));
         }
+      } else {
+        console.warn(`LAYOUT MISMATCH. DISCARDING`);
+        isStale = true;
+        columnsLayout = parsedColumns.map((c) => ({
+          id: c.id,
+          props: { isHidden: undefined, width: undefined },
+        }));
       }
-
-      console.warn(`LAYOUT MISMATCH. DISCARDING`);
+    } else {
+      isStale = true;
+      columnsLayout = parsedColumns.map((c) => ({
+        id: c.id,
+        props: { isHidden: undefined, width: undefined },
+      }));
     }
 
-    setIsStale(true);
+    // --- SORTING ---
+    let sorting: TSorting;
+    if (externalLayout?.sorting) {
+      sorting = externalLayout.sorting;
+    } else {
+      isStale = true;
+      sorting = DEFAULT_SORTING;
+    }
 
-    return parsedColumns.map((c) => ({
-      id: c.id,
-      props: {
-        isHidden: undefined,
-        width: undefined,
-      },
-    }));
+    // --- FILTERING ---
+    let filtering: TFiltering;
+    if (externalLayout?.filtering) {
+      filtering = externalLayout.filtering;
+    } else {
+      isStale = true;
+      filtering = DEFAULT_FILTERING;
+    }
+
+    // --- PAGINATION ---
+    let pagination: IPagination;
+    if (externalLayout?.pagination) {
+      pagination = externalLayout.pagination;
+    } else {
+      isStale = true;
+      pagination = DEFAULT_PAGINATION;
+    }
+
+    return { columnsLayout, sorting, filtering, pagination, isStale };
   }, [externalLayout, parsedColumns]);
 
-  const defaultSorting = useCallback<() => TSorting>(() => {
-    if (externalLayout?.sorting) {
-      return externalLayout.sorting;
-    }
+  /* -------------------------------------------------------------------------------------------------
+   * STATE
+   * -----------------------------------------------------------------------------------------------*/
+  const [columnsLayout, setColumnsLayout] = useState<IColumnLayout[]>(
+    defaults.columnsLayout
+  );
+  const [sorting, setSorting] = useState<TSorting>(defaults.sorting);
+  const [filtering, setFiltering] = useState<TFiltering>(defaults.filtering);
+  const [pagination, setPagination] = useState<IPagination>(
+    defaults.pagination
+  );
+  const [isStale, setIsStale] = useState<boolean>(defaults.isStale);
 
-    setIsStale(true);
+  /* -------------------------------------------------------------------------------------------------
+   * SYNC STATE WITH PROPS (Render-time update pattern)
+   * -----------------------------------------------------------------------------------------------*/
+  const [prevDefaultsJson, setPrevDefaultsJson] = useState(
+    JSON.stringify(defaults)
+  );
+  const currentDefaultsJson = JSON.stringify(defaults);
 
-    return DEFAULT_SORTING;
-  }, [externalLayout]);
-
-  const defaultFiltering = useCallback<() => TFiltering>(() => {
-    if (externalLayout?.filtering) {
-      return externalLayout.filtering;
-    }
-
-    setIsStale(true);
-
-    return DEFAULT_FILTERING;
-  }, [externalLayout]);
-
-  const defaultPagination = useCallback<() => IPagination>(() => {
-    if (externalLayout?.pagination) {
-      return externalLayout.pagination;
-    }
-
-    setIsStale(true);
-
-    return DEFAULT_PAGINATION;
-  }, [externalLayout]);
-
-  const [columnsLayout, setColumnsLayout] =
-    useState<IColumnLayout[]>(defaultColumnsLayout);
-  const [sorting, setSorting] = useState<TSorting>(defaultSorting);
-
-  const [filtering, setFiltering] = useState<TFiltering>(defaultFiltering);
-
-  const [pagination, setPagination] = useState<IPagination>(defaultPagination);
-
-  // Synchronize internal state with external props when they change
-  useEffect(() => {
-    setColumnsLayout(defaultColumnsLayout());
-  }, [defaultColumnsLayout]);
-
-  useEffect(() => {
-    setSorting(defaultSorting());
-  }, [defaultSorting]);
-
-  useEffect(() => {
-    setFiltering(defaultFiltering());
-  }, [defaultFiltering]);
-
-  useEffect(() => {
-    setPagination(defaultPagination());
-  }, [defaultPagination]);
+  if (prevDefaultsJson !== currentDefaultsJson) {
+    setPrevDefaultsJson(currentDefaultsJson);
+    setColumnsLayout(defaults.columnsLayout);
+    setSorting(defaults.sorting);
+    setFiltering(defaults.filtering);
+    setPagination(defaults.pagination);
+    setIsStale(defaults.isStale);
+  }
 
   const resetLayout = useCallback(() => {
-    setColumnsLayout(defaultColumnsLayout());
-    setSorting(defaultSorting());
-    setFiltering(defaultFiltering());
-    setPagination(defaultPagination());
-  }, [
-    defaultColumnsLayout,
-    defaultSorting,
-    defaultFiltering,
-    defaultPagination,
-  ]);
+    setColumnsLayout(defaults.columnsLayout);
+    setSorting(defaults.sorting);
+    setFiltering(defaults.filtering);
+    setPagination(defaults.pagination);
+  }, [defaults]);
 
   const tableLayout = useMemo<ITableLayout>(() => {
     return {

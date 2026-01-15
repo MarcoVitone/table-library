@@ -43,88 +43,98 @@ function useParser({ src, freeze }: IProps) {
     return (srcRef.current = src);
   }, [freeze, src]);
 
+  /* -------------------------------------------------------------------------------------------------
+   * PARSING
+   * -----------------------------------------------------------------------------------------------*/
+
+  const prevOutputRef = useRef<IColumn[]>([]);
+
   return useMemo(() => {
     // PARSE JSX STRUCTURE AND CREATE COLUMN DESCRIPTORS
 
     const output: IColumn[] = [];
 
-    if (!memoized) {
-      return output;
-    }
-
-    ObjectUtils.forEach(
-      Children.toArray(memoized),
-      ({ value, skip }, ctx: IRecursionCtx) => {
-        if (!isValidElement(value)) {
-          return;
-        }
-
-        switch (true) {
-          case value.type === ColumnGroup: {
-            const elem = value as ReactElement<IColumnGroupProps>;
-
-            return {
-              ...ctx,
-              groups: [
-                ...ctx.groups,
-                // ADD GROUP TO RECURSION CONTEXT
-                {
-                  groupKey: elem.props.groupKey,
-                  label: elem.props.label,
-                },
-              ],
-            };
+    if (memoized) {
+      ObjectUtils.forEach(
+        Children.toArray(memoized),
+        ({ value, skip }, ctx: IRecursionCtx) => {
+          if (!isValidElement(value)) {
+            return;
           }
 
-          case value.type === Column: {
-            skip(); // SKIP THIS BRANCH RECURSION
+          switch (true) {
+            case value.type === ColumnGroup: {
+              const elem = value as ReactElement<IColumnGroupProps>;
 
-            const elem = value as ReactElement<IColumnProps>;
+              return {
+                ...ctx,
+                groups: [
+                  ...ctx.groups,
+                  // ADD GROUP TO RECURSION CONTEXT
+                  {
+                    groupKey: elem.props.groupKey,
+                    label: elem.props.label,
+                  },
+                ],
+              };
+            }
 
-            const column = parseColumn(
-              elem,
-              ctx.groups,
-              ctx.ids,
-              output.length
-            );
+            case value.type === Column: {
+              skip(); // SKIP THIS BRANCH RECURSION
 
-            if (!column.id) {
+              const elem = value as ReactElement<IColumnProps>;
+
+              const column = parseColumn(
+                elem,
+                ctx.groups,
+                ctx.ids,
+                output.length
+              );
+
+              if (!column.id) {
+                break;
+              }
+
+              // ADD ROOT GROUP (FOR MAIN HEADER ROW)
+              column.groups.unshift({
+                label: column.label,
+                groupKey: "root",
+              } as IColumnGroup);
+
+              // ADD COLUMN TO OUTPUT
+              output.push(column);
+
               break;
             }
 
-            // ADD ROOT GROUP (FOR MAIN HEADER ROW)
-            column.groups.unshift({
-              label: column.label,
-              groupKey: "root",
-            } as IColumnGroup);
+            default: {
+              if (value.type !== Fragment) {
+                skip(); // SKIP THIS BRANCH RECURSION
 
-            // ADD COLUMN TO OUTPUT
-            output.push(column);
+                console.warn(
+                  `UNEXPECTED TABLE CHILDREN ELEMENT. ONLY Column AND ColumnGroup ARE ACCEPTED. SKIPPING.`
+                );
+              }
 
-            break;
-          }
-
-          default: {
-            if (value.type !== Fragment) {
-              skip(); // SKIP THIS BRANCH RECURSION
-
-              console.warn(
-                `UNEXPECTED TABLE CHILDREN ELEMENT. ONLY Column AND ColumnGroup ARE ACCEPTED. SKIPPING.`
-              );
+              break;
             }
-
-            break;
           }
-        }
-      },
-      {
-        only: ["children", "props", /[\d]*$/],
-        context: {
-          groups: [],
-          ids: new Set<string>(),
         },
-      }
-    );
+        {
+          only: ["children", "props", /[\d]*$/],
+          context: {
+            groups: [],
+            ids: new Set<string>(),
+          },
+        }
+      );
+    }
+
+    if (ObjectUtils.deepEqual(output, prevOutputRef.current)) {
+      return prevOutputRef.current;
+    }
+
+    prevOutputRef.current = output;
 
     return output;
   }, [memoized]);

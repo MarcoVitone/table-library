@@ -6,6 +6,7 @@ import {
   useMemo,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import type {
   TTableParserAPI,
@@ -176,19 +177,34 @@ const TableRenderer = <T,>({
     }
   }, [empty]);
 
+  /* -------------------------------------------------------------------------------------------------
+   * MEMOIZED API
+   * -----------------------------------------------------------------------------------------------*/
+  // PARSER API (Deep check)
+  const [memoizedParserAPI, setMemoizedParserAPI] = useState(parserAPI);
+  if (JSON.stringify(memoizedParserAPI) !== JSON.stringify(parserAPI)) {
+    setMemoizedParserAPI(parserAPI);
+  }
+
+  // ROWS STATUS (Deep check)
+  const [memoizedRowsStatus, setMemoizedRowsStatus] = useState(rowsStatus);
+  if (JSON.stringify(memoizedRowsStatus) !== JSON.stringify(rowsStatus)) {
+    setMemoizedRowsStatus(rowsStatus);
+  }
+
   const rendererAPI = useMemo<TTableRendererAPI>(() => {
     return {
       ...defaultAPI,
-      ...parserAPI,
-      rowsStatus,
+      ...memoizedParserAPI,
+      rowsStatus: memoizedRowsStatus,
       setRowsStatus,
       source,
       stickyHeader,
       enableColumnFilters,
     };
   }, [
-    parserAPI,
-    rowsStatus,
+    memoizedParserAPI,
+    memoizedRowsStatus,
     setRowsStatus,
     source,
     stickyHeader,
