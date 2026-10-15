@@ -1,5 +1,5 @@
 import type { ElementType, ReactNode } from "react";
-import { useState, useMemo, isValidElement, useCallback } from "react";
+import { useState, useMemo, useEffect, isValidElement, useCallback } from "react";
 import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell";
 import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell";
 import { ActionsCell } from "@/tables-framework/components/cells/actions-cell/actions-cell";
@@ -122,7 +122,7 @@ interface IDynamicTableProps<T>
       IUnknownProps,
       T
     >,
-    "children" | "data"
+    "children" | "data" | "dataPagination" | "onDataCountChange"
   > {
   columns: IColumnConfig<T>[];
   data: T[];
@@ -244,23 +244,19 @@ const DynamicTable = <T extends object>({
     ? controlled.page * controlled.limit
     : internalOffset;
 
-  // Total items: from server-side config or data length
-  const totalItems = serverSide?.enabled ? serverSide.totalItems : data.length;
+  const [filteredTotalItems, setFilteredTotalItems] = useState(data.length);
+  const totalItems = serverSide?.enabled
+    ? serverSide.totalItems
+    : filteredTotalItems;
   const totalPages = Math.ceil(totalItems / limit);
   const isLoading = serverSide?.isLoading ?? false;
 
-  // Paginated data: server-side mode uses data as-is, client-side slices
-  const paginatedData = useMemo(() => {
-    if (!paginationEnabled) {
-      return data;
-    }
-    // In server-side mode, data is already paginated
-    if (serverSide?.enabled) {
-      return data;
-    }
-    // Client-side pagination
-    return data.slice(offset, offset + limit);
-  }, [data, offset, limit, paginationEnabled, serverSide?.enabled]);
+  // The parser applies client-side pagination after filtering and sorting.
+  const dataPagination = useMemo(
+    () =>
+      paginationEnabled && !serverSide?.enabled ? { limit, offset } : undefined,
+    [paginationEnabled, serverSide?.enabled, limit, offset]
+  );
 
   const frozenColumnCount = useMemo(() => {
     return columns.filter((c) => c.fixed).length;
@@ -303,19 +299,40 @@ const DynamicTable = <T extends object>({
     return offsets;
   }, [orderedColumns, frozenColumnCount, stickyWidths]);
 
-  const handlePageChange = (page: number) => {
-    if (isControlled) {
-      controlled.onPageChange(page);
-    } else {
-      const newOffset = page * limit;
-      setInternalOffset(newOffset);
-    }
-    // Phase 3: Persist state
-    if (persistence?.enabled) {
-      persistState({ page, limit });
-    }
-    onPaginationChange?.({ limit, offset: page * limit });
-  };
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (isControlled) {
+        controlled.onPageChange(page);
+      } else {
+        const newOffset = page * limit;
+        setInternalOffset(newOffset);
+      }
+      if (persistence?.enabled) {
+        persistState({ page, limit });
+      }
+      onPaginationChange?.({ limit, offset: page * limit });
+    },
+    [
+      isControlled,
+      controlled,
+      limit,
+      persistence?.enabled,
+      persistState,
+      onPaginationChange,
+    ]
+  );
+
+  useEffect(() => {
+    if (!paginationEnabled || serverSide?.enabled) return;
+    const lastPage = Math.max(0, totalPages - 1);
+    if (currentPage > lastPage) handlePageChange(lastPage);
+  }, [
+    paginationEnabled,
+    serverSide?.enabled,
+    totalPages,
+    currentPage,
+    handlePageChange,
+  ]);
 
   const handleLimitChange = (newLimit: number) => {
     if (isControlled) {
@@ -665,7 +682,9 @@ const DynamicTable = <T extends object>({
       <Table
         table={ScrollableTable}
         stickyHeader={stickyHeader}
-        data={paginatedData}
+        data={data}
+        dataPagination={dataPagination}
+        onDataCountChange={setFilteredTotalItems}
         onRowSelectionChange={onRowSelectionChange}
         onRowDoubleClick={onRowDoubleClick}
         before={<>{tableExtensions}</>}

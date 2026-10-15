@@ -1,7 +1,8 @@
 import type { ComponentType } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type {
   IDatum,
+  IPagination,
   IRowNavigationConfig,
   ITableLayout,
   TCellCombo,
@@ -34,6 +35,8 @@ interface ITableParserProps<T = unknown> extends TBase<T> {
     footer: TRowCombo;
   };
   idKey?: string;
+  dataPagination?: IPagination;
+  onDataCountChange?: (totalItems: number) => void;
   layout?: ITableLayout;
   onLayoutChange?: (newLayout: ITableLayout) => void;
   renderer?: ComponentType<ITableRendererProps<T>>;
@@ -49,6 +52,8 @@ const TableParser = <T,>({
   cells,
   rows,
   idKey = "id",
+  dataPagination,
+  onDataCountChange,
   layout: externalLayout = undefined,
   onLayoutChange = undefined,
   renderer: RendererComponent = TableRenderer,
@@ -87,12 +92,17 @@ const TableParser = <T,>({
     tableLayout,
   });
 
-  const loadedColumns = useData({
+  const { columns: loadedColumns, totalItems } = useData({
     columns: resolvedColumns,
     tableLayout,
     data: data as IDatum[],
     idKey,
+    pagination: dataPagination,
   });
+
+  useEffect(() => {
+    onDataCountChange?.(totalItems);
+  }, [onDataCountChange, totalItems]);
 
   const header = useHeader({
     columns: loadedColumns,

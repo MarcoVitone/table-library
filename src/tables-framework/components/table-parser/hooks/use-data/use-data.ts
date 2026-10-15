@@ -5,6 +5,7 @@ import type {
   IDatum,
   IDataSource,
   IFlatDatum,
+  IPagination,
 } from "@/tables-framework/defines/common.types";
 import {
   ObjectUtils,
@@ -17,9 +18,10 @@ interface IProps {
   tableLayout: ITableLayout;
   data: IDatum[];
   idKey: string;
+  pagination?: IPagination;
 }
 
-function useData({ columns, tableLayout, data, idKey }: IProps): IColumn[] {
+function useData({ columns, tableLayout, data, idKey, pagination }: IProps) {
   const sources = useMemo<IDataSource[]>(() => {
     return data.map((full) => {
       const flat = ObjectUtils.flatten(full, true) as IFlatDatum;
@@ -106,9 +108,15 @@ function useData({ columns, tableLayout, data, idKey }: IProps): IColumn[] {
     }
   }, [filtered, tableLayout.sorting]);
 
-  return useMemo<IColumn[]>(() => {
+  // Filter and sort the complete dataset before selecting the current page.
+  const paginated = useMemo(() => {
+    if (!pagination || pagination.limit === null) return sorted;
+    return sorted.slice(pagination.offset, pagination.offset + pagination.limit);
+  }, [sorted, pagination]);
+
+  const loadedColumns = useMemo<IColumn[]>(() => {
     return columns.map((c) => {
-      c.data = sorted.map(({ id, flat, full }) => {
+      c.data = paginated.map(({ id, flat, full }) => {
         // 1. Prova a prendere il valore dalla versione piatta (veloce)
         let value = flat[c.dataKey];
 
@@ -142,7 +150,9 @@ function useData({ columns, tableLayout, data, idKey }: IProps): IColumn[] {
       });
       return c;
     });
-  }, [columns, sorted]);
+  }, [columns, paginated]);
+
+  return { columns: loadedColumns, totalItems: filtered.length };
 }
 
 export { useData };
