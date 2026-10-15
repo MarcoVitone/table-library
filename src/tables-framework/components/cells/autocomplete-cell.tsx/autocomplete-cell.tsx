@@ -30,9 +30,14 @@ const AutocompleteCell: FC<IAutocompleteCellProps> = ({
   disableClearable = false,
   ...rest
 }) => {
-  const [value, setValue] = useState<TAutocompleteOption | null>(
-    (data?.value as TAutocompleteOption) ?? null
-  );
+  const sourceValue = (data?.value as TAutocompleteOption) ?? null;
+  const [value, setValue] = useState<TAutocompleteOption | null>(sourceValue);
+  const [previousSourceValue, setPreviousSourceValue] = useState(sourceValue);
+
+  if (!Object.is(sourceValue, previousSourceValue)) {
+    setPreviousSourceValue(sourceValue);
+    setValue(sourceValue);
+  }
 
   const handleChange = (
     _event: SyntheticEvent,
