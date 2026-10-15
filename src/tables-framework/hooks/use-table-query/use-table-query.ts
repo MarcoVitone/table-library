@@ -7,6 +7,7 @@ export function normalizeTableQuery(query: Partial<ITableQuery>): ITableQuery {
     pageSize: Number.isFinite(query.pageSize) ? Math.max(1, Math.floor(query.pageSize!)) : 25,
     sorting: query.sorting ?? [],
     filters: query.filters ?? [],
+    ...(query.search !== undefined ? { search: query.search } : {}),
   };
 }
 
@@ -16,7 +17,8 @@ export function useTableQuery({ query, defaultQuery, onQueryChange }: ITableQuer
   const update = useCallback((patch: Partial<ITableQuery>) => {
     const changesQuery = (patch.sorting !== undefined && JSON.stringify(patch.sorting) !== JSON.stringify(current.sorting))
       || (patch.filters !== undefined && JSON.stringify(patch.filters) !== JSON.stringify(current.filters))
-      || (patch.pageSize !== undefined && patch.pageSize !== current.pageSize);
+      || (patch.pageSize !== undefined && patch.pageSize !== current.pageSize)
+      || (patch.search !== undefined && patch.search !== (current.search ?? ""));
     const next = normalizeTableQuery({ ...current, ...patch, ...(changesQuery ? { page: 0 } : {}) });
     if (JSON.stringify(next) === JSON.stringify(current)) return;
     if (!query) setInternalQuery(next);

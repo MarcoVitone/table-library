@@ -76,6 +76,7 @@ interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   loadingContent?: ReactNode;
   emptyContent?: ReactNode;
   noResultsContent?: ReactNode;
+  searchTerm?: string;
   virtualization?: TVirtualization;
 }
 
@@ -106,6 +107,7 @@ const TableRenderer = <T,>({
   emptyContent = "Nessun dato disponibile",
   noResultsContent = "Nessun risultato per i filtri applicati",
   virtualization,
+  searchTerm = "",
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -278,7 +280,7 @@ const TableRenderer = <T,>({
 
   const hasError = error !== undefined && error !== null && error !== false;
   const stateContent = isLoading ? loadingContent : hasError ? error
-    : parserAPI.filtering?.length ? noResultsContent : emptyContent;
+    : parserAPI.filtering?.length || searchTerm.trim() ? noResultsContent : emptyContent;
   const stateRow = (
     <tr className="tbl-state-row">
       <td colSpan={Math.max(1, source.columns.length)} className="tbl-state-cell">

@@ -72,6 +72,10 @@ loading/error/empty states, editor validation and keyboard interaction. The
 **Modifica celle** includes validation and simulated asynchronous saves.
 The **Virtualizzazione** demo renders 10,000 records with a bounded number of
 mounted rows, including selection, fixed columns and editing during scrolling.
+The **Ricerca globale** demo searches multiple columns through one field. Enable
+it with `globalSearch` or configure `globalSearch={{ columns: ["name", "email"] }}`.
+Search composes with column filters, pagination and virtualization; server
+queries include the optional `search` field.
 
 ## Browser checks with Playwright
 

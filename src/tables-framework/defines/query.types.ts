@@ -1,6 +1,8 @@
 import type { TFiltering, TSorting } from "./common.types";
 
 export interface ITableQuery {
+  /** Global search text, applied across the configured data columns. */
+  search?: string;
   page: number;
   pageSize: number;
   sorting: TSorting;

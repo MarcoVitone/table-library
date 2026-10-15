@@ -119,6 +119,62 @@ option alone skips slicing; use the new server mode to delegate all operations.
 
 ## Filtering
 
+### Global search
+
+Enable a single search field with `globalSearch`. It searches the configured
+data columns, including hidden columns, and excludes action and checkbox
+columns by default. Use `columns` to choose **data keys**, rather than column
+IDs when these differ. Nested paths such as `address.city` or `items[0].name`
+are supported.
+
+```tsx
+<DynamicTable data={users} columns={columns} globalSearch />
+
+<DynamicTable
+  data={users} columns={columns}
+  globalSearch={{
+    columns: ["name", "email", "address.city"],
+    label: "Search contacts",
+    placeholder: "Name, email or city…",
+    defaultValue: "Roma",
+  }}
+/>
+```
+
+Search ignores case, accents and extra whitespace. Each word must match at
+least one chosen column: `Marco Roma` can match the name and city separately.
+It searches raw string, number and boolean values, dates and object/array
+values; missing values and React elements are ignored. Rendered JSX and
+display formatting are not indexed. With `columns: []`, a nonempty search
+matches no rows. Clearing the field, the clear button or Escape restores the
+unsearched results. Enter does not submit an enclosing form.
+
+Search combines with column filters using AND, before sorting, result counting,
+pagination and virtualization. Changing the search resets pagination to page
+zero. A search with no matches uses `noResultsContent`.
+
+Without unified query props, `globalSearch={{ value, onChange }}` controls the
+field; update `value` in `onChange`. `defaultValue` initializes internal state.
+Existing controlled pagination still receives the page reset through
+`onPageChange`. The search text is not persisted automatically.
+
+With `query`, `defaultQuery`, `onQueryChange` or server mode, the optional
+`ITableQuery.search` field owns the search text and takes priority over
+`globalSearch.value`. Set the initial text in `query.search` or
+`defaultQuery.search`; `globalSearch.defaultValue` is a fallback for an internal
+query. `onQueryChange` reports text and page zero together, preserving filters,
+sorting and page size. `globalSearch.onChange` can still observe field edits.
+Query search also works without displaying the built-in field.
+
+In `dataMode="server"`, the supplied page is never searched locally: the backend
+must apply `query.search` across the intended fields and return the matching
+`totalItems`. The host owns request debouncing and cancellation. The
+**Stati e server** demo shows this flow; **Ricerca globale** shows client search.
+
+The lower-level `<Table>` / `<TableParser>` accepts `searchTerm` and
+`searchColumns` for a custom search field. It does not create an input or
+automatically reset externally managed pagination.
+
 The table supports per-column filtering. Text search ignores case in both the
 cell content and the search query. For example, `MARCO` matches `Marco`.
 

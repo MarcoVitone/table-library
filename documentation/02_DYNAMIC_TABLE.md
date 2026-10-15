@@ -34,6 +34,7 @@ Below is the complete list of properties accepted by the `DynamicTable` componen
 | `enableColumnFilters`  | `boolean`             | `false`    | Enables filter inputs in column headers.                           |
 | `dragHandleVisibility` | `"always" \| "hover"` | `"always"` | Controls visibility of the drag handle for reordering.             |
 | `virtualization` | `boolean \| IVirtualizationConfig` | `false` | Mounts only visible body rows plus overscan and active editors. |
+| `globalSearch` | `boolean \| IGlobalSearchConfig` | `false` | Displays one search field for multiple data columns. See [global search](./04_ADVANCED_FEATURES.md#global-search). |
 
 `virtualization={true}` uses a 48px row-height estimate and five extra rows per
 side. The viewport height comes from `maxHeight` or defaults to 400px. Set

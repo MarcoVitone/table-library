@@ -24,7 +24,8 @@ export function ReliabilityTable() {
         setError("Impossibile caricare i dati");
       } else {
         let result = scenario === "empty" ? [] : records.filter(row => query.filters.every(filter =>
-          row.name.toLowerCase().includes(String(filter.val).toLowerCase())));
+          row.name.toLowerCase().includes(String(filter.val).toLowerCase()))
+          && (query.search ?? "").trim().toLowerCase().split(/\s+/).every(word => row.name.toLowerCase().includes(word)));
         if (query.sorting.length) result = [...result].sort((a, b) =>
           a.name.localeCompare(b.name) * (query.sorting[0].dir === "asc" ? 1 : -1));
         setTotal(result.length);
@@ -52,7 +53,7 @@ export function ReliabilityTable() {
       onQueryChange={next => { setQuery(next); setQueryChanges(count => count + 1); setIsLoading(true); }}
       isLoading={isLoading} error={error} onRetry={() => { setScenario("data"); setAttempt(value => value + 1); setIsLoading(true); }}
       pagination={{ enabled: true, limitOptions: [2, 5] }} enableColumnFilters enableColumnReorder isResizable
-      tableLabel="Risultati server" stripedRows />
+      tableLabel="Risultati server" globalSearch stripedRows />
     <output aria-label="Query corrente">{JSON.stringify(query)}</output>
     <output aria-label="Cambi query">{queryChanges}</output>
   </>;

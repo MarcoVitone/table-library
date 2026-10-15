@@ -39,6 +39,7 @@ import type { IColumnConfig } from "@/tables-framework/defines/column-config";
 import type { TCellValue } from "@/tables-framework/defines/editing.types";
 import type { ITableQuery, ITableQueryProps } from "@/tables-framework/defines/query.types";
 import { useTableQuery } from "@/tables-framework/hooks/use-table-query/use-table-query";
+import type { TGlobalSearch } from "@/tables-framework/defines/global-search.types";
 export type { IColumnConfig } from "@/tables-framework/defines/column-config";
 import { TableToolbar } from "@/tables-framework/components/table-sub-components/table-toolbar/table-toolbar";
 import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns-config-modal/columns-config-modal";
@@ -68,7 +69,7 @@ export interface IDynamicTableProps<T>
       IUnknownProps,
       T
     >,
-    "children" | "data" | "dataPagination" | "onDataCountChange"
+    "children" | "data" | "dataPagination" | "onDataCountChange" | "searchTerm" | "searchColumns"
   >, Omit<ITableQueryProps, "dataMode"> {
   columns: IColumnConfig<T>[];
   data: T[];
@@ -89,6 +90,7 @@ export interface IDynamicTableProps<T>
   enableColumnConfig?: boolean; // Abilita il bottone "Settings" per la modale
   dragHandleVisibility?: "always" | "hover";
   enableColumnFilters?: boolean;
+  globalSearch?: TGlobalSearch;
 }
 
 const CELL_COMPONENTS: Record<string, ElementType> = {
@@ -126,6 +128,7 @@ const DynamicTable = <T extends object>({
   isLoading: externalIsLoading,
   layout: externalLayout,
   virtualization,
+  globalSearch = false,
   isResizable: globalResizable = false,
   // Estrai le nuove props (default false)
   enableColumnReorder = false,
@@ -159,6 +162,11 @@ const DynamicTable = <T extends object>({
   } = paginationConfig || {};
 
   const unifiedQuery = !!(query || defaultQuery || onQueryChange || dataMode === "server");
+  const searchConfig = typeof globalSearch === "object" ? globalSearch : undefined;
+  const [internalSearch, setInternalSearch] = useState(searchConfig?.defaultValue ?? "");
+  const searchColumns = useMemo(() => searchConfig?.columns ?? columns
+    .filter(column => column.type !== "checkbox" && column.type !== "action")
+    .map(column => column.dataKey || column.id), [searchConfig?.columns, columns]);
   const isVirtualized = !!virtualization;
   const resolvedVirtualization = useMemo(() => virtualization ? {
     ...(typeof virtualization === "object" ? virtualization : {}),
@@ -186,8 +194,10 @@ const DynamicTable = <T extends object>({
   }, [persistence?.enabled, persistState, onQueryChange]);
   const { query: queryState, updateQuery } = useTableQuery({ query, onQueryChange: handleQueryChange,
     defaultQuery: { page: persistedPage, pageSize: persistedLimit ?? initialLimit,
-      sorting: externalLayout?.sorting, filters: externalLayout?.filtering, ...defaultQuery },
+      sorting: externalLayout?.sorting, filters: externalLayout?.filtering,
+      ...(searchConfig?.defaultValue !== undefined ? { search: searchConfig.defaultValue } : {}), ...defaultQuery },
   });
+  const searchTerm = unifiedQuery ? queryState.search ?? "" : globalSearch ? searchConfig?.value ?? internalSearch : "";
 
   // Internal state (used when not in controlled mode)
   const [internalOffset, setInternalOffset] = useState<number>(
@@ -312,6 +322,16 @@ const DynamicTable = <T extends object>({
     dataMode,
     serverTotalItems,
   ]);
+
+  const handleSearchChange = (value: string) => {
+    if (value === searchTerm) return;
+    if (unifiedQuery) updateQuery({ search: value });
+    else {
+      if (searchConfig?.value === undefined) setInternalSearch(value);
+      if (currentPage !== 0) handlePageChange(0);
+    }
+    searchConfig?.onChange?.(value);
+  };
 
   const handleLimitChange = (newLimit: number) => {
     if (unifiedQuery) {
@@ -665,6 +685,19 @@ const DynamicTable = <T extends object>({
 
       {renderNode(before)}
 
+      {globalSearch && <div className="tbl-global-search" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {searchConfig?.label ?? "Ricerca globale"}
+          <input type="search" value={searchTerm} placeholder={searchConfig?.placeholder ?? "Cerca nelle colonne…"}
+            onChange={event => handleSearchChange(event.target.value)}
+            onKeyDown={event => {
+              if (event.key === "Enter") event.preventDefault();
+              if (event.key === "Escape") { event.preventDefault(); handleSearchChange(""); }
+            }} />
+        </label>
+        {searchTerm && <button type="button" onClick={() => handleSearchChange("")}>Cancella ricerca globale</button>}
+      </div>}
+
       {infiniteScrollConfig?.enabled && (
         <InfiniteScroll
           hasMore={infiniteScrollConfig.hasMore}
@@ -692,6 +725,8 @@ const DynamicTable = <T extends object>({
         }}
         {...passedTableProps}
         dataMode={dataMode}
+        searchTerm={searchTerm}
+        searchColumns={searchColumns}
         isLoading={isLoading}
         virtualization={resolvedVirtualization}
         layout={useMemo(() => ({

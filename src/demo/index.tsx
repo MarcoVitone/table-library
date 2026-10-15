@@ -14,6 +14,7 @@ import { ColumnConfigTable } from "./features/column-config/ColumnConfigTable";
 import { EditingTable } from "./features/editing/EditingTable";
 import { ReliabilityTable } from "./features/reliability/ReliabilityTable";
 import { VirtualizedTable } from "./features/virtualization/VirtualizedTable";
+import { GlobalSearchTable } from "./features/global-search/GlobalSearchTable";
 
 const DemoApp: FC = () => {
   const [activePage, setActivePage] = useState<TDemoPage>("basic");
@@ -41,6 +42,8 @@ const DemoApp: FC = () => {
         return <ReliabilityTable />;
       case "virtualization":
         return <VirtualizedTable />;
+      case "global-search":
+        return <GlobalSearchTable />;
       case "column-config":
         return <ColumnConfigTable />;
       default:

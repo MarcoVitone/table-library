@@ -31,8 +31,12 @@ const props: IDynamicTableProps<Row> = {
   query: { page: 0, pageSize: 25, sorting: [], filters: [] }, onQueryChange: next => { void next.filters.length; },
   onDataChange: async (_next, row) => { row.name.toUpperCase(); },
   virtualization: { height: "50vh", rowHeight: 48, overscan: 5 },
+  globalSearch: { columns: ["name"], value: "test", onChange: value => { value.toUpperCase(); } },
 };
 // @ts-expect-error Virtualization uses a numeric estimate in pixels.
 const invalidVirtualization: IDynamicTableProps<Row> = { data: [], columns: valid, virtualization: { rowHeight: "48px" } };
 void invalidVirtualization;
+// @ts-expect-error Search columns must be data key strings.
+const invalidSearch: IDynamicTableProps<Row> = { data: [], columns: valid, globalSearch: { columns: [3] } };
+void invalidSearch;
 void [valid, invalidCurrency, invalidActions, missingCustom, invalidInput, invalidValidator, props];

@@ -37,6 +37,7 @@ interface ITableParserProps<T = unknown> extends TBase<T> {
   idKey?: string;
   dataPagination?: IPagination;
   dataMode?: "client" | "server";
+  searchColumns?: string[];
   onDataCountChange?: (totalItems: number) => void;
   layout?: ITableLayout;
   onLayoutChange?: (newLayout: ITableLayout) => void;
@@ -55,6 +56,8 @@ const TableParser = <T,>({
   idKey = "id",
   dataPagination,
   dataMode = "client",
+  searchTerm,
+  searchColumns,
   onDataCountChange,
   layout: externalLayout = undefined,
   onLayoutChange = undefined,
@@ -101,6 +104,8 @@ const TableParser = <T,>({
     idKey,
     pagination: dataPagination,
     dataMode,
+    searchTerm,
+    searchColumns: searchColumns ?? parsedColumns.map(column => column.dataKey),
   });
 
   useEffect(() => {
@@ -171,6 +176,7 @@ const TableParser = <T,>({
   return (
     <RendererComponent
       {...rest}
+      searchTerm={searchTerm}
       source={source}
       parserAPI={parserAPI}
       enableColumnFilters={enableColumnFilters}

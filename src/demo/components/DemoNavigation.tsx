@@ -12,7 +12,8 @@ type TDemoPage =
   | "column-config"
   | "editing"
   | "reliability"
-  | "virtualization";
+  | "virtualization"
+  | "global-search";
 
 interface IDemoNavigationProps {
   activePage: TDemoPage;
@@ -36,6 +37,7 @@ const DemoNavigation: FC<IDemoNavigationProps> = ({
     { id: "editing", label: "Modifica celle" },
     { id: "reliability", label: "Stati e server" },
     { id: "virtualization", label: "Virtualizzazione" },
+    { id: "global-search", label: "Ricerca globale" },
   ];
 
   return (

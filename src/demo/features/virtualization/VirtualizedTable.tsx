@@ -36,7 +36,7 @@ export function VirtualizedTable() {
     <button type="button" onClick={() => setRows(initialRows)}>Ripristina dataset</button>
     <DynamicTable data={rows} columns={columns} tableLabel="Righe virtualizzate"
       maxHeight={compact ? 240 : 400} virtualization={{ rowHeight: 48, overscan: 4 }}
-      enableColumnFilters isResizable stripedRows onRowSelectionChange={selectedRows => setSelected(selectedRows.length)}
+      globalSearch enableColumnFilters isResizable stripedRows onRowSelectionChange={selectedRows => setSelected(selectedRows.length)}
       onDataChange={(_next, updated) => {
         const apply = () => {
           if (rejectSave) throw new Error("Salvataggio rifiutato");
