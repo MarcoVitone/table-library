@@ -123,11 +123,32 @@ function useLayout({
   const currentDefaultsJson = JSON.stringify(defaults);
 
   if (prevDefaultsJson !== currentDefaultsJson) {
+    const previousDefaults = JSON.parse(prevDefaultsJson) as typeof defaults;
     setPrevDefaultsJson(currentDefaultsJson);
-    setColumnsLayout(defaults.columnsLayout);
-    setSorting(defaults.sorting);
-    setFiltering(defaults.filtering);
-    setPagination(defaults.pagination);
+
+    // Column layout feedback must not reset filtering, sorting or pagination.
+    if (
+      JSON.stringify(previousDefaults.columnsLayout) !==
+      JSON.stringify(defaults.columnsLayout)
+    ) {
+      setColumnsLayout(defaults.columnsLayout);
+    }
+    if (
+      JSON.stringify(previousDefaults.sorting) !== JSON.stringify(defaults.sorting)
+    ) {
+      setSorting(defaults.sorting);
+    }
+    if (
+      JSON.stringify(previousDefaults.filtering) !== JSON.stringify(defaults.filtering)
+    ) {
+      setFiltering(defaults.filtering);
+    }
+    if (
+      JSON.stringify(previousDefaults.pagination) !==
+      JSON.stringify(defaults.pagination)
+    ) {
+      setPagination(defaults.pagination);
+    }
     setIsStale(defaults.isStale);
   }
 
