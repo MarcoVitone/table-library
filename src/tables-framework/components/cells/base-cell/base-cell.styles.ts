@@ -11,6 +11,7 @@ interface IBaseCellProps {
   textTransform?: TtextTransform;
   fontColor?: string;
   backgroundColor?: string;
+  rowBackgroundColor?: string;
   fontSize?: string;
   padding?: string;
   overFlow?: string;
@@ -42,7 +43,7 @@ export const BaseCellComponent = nativeElement<'td', IBaseCellProps>('td', 'tbl-
   borderBottom: border(p.borderBottom, p.borderColor || '#ddd'),
   padding: p.padding || '.5rem .75rem',
   color: p.fontColor || p.theme.palette.primary.dark,
-  backgroundColor: p.isSelected ? p.rowSelectedColor || 'rgba(0,73,135,.1)' : p.isSorted ? p.backgroundColorSort : p.backgroundColor || (p.fixed ? '#fff' : 'transparent'),
+  backgroundColor: p.isSelected ? p.rowSelectedColor || 'rgba(0,73,135,.1)' : p.isSorted ? p.backgroundColorSort : p.backgroundColor ?? p.rowBackgroundColor ?? (p.fixed ? '#fff' : 'transparent'),
   fontWeight: p.bold ? 'bold' : 'normal',
   textAlign: p.textPosition || 'left',
   textTransform: p.textTransform,

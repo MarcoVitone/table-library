@@ -218,6 +218,10 @@ export const BasicTable = () => {
         maxHeight={500}
         headerBorder={headerBorder}
         bodyBorder={bodyBorder}
+        stripedRows={{ oddColor: "#ffffff", evenColor: "#f5f7fa" }}
+        getRowStyle={(user) => user.role === "Admin"
+          ? { backgroundColor: "#fff3cd" }
+          : undefined}
       />
     </div>
   );

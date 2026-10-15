@@ -40,6 +40,14 @@ Below is the complete list of properties accepted by the `DynamicTable` componen
 | :------------- | :-------------- | :---------------------------------------------------- |
 | `headerBorder` | `IBorderConfig` | Configuration for header cell borders (bottom/right). |
 | `bodyBorder`   | `IBorderConfig` | Configuration for body cell borders (bottom/right).   |
+| `stripedRows` | `boolean \| IStripedRowsConfig` | Alternating body row backgrounds. Default: `false`. |
+| `getRowStyle` | `(row: T, rowIndex: number) => CSSProperties \| null \| undefined` | Styles based on the original row data and zero-based visible page index. |
+
+`stripedRows={true}` uses `#ffffff` for the first/third rows and `#f5f7fa` for
+the second/fourth rows. Customize them with
+`stripedRows={{ oddColor: "#ffffff", evenColor: "#eef4ff" }}`.
+`getRowStyle` overrides the alternating styles; return `undefined` or `null`
+to keep them. See [row styling examples](./06_THEMING_AND_STYLING.md#conditional-and-alternating-rows).
 
 #### `IBorderConfig` Interface
 

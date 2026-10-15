@@ -14,6 +14,7 @@ import type {
 } from "@/tables-framework/defines/api.types.ts";
 import type {
   IRowNavigationConfig,
+  IRowStyling,
   ISource,
 } from "@/tables-framework/defines/common.types.ts";
 import { BaseBody } from "@/tables-framework/components/areas/base-body/base-body.tsx";
@@ -46,7 +47,7 @@ const defaultAPI = {
 
 const TableContext = createContext<TTableRendererAPI>(defaultAPI);
 
-interface ITableRendererProps<T = unknown> {
+interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   source: ISource;
   table?: ElementType;
   header?: ElementType;
@@ -80,6 +81,8 @@ const TableRenderer = <T,>({
   showFooter = false,
   onRowSelectionChange,
   onRowDoubleClick,
+  stripedRows = false,
+  getRowStyle,
   stickyHeader = true,
   enableColumnFilters = false,
 }: ITableRendererProps<T>) => {
@@ -126,8 +129,8 @@ const TableRenderer = <T,>({
   );
 
   const body = useMemo(
-    () => renderRows(source.body.rows, onRowDoubleClick),
-    [source.body.rows, onRowDoubleClick]
+    () => renderRows(source.body.rows, onRowDoubleClick, { stripedRows, getRowStyle }),
+    [source.body.rows, onRowDoubleClick, stripedRows, getRowStyle]
   );
 
   const footer = useMemo(

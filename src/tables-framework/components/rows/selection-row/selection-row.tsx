@@ -1,10 +1,11 @@
-import type { FC } from "react";
+import type { CSSProperties, FC } from "react";
 import { useCallback } from "react";
 import type { IRowProps } from "@/tables-framework/defines/common.types.ts";
 import { BaseTr } from "./selection-row.styles.ts";
 import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 
 interface ISelectionRowProps extends IRowProps {
+  style?: CSSProperties;
   singleSelect: boolean;
   onRowSelected?: (id: string) => void;
 }
@@ -14,6 +15,7 @@ const SelectionRow: FC<ISelectionRowProps> = ({
   onRowSelected,
   data,
   children,
+  style,
 }) => {
   const { rowStatus, setRowStatus, clearSelectedRows } = useTable(data);
 
@@ -46,6 +48,7 @@ const SelectionRow: FC<ISelectionRowProps> = ({
 
   return (
     <BaseTr
+      style={style}
       isSelected={isSelected}
       isLoading={isLoading}
       onClick={isSelected ? onRowUnselectHandler : onRowSelectHandler}

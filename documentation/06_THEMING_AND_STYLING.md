@@ -45,6 +45,41 @@ Customize the background color of selected rows:
 />
 ```
 
+### Conditional and alternating rows
+
+Use `stripedRows` for alternating backgrounds and `getRowStyle` for styles based
+on each original data object. Both props are also available on `Table`.
+
+```tsx
+<DynamicTable
+  data={users}
+  columns={columns}
+  stripedRows={{ oddColor: "#ffffff", evenColor: "#f5f7fa" }}
+  getRowStyle={(user, rowIndex) => {
+    if (user.isUrgent) {
+      return { backgroundColor: "#fff3cd", color: "#664d03" };
+    }
+    return undefined; // Keep the alternating background.
+  }}
+  rowSelectedColor="#dbeafe"
+/>
+```
+
+- `stripedRows` defaults to `false`. Set it to `true` for the colors above;
+  either custom color can be omitted to retain its default. `oddColor` is the
+  first visible body row, `evenColor` the second.
+- The callback receives the original row object and a zero-based index after
+  filtering, sorting and pagination. Alternation restarts on each page,
+  including server-side pages. Header and footer rows are unaffected.
+- Styles merge in this order: alternating background, existing custom row
+  `style`, then `getRowStyle`. Return `null` or `undefined` to add no styles.
+- The background also applies to fixed body cells. Explicit cell backgrounds
+  and font colors retain priority. Selected and sorted cell backgrounds retain
+  priority over the row background; explicit cell `style` has final priority.
+- Other CSS properties apply to the row element. Custom row components should
+  forward their `style` prop; custom cell components should forward
+  `rowBackgroundColor` and `fontColor` to `BaseCell` to use the row colors.
+
 ### Native theme
 
 Import the provider from the table framework. The default theme works without a provider.

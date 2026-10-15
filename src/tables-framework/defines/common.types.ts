@@ -222,6 +222,20 @@ interface IRowProps {
   children: ReactNode;
 }
 
+export interface IStripedRowsConfig {
+  /** Background of the first, third, ... visible body rows. Default: #ffffff. */
+  oddColor?: string;
+  /** Background of the second, fourth, ... visible body rows. Default: #f5f7fa. */
+  evenColor?: string;
+}
+
+export interface IRowStyling<T = unknown> {
+  /** Alternating body row backgrounds; restarts on each page. Default: false. */
+  stripedRows?: boolean | IStripedRowsConfig;
+  /** Original row data and zero-based visible page index, after filtering/sorting. */
+  getRowStyle?: (row: T, rowIndex: number) => CSSProperties | null | undefined;
+}
+
 type TElementCombo = [ElementType, Record<string, unknown>];
 
 type TCellCombo<T = IUnknownProps> = [

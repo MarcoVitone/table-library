@@ -28,6 +28,22 @@ for (const demo of demos) {
   });
 }
 
+test('row colors combine conditional backgrounds with alternating rows', async ({ page }) => {
+  const rows = bodyRows(page);
+  await expect(rows).toHaveCount(MOCK_USERS.length);
+  for (let index = 0; index < MOCK_USERS.length; index++) {
+    const expected = MOCK_USERS[index].role === 'Admin'
+      ? 'rgb(255, 243, 205)'
+      : index % 2 === 0 ? 'rgb(255, 255, 255)' : 'rgb(245, 247, 250)';
+    await expect(rows.nth(index)).toHaveCSS('background-color', expected);
+    const colors = await rows.nth(index).locator('td').evaluateAll(cells =>
+      cells.map(cell => getComputedStyle(cell).backgroundColor)
+    );
+    expect(colors.every(color => color === expected)).toBe(true);
+  }
+  await expect(page.locator('thead td').first()).toHaveCSS('background-color', 'rgb(245, 245, 245)');
+});
+
 test('pagination changes page and page size', async ({ page }) => {
   await page.getByRole('button', { name: 'Paginazione', exact: true }).click();
   await expect(bodyRows(page)).toHaveCount(5);

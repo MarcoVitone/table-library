@@ -40,6 +40,7 @@ interface IBaseCellProps extends ICellProps {
   label?: string;
   fontColor?: string;
   backgroundColor?: string;
+  rowBackgroundColor?: string;
   fontSize?: string;
   bold?: string;
   padding?: string;
