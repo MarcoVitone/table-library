@@ -57,11 +57,16 @@ const FilterMenu: FC<IFilterMenuProps> = ({ dataKey, config }) => {
         return otherFilters;
       }
 
+      const filterValue = config.type === "number" ? Number(val) : val;
+      if (config.type === "number" && !Number.isFinite(filterValue)) {
+        return prev;
+      }
+
       let op: IFilter["op"] = "eq";
       if (config.type === "text") op = "match";
       if (config.type === "multi-select") op = "in";
 
-      return [...otherFilters, { key: dataKey, op, val }];
+      return [...otherFilters, { key: dataKey, op, val: filterValue }];
     });
   };
 
@@ -155,7 +160,7 @@ const FilterMenu: FC<IFilterMenuProps> = ({ dataKey, config }) => {
               variant="standard"
               size="small"
               fullWidth
-              value={currentFilter?.val || ""}
+              value={currentFilter?.val ?? ""}
               onChange={(e) => handleFilterChange(e.target.value)}
             />
           )}
