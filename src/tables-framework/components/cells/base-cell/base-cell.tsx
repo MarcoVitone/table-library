@@ -96,7 +96,7 @@ const BaseCell: FC<IBaseCellProps> = ({
   textOverflow,
   sortable = false,
   sortIcon = <ArrowUpward style={{ width: "1rem", height: "1rem" }} />,
-  isServerSideSort = true,
+  isServerSideSort = false,
   sortParam,
   backgroundColorSort,
   onSortClick,
