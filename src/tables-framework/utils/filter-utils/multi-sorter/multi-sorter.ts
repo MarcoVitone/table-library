@@ -52,13 +52,13 @@ function multiSorter<T>(
                 bVal = new Date(bVal).getTime();
             }
 
-            const aMissing = aVal === null || aVal === undefined;
-            const bMissing = bVal === null || bVal === undefined;
-            if (aMissing && bMissing) {
-                continue;
-            } else if (aMissing) {
+            if (aVal === null || aVal === undefined) {
+                if (bVal === null || bVal === undefined) {
+                    continue;
+                }
                 return 1;
-            } else if (bMissing) {
+            }
+            if (bVal === null || bVal === undefined) {
                 return -1;
             }
 

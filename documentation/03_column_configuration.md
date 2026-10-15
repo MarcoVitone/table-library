@@ -114,6 +114,8 @@ Renders an editable input field.
 `items[0].name`. With `DynamicTable`, edits are reported through `onDataChange`
 using a new data array and updated row. Objects and arrays along the edited
 path are copied; the original row and unrelated branches remain unchanged.
+Numeric inputs commit finite numbers; clearing them commits an empty string.
+Input and autocomplete cells also reflect values updated by their parent.
 
 - **Config**:
   - `inputType`: `"text" | "number" | "date" | "email"`

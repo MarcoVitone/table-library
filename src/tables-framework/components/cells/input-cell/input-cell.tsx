@@ -28,19 +28,25 @@ const InputCell: FC<IInputCellProps> = ({
   onCellChange,
   ...rest
 }) => {
-  const [value, setValue] = useState<string | number>(
-    (data?.value as string | number) ?? ""
-  );
+  const sourceValue = (data?.value as string | number) ?? "";
+  const [value, setValue] = useState<string | number>(sourceValue);
+  const [previousSourceValue, setPreviousSourceValue] = useState(sourceValue);
+
+  if (!Object.is(sourceValue, previousSourceValue)) {
+    setPreviousSourceValue(sourceValue);
+    setValue(sourceValue);
+  }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
 
   const handleBlur = () => {
-    if (value !== data?.value) {
-      if (data) {
-        onCellChange?.(value, data);
-      }
+    const nextValue =
+      inputType === "number" && value !== "" ? Number(value) : value;
+    if (typeof nextValue === "number" && !Number.isFinite(nextValue)) return;
+    if (data && nextValue !== data.value) {
+      onCellChange?.(nextValue, data);
     }
   };
 

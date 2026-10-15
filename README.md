@@ -50,9 +50,14 @@ npm run dev
 
 ## Regression checks
 
-Run `npm test` with Node.js 22.13 or newer. These tests use Node built-ins and
-run without installing the application dependencies. They cover data filtering,
-sorting, row identity, and immutable cell updates in isolation.
+Run `npm test` with Node.js 22.13 or newer after installing dependencies. The
+suite includes isolated data tests and integration tests using real React, table
+components, and hooks. It covers all demo renderings, pagination, filtering,
+sorting, row identity, editing, and changes to externally supplied cell values.
+
+`npm run test:unit` runs only the isolated data tests without application
+dependencies. Integration tests use server rendering; browser layout, pointer
+interactions, and client effects require a connected browser.
 
 Run `npm run build` and `npm run lint` separately for TypeScript, bundling, and
 lint checks once the application dependencies are installed.
