@@ -50,6 +50,7 @@ import type { TStatusConfig } from "@/tables-framework/components/cells/status-c
 import { TableToolbar } from "@/tables-framework/components/table-sub-components/table-toolbar/table-toolbar";
 import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns-config-modal/columns-config-modal";
 import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table";
+import { setValueAtPath } from "@/tables-framework/utils/object-utils/set-value-at-path/set-value-at-path";
 
 type TUserBaseCellProps = Partial<Omit<IBaseCellProps, keyof ICellProps>>;
 
@@ -365,7 +366,7 @@ const DynamicTable = <T extends object>({
 
       if (rowIndex === -1) return;
 
-      const updatedRow = { ...data[rowIndex], [colKey]: newValue };
+      const updatedRow = setValueAtPath(data[rowIndex], colKey, newValue);
       const newData = [...data];
       newData[rowIndex] = updatedRow;
 

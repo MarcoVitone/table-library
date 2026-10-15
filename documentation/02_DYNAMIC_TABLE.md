@@ -64,7 +64,10 @@ interface IBorderConfig {
 
 ### Data (`data`)
 
-The `data` prop accepts a simple array of objects. It is recommended that each object has a unique identifier (e.g., `id` or `_id`) for correct row handling.
+The `data` prop accepts a simple array of objects. Each row should have a unique
+identifier. The default `idKey` is `"id"`; set `idKey="_id"` for rows using `_id`.
+Numeric IDs, including `0`, and string IDs are supported. IDs are serialized
+to strings internally, so `0` and `"0"` refer to the same row identity.
 
 ```typescript
 const users = [

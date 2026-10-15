@@ -47,3 +47,12 @@ This project uses **React** + **TypeScript** + **Vite**.
 npm install
 npm run dev
 ```
+
+## Regression checks
+
+Run `npm test` with Node.js 22.13 or newer. These tests use Node built-ins and
+run without installing the application dependencies. They cover data filtering,
+sorting, row identity, and immutable cell updates in isolation.
+
+Run `npm run build` and `npm run lint` separately for TypeScript, bundling, and
+lint checks once the application dependencies are installed.

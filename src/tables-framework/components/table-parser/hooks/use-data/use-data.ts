@@ -26,7 +26,7 @@ function useData({ columns, tableLayout, data, idKey, pagination }: IProps) {
     return data.map((full) => {
       const flat = ObjectUtils.flatten(full, true) as IFlatDatum;
       let id = "void";
-      if (flat[idKey]) {
+      if (flat[idKey] !== undefined && flat[idKey] !== null) {
         id = StringUtils.serialize(flat[idKey]);
       } else {
         console.warn(`RECEIVED DATUM WITHOUT A VALID ID`);
@@ -73,7 +73,7 @@ function useData({ columns, tableLayout, data, idKey, pagination }: IProps) {
               if (typeof val === "string")
                 return StringUtils.serialize(content)
                   .toLowerCase()
-                  .includes(val);
+                  .includes(val.toLowerCase());
               return false;
             case "in":
               if (Array.isArray(val)) {
