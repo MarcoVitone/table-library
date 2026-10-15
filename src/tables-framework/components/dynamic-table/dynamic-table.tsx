@@ -46,6 +46,7 @@ export type { IColumnConfig } from "@/tables-framework/defines/column-config";
 import { TableToolbar } from "@/tables-framework/components/table-sub-components/table-toolbar/table-toolbar";
 import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns-config-modal/columns-config-modal";
 import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table";
+import { ObjectUtils, StringUtils } from "@/tables-framework/utils";
 import { setValueAtPath } from "@/tables-framework/utils/object-utils/set-value-at-path/set-value-at-path";
 
 export interface IPaginationConfig extends IPaginationCustomization {
@@ -112,6 +113,7 @@ const CELL_COMPONENTS: Record<string, ElementType> = {
 const DynamicTable = <T extends object>({
   columns,
   data,
+  idKey = "id",
   onRowSelectionChange,
   onRowDoubleClick,
   pagination: paginationConfig,
@@ -242,46 +244,42 @@ const DynamicTable = <T extends object>({
     [paginationEnabled, serverSide?.enabled, limit, offset]
   );
 
-  const frozenColumnCount = useMemo(() => {
-    return columns.filter((c) => c.fixed).length;
-  }, [columns]);
+  const columnsLayout = externalLayout?.columnsLayout ?? internalColumnsLayout;
 
   const orderedColumns = useMemo(() => {
     // Se non abbiamo ancora un layout (primo render), usiamo l'ordine originale
-    if (internalColumnsLayout.length === 0) return columns;
+    if (columnsLayout.length === 0) return columns;
 
     // Creiamo una mappa per accesso veloce
     const colMap = new Map(columns.map((c) => [c.id, c]));
 
     // Ricostruiamo l'array nell'ordine corretto
-    const ordered = internalColumnsLayout
+    const ordered = columnsLayout
       .map((l) => colMap.get(l.id))
       .filter((c): c is IColumnConfig<T> => !!c); // Filtra eventuali undefined
 
     // Aggiungiamo in coda eventuali colonne nuove che non sono ancora nel layoutIds
-    const orderedIds = new Set(internalColumnsLayout.map((l) => l.id));
+    const orderedIds = new Set(columnsLayout.map((l) => l.id));
     const remaining = columns.filter((c) => !orderedIds.has(c.id));
 
     return [...ordered, ...remaining];
-  }, [columns, internalColumnsLayout]);
+  }, [columns, columnsLayout]);
 
   const stickyOffsets = useMemo(() => {
     const offsets: Record<string, string> = {};
     let accumulator = 0;
 
-    // Iteriamo le colonne NELL'ORDINE VISUALE CORRENTE
-    orderedColumns.forEach((col, index) => {
-      // Una colonna è 'fixed' se si trova nelle prime 'frozenColumnCount' posizioni
-      const isFixed = index < frozenColumnCount;
-
-      if (isFixed) {
+    // Only visible fixed columns contribute to the left offsets.
+    orderedColumns.forEach((col) => {
+      const hidden = columnsLayout.find((layout) => layout.id === col.id)?.props.isHidden;
+      if (col.fixed && !hidden) {
         offsets[col.id] = `${accumulator}px`;
         // Aggiungiamo la larghezza (reale o 0) all'accumulatore
         accumulator += stickyWidths[col.id] || 0;
       }
     });
     return offsets;
-  }, [orderedColumns, frozenColumnCount, stickyWidths]);
+  }, [orderedColumns, columnsLayout, stickyWidths]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -359,13 +357,10 @@ const DynamicTable = <T extends object>({
     (rowId: string, colKey: string, newValue: TCellValue) => {
       if (!onDataChange) return;
 
-      // The parser serializes row IDs, so compare numeric IDs as strings too.
-      const matchesRowId = (id: unknown) =>
-        (typeof id === "string" || typeof id === "number") &&
-        String(id) === rowId;
+      // Resolve exactly the same key and serialization as the data parser.
       const rowIndex = data.findIndex((item) => {
-        const row = item as Record<string, unknown>;
-        return matchesRowId(row.id) || matchesRowId(row._id);
+        const id = ObjectUtils.flatten(item, true)[idKey];
+        return id !== undefined && id !== null && StringUtils.serialize(id) === rowId;
       });
 
       if (rowIndex === -1) return;
@@ -376,7 +371,7 @@ const DynamicTable = <T extends object>({
 
       return onDataChange(newData, updatedRow);
     },
-    [data, onDataChange]
+    [data, idKey, onDataChange]
   );
 
   const measureColumn = useCallback(
@@ -541,10 +536,10 @@ const DynamicTable = <T extends object>({
   );
 
   const tableChildren = useMemo(() => {
-    return orderedColumns.map((col, index) => {
+    return orderedColumns.map((col) => {
       const CellComponent = getComponentByType(col.type);
       const HeaderComponent = col.type === "checkbox" ? CheckboxCell : BaseCell;
-      const fixed = index < frozenColumnCount;
+      const fixed = !!col.fixed;
       const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
       const isCheckbox = col.type === "checkbox";
       const isColumnResizable = isCheckbox
@@ -561,7 +556,7 @@ const DynamicTable = <T extends object>({
           id={col.id}
           width={col.width}
           isHidden={
-            internalColumnsLayout.find((l) => l.id === col.id)?.props?.isHidden
+            columnsLayout.find((l) => l.id === col.id)?.props?.isHidden
           }
           filterConfig={col.filterConfig}
           link={col.link as ILinkConfig<ILinkObject>}
@@ -681,7 +676,6 @@ const DynamicTable = <T extends object>({
     });
   }, [
     orderedColumns,
-    frozenColumnCount,
     stickyOffsets,
     headerBorder,
     bodyBorder,
@@ -692,14 +686,12 @@ const DynamicTable = <T extends object>({
     dragHandleVisibility,
     handleCellChange,
     measureColumn,
-    internalColumnsLayout,
+    columnsLayout,
   ]);
 
   return (
     <div>
       {paginationPosition === "top" && paginationComponent}
-
-      {renderNode(before)}
 
       {globalSearch && <div className="tbl-global-search" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -729,11 +721,13 @@ const DynamicTable = <T extends object>({
         table={ScrollableTable}
         stickyHeader={stickyHeader}
         data={data}
+        idKey={idKey}
         dataPagination={dataPagination}
         onDataCountChange={setFilteredTotalItems}
         onRowSelectionChange={onRowSelectionChange}
         onRowDoubleClick={onRowDoubleClick}
-        before={<>{tableExtensions}</>}
+        before={<>{renderNode(before)}{tableExtensions}</>}
+        after={renderNode(after)}
         onLayoutChange={handleLayoutChange}
         enableColumnFilters={enableColumnFilters}
         parserAPI={{
@@ -753,7 +747,6 @@ const DynamicTable = <T extends object>({
       >
         {tableChildren}
       </Table>
-      {renderNode(after)}
       {paginationPosition === "bottom" && paginationComponent}
     </div>
   );

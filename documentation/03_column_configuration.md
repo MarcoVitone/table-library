@@ -251,3 +251,12 @@ const MyCustomCell = ({ data }) => (
   component: MyCustomCell
 }
 ```
+
+### Missing dates and fixed columns
+
+Date cells render an empty value for missing, blank or invalid dates; valid
+values, including timestamp zero, keep the configured format and timezone.
+
+Set `fixed: true` on each column that should remain sticky on the left.
+The flag stays attached to that column when it is reordered. Offsets follow
+the current visual order of visible fixed columns; hidden columns take no space.

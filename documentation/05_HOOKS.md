@@ -14,7 +14,7 @@ const TableControls = () => {
 
   return (
     <div>
-      <button onClick={exportCSV}>Download CSV</button>
+      <button onClick={() => exportCSV?.()}>Download CSV</button>
       <button onClick={selectAllRows}>Select All</button>
     </div>
   );
@@ -49,10 +49,10 @@ The object returned by `useTable()` contains methods and state.
 
 | Property       | Type          | Description                                        |
 | :------------- | :------------ | :------------------------------------------------- |
-| `selectedRows` | `T[]`         | Array of currently selected row objects.           |
+| `selectedRows` | `IRow[] \| null`         | Array of internal rows; original records are available as row.source.full.           |
 | `filtering`    | `IFilter[]`   | Current active filters.                            |
 | `sorting`      | `ISorting[]`  | Current active sorting rules.                      |
-| `pagination`   | `IPagination` | Current pagination state (page, limit).            |
+| `pagination`   | `IPagination` | Current internal pagination state (offset, limit).            |
 | `rowsStatus`   | `TRowsStatus` | Internal status mapping (selection, pinned state). |
 
 ## Advanced: Accessing Row/Cell Context

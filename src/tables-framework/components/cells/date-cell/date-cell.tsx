@@ -19,8 +19,14 @@ const DateCell: FC<IDateCellProps> = ({
   ...rest
 }) => {
   const { timezone } = useTimezone();
-  const dateByTimezone = toZonedTime(data.value as string, timezone);
-  const dateFormatted = formatFn(dateByTimezone, format);
+  const value = data?.value;
+  const dateByTimezone = (typeof value === "string" && value.trim() !== "")
+    || typeof value === "number" || value instanceof Date
+    ? toZonedTime(value as string | number | Date, timezone)
+    : null;
+  const dateFormatted = dateByTimezone && !Number.isNaN(dateByTimezone.getTime())
+    ? formatFn(dateByTimezone, format)
+    : "";
 
   return (
     <BaseCell data={data} textAlignment={textAlignment} {...rest}>

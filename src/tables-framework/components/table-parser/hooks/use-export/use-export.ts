@@ -9,7 +9,6 @@ import type {
   ISource,
   TNonNullable,
   ICell,
-  IRow,
   IDatum,
 } from "@/tables-framework/defines/common.types";
 import { StringUtils, ObjectUtils } from "@/tables-framework/utils";
@@ -55,11 +54,6 @@ function useExport({ source }: IProps): TNonNullable<IExportAPI> {
   ): ICell => {
     let cellValue = cellData.value ?? "";
 
-    // Doing this because \n and % break the rows and ; add another column on the Excel file
-    if (typeof cellValue === "string") {
-      cellValue = cellValue.replaceAll(/\n|%/g, " \\ ").replaceAll(";", ",");
-    }
-
     // In order to have a correct translations for boolean and "Y/N" values.
     // Will enter here on if translation function is not undefined.
     if (translation) {
@@ -95,63 +89,39 @@ function useExport({ source }: IProps): TNonNullable<IExportAPI> {
 
   const getCSV = useCallback<TGetCSV>(
     (lt = "\r\n", isSimpleExport = false, translation) => {
-      let rows: IRow[] = [];
-      if (isSimpleExport) {
-        // Fist we remove all empty columns' titles
-        const headerRows = [
-          {
-            ...source.header.rows[0],
-            ...{
-              cells: source.header.rows[0].cells
-                .filter((cellValue: ICell) => !!cellValue.value)
-                .map((cellData: ICell) => formatCell(cellData, translation)),
-            },
-          },
-        ];
-
-        const bodyRows = source.body.rows.map((singleRow: IRow) => {
-          return {
-            ...singleRow,
-            ...{
-              cells: singleRow.cells.map((cellData: ICell) =>
-                formatCell(cellData, translation)
-              ),
-            },
-          };
+      const delimiter = isSimpleExport ? ";" : ",";
+      const rows = [
+        ...(isSimpleExport ? source.header.rows.slice(0, 1) : source.header.rows),
+        ...source.body.rows,
+        ...(isSimpleExport ? source.footer.rows.slice(0, 1) : source.footer.rows),
+      ];
+      // Omit untitled columns consistently from every row in simple exports.
+      const included = new Set<number>();
+      let position = 0;
+      const header = source.header.rows[0];
+      if (isSimpleExport && header) {
+        header.cells.forEach(cell => {
+          for (let i = 0; i < cell.colSpan; i++) {
+            if (cell.value !== null && cell.value !== undefined && cell.value !== "") included.add(position);
+            position++;
+          }
         });
-        // Removing nullable values in footer
-        const footerRows = [
-          {
-            ...source.footer.rows[0],
-            ...{
-              cells: source.footer.rows[0].cells.filter(
-                (cellValue: ICell) => !!cellValue.value
-              ),
-            },
-          },
-        ];
-        rows = [...headerRows, ...bodyRows, ...footerRows];
-      } else {
-        rows = [
-          ...source.header.rows,
-          ...source.body.rows,
-          ...source.footer.rows,
-        ];
       }
-
-      return rows
-        .map((r) => {
-          const output: string[] = [];
-
-          r.cells.forEach((c) => {
-            for (let i = 0; i < c.colSpan; i++) {
-              output.push(StringUtils.serialize(c.value));
-            }
-          });
-
-          return output.join(isSimpleExport ? ";" : ",");
-        })
-        .join(lt);
+      return rows.map(row => {
+        const output: string[] = [];
+        let position = 0;
+        row.cells.forEach(cell => {
+          const value = isSimpleExport ? formatCell(cell, translation).value : cell.value;
+          const text = value == null ? "" : StringUtils.serialize(value);
+          const escaped = text.includes(delimiter) || /["\r\n]/.test(text)
+            ? '"' + text.replaceAll('"', '""') + '"' : text;
+          for (let i = 0; i < cell.colSpan; i++) {
+            if (!isSimpleExport || !header || included.has(position)) output.push(escaped);
+            position++;
+          }
+        });
+        return output.join(delimiter);
+      }).join(lt);
     },
     [source.header.rows, source.body.rows, source.footer.rows]
   );

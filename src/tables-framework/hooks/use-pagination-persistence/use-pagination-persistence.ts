@@ -31,8 +31,43 @@ interface IUsePaginationPersistenceReturn {
 
 const getStorage = (type: TPersistenceStorage): Storage | null => {
   if (typeof globalThis.window === "undefined") return null;
-  return type === "localStorage" ? localStorage : sessionStorage;
+  try {
+    return type === "localStorage" ? globalThis.localStorage : globalThis.sessionStorage;
+  } catch {
+    // The storage property itself can throw in restricted browser contexts.
+    return null;
+  }
 };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+const isWidth = (value: unknown): value is string | number | null | undefined =>
+  value == null || typeof value === "string"
+    || (typeof value === "number" && Number.isFinite(value) && value >= 0);
+const isColumnsLayout = (value: unknown): value is IColumnLayout[] =>
+  Array.isArray(value) && value.every(column =>
+    isRecord(column) && typeof column.id === "string" && column.id.length > 0
+    && isRecord(column.props)
+    && (column.props.isHidden === undefined || typeof column.props.isHidden === "boolean")
+    && isWidth(column.props.width) && isWidth(column.props.savedWidth))
+  && new Set(value.map(column => column.id)).size === value.length;
+
+function parsePersistedState(stored: string | null): IPersistedState {
+  if (!stored) return {};
+  try {
+    const parsed: unknown = JSON.parse(stored);
+    if (!isRecord(parsed)) return {};
+    return {
+      limit: typeof parsed.limit === "number" && Number.isSafeInteger(parsed.limit) && parsed.limit > 0
+        ? parsed.limit : undefined,
+      page: typeof parsed.page === "number" && Number.isSafeInteger(parsed.page) && parsed.page >= 0
+        ? parsed.page : undefined,
+      columnsLayout: isColumnsLayout(parsed.columnsLayout) ? parsed.columnsLayout : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
 
 /**
  * Hook to persist pagination state in localStorage or sessionStorage
@@ -61,7 +96,7 @@ const usePaginationPersistence = (
     try {
       const stored = storageInstance.getItem(storageKey);
       if (stored) {
-        const parsed = JSON.parse(stored) as IPersistedState;
+        const parsed = parsePersistedState(stored);
         return {
           limit: persistLimit ? parsed.limit : undefined,
           page: persistPage ? parsed.page : undefined,
@@ -89,7 +124,7 @@ const usePaginationPersistence = (
 
       try {
         const stored = storageInstance.getItem(storageKey);
-        const current: IPersistedState = stored ? JSON.parse(stored) : {};
+        const current = parsePersistedState(stored);
 
         const toStore: IPersistedState = { ...current };
 

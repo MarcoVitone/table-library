@@ -30,7 +30,6 @@ import { useVirtualRows } from "@/tables-framework/hooks/use-virtual-rows/use-vi
 import { VirtualRowRetentionContext } from "@/tables-framework/hooks/use-virtual-rows/virtualization-context";
 import type { IBulkAction } from "@/tables-framework/defines/bulk-actions.types";
 import { BulkActionsToolbar } from "../table-sub-components/bulk-actions-toolbar/bulk-actions-toolbar";
-import { serializeTableState } from "@/tables-framework/utils/table-state/table-state";
 
 const defaultAPI = {
   tableLayout: null,
@@ -245,12 +244,6 @@ const TableRenderer = <T,>({
   /* -------------------------------------------------------------------------------------------------
    * MEMOIZED API
    * -----------------------------------------------------------------------------------------------*/
-  // PARSER API (Deep check)
-  const [memoizedParserAPI, setMemoizedParserAPI] = useState(parserAPI);
-  if (serializeTableState(memoizedParserAPI) !== serializeTableState(parserAPI)) {
-    setMemoizedParserAPI(parserAPI);
-  }
-
   // ROWS STATUS (Deep check)
   const [memoizedRowsStatus, setMemoizedRowsStatus] = useState(rowsStatus);
   if (JSON.stringify(memoizedRowsStatus) !== JSON.stringify(rowsStatus)) {
@@ -260,7 +253,7 @@ const TableRenderer = <T,>({
   const rendererAPI = useMemo<TTableRendererAPI>(() => {
     return {
       ...defaultAPI,
-      ...memoizedParserAPI,
+      ...parserAPI,
       rowsStatus: memoizedRowsStatus,
       setRowsStatus,
       source,
@@ -271,7 +264,7 @@ const TableRenderer = <T,>({
       virtualRowCount: virtual.enabled ? source.header.rows.length + source.body.rows.length + (showFooter ? source.footer.rows.length : 0) : undefined,
     };
   }, [
-    memoizedParserAPI,
+    parserAPI,
     memoizedRowsStatus,
     setRowsStatus,
     source,
