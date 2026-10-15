@@ -134,3 +134,7 @@ vite.config.ts.timestamp-*
 .vscode/
 .idea/
 .DS_Store
+
+# Playwright browser-test artifacts
+playwright-report/
+test-results/

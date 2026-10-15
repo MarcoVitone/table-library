@@ -1,0 +1,197 @@
+import { test, expect } from '@playwright/test';
+import { MOCK_USERS } from '../src/demo/mock-data.ts';
+
+const demos = ['Base', 'Paginazione', 'Ordina & Filtra', 'Celle Custom', 'Selezione', 'Drag & Drop', 'Ridimensionabile', 'Collassabile', 'Config. Colonne'];
+const bodyRows = page => page.locator('tbody tr');
+const header = (page, label) => page.locator('thead td').filter({ has: page.getByText(label, { exact: true }) });
+const names = page => bodyRows(page).locator('td:first-child').allTextContents();
+const pageErrors = new WeakMap();
+
+// Each test starts a fresh browser context with no user profiles or stored credentials.
+test.beforeEach(async ({ page }) => {
+  const errors = [];
+  pageErrors.set(page, errors);
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Framework Tabelle - Demo' })).toBeVisible();
+});
+
+test.afterEach(async ({ page }) => {
+  expect(pageErrors.get(page)).toEqual([]);
+});
+
+for (const demo of demos) {
+  test('renders demo: ' + demo, async ({ page }) => {
+    await page.getByRole('button', { name: demo, exact: true }).click();
+    await expect(page.locator('table')).toBeVisible();
+    await expect(bodyRows(page).first()).toBeVisible();
+  });
+}
+
+test('pagination changes page and page size', async ({ page }) => {
+  await page.getByRole('button', { name: 'Paginazione', exact: true }).click();
+  await expect(bodyRows(page)).toHaveCount(5);
+  await expect(bodyRows(page).first()).toContainText(MOCK_USERS[0].firstName);
+  await page.getByRole('button', { name: 'Pagina successiva', exact: true }).click();
+  await expect(bodyRows(page).first()).toContainText(MOCK_USERS[5].firstName);
+  await page.getByRole('combobox').selectOption('10');
+  await expect(bodyRows(page)).toHaveCount(Math.min(10, MOCK_USERS.length));
+  await expect(bodyRows(page).first()).toContainText(MOCK_USERS[0].firstName);
+});
+
+test('sorting cycles through ascending, descending and original order', async ({ page }) => {
+  await page.getByRole('button', { name: 'Ordina & Filtra', exact: true }).click();
+  const nameHeader = header(page, 'Nome');
+  await nameHeader.hover();
+  const sortButton = nameHeader.locator('.sort-icon');
+  await sortButton.click();
+  const ascending = MOCK_USERS.map(user => user.firstName).sort();
+  await expect.poll(() => names(page)).toEqual(ascending);
+  await sortButton.click();
+  await expect.poll(() => names(page)).toEqual([...ascending].reverse());
+  await sortButton.click();
+  await expect.poll(() => names(page)).toEqual(MOCK_USERS.map(user => user.firstName));
+});
+
+test('text filter accepts uppercase input and can be cleared', async ({ page }) => {
+  await page.getByRole('button', { name: 'Ordina & Filtra', exact: true }).click();
+  const nameHeader = header(page, 'Nome');
+  await nameHeader.hover();
+  await nameHeader.locator('.filter-icon').click();
+  await page.getByRole('textbox').fill('MARIO');
+  await expect(bodyRows(page)).toHaveCount(1);
+  await expect(bodyRows(page).first()).toContainText('Mario');
+  await page.getByRole('button', { name: 'Reset', exact: true }).click();
+  await expect(bodyRows(page)).toHaveCount(MOCK_USERS.length);
+});
+
+test('numeric filter matches numeric ages and can be cleared', async ({ page }) => {
+  await page.getByRole('button', { name: 'Ordina & Filtra', exact: true }).click();
+  const ageHeader = header(page, 'Età');
+  await ageHeader.hover();
+  await ageHeader.locator('.filter-icon').click();
+  const field = page.getByRole('spinbutton');
+  const age = MOCK_USERS[0].age;
+  await field.fill(String(age));
+  await expect(bodyRows(page)).toHaveCount(MOCK_USERS.filter(user => user.age === age).length);
+  await expect(bodyRows(page).first()).toContainText('Mario');
+  await field.fill('');
+  await expect(bodyRows(page)).toHaveCount(MOCK_USERS.length);
+});
+
+test('selection handles one row, all rows and clearing', async ({ page }) => {
+  await page.getByRole('button', { name: 'Selezione', exact: true }).click();
+  const counter = page.locator('strong').filter({ hasText: 'Selected Rows:' }).locator('..');
+  await page.locator('tbody input[type="checkbox"]').first().check();
+  await expect(counter).toHaveText(/Selected Rows:\s*1$/);
+  const all = page.locator('thead input[type="checkbox"]');
+  await all.check();
+  await expect(counter).toHaveText(new RegExp('Selected Rows:\\s*' + MOCK_USERS.length + '$'));
+  await all.uncheck();
+  await expect(counter).toHaveText(/Selected Rows:\s*0$/);
+});
+
+async function resizeColumn(page, column, delta) {
+  const handle = column.getByRole('separator', { name: 'Ridimensiona colonna' });
+  await handle.scrollIntoViewIfNeeded();
+  const box = await handle.boundingBox();
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + delta, y, { steps: 10 });
+  const liveWidth = await column.evaluate(cell => cell.getBoundingClientRect().width);
+  await page.mouse.up();
+  await expect.poll(async () => Math.abs((await column.boundingBox()).width - liveWidth)).toBeLessThan(2);
+  return (await column.boundingBox()).width;
+}
+
+test('resize grows and shrinks smoothly without moving the other columns', async ({ page }) => {
+  await page.getByRole('button', { name: 'Ridimensionabile', exact: true }).click();
+  const cells = page.locator('thead td');
+  const first = cells.nth(0);
+  const start = await first.boundingBox();
+  const neighbor = await cells.nth(1).boundingBox();
+  const grown = await resizeColumn(page, first, 120);
+  expect(Math.abs(grown - (start.width + 120))).toBeLessThan(2);
+  const shrunk = await resizeColumn(page, first, -180);
+  expect(Math.abs(shrunk - (grown - 180))).toBeLessThan(2);
+  expect(shrunk).toBeLessThan(start.width);
+  expect(Math.abs((await cells.nth(1).boundingBox()).width - neighbor.width)).toBeLessThan(2);
+  expect(Math.abs((await page.locator('tbody tr').first().locator('td').first().boundingBox()).width - shrunk)).toBeLessThan(2);
+});
+
+test('resize respects the configured minimum width', async ({ page }) => {
+  await page.getByRole('button', { name: 'Ridimensionabile', exact: true }).click();
+  const first = page.locator('thead td').first();
+  const start = await first.boundingBox();
+  const width = await resizeColumn(page, first, 100 - start.width - 40);
+  expect(Math.abs(width - 100)).toBeLessThan(2);
+  await expect.poll(() => page.locator('body').evaluate(body => body.style.cursor)).toBe('');
+});
+
+
+test('resize works on another column, supports repeated drags and a click without movement', async ({ page }) => {
+  await page.getByRole('button', { name: 'Ridimensionabile', exact: true }).click();
+  const cells = page.locator('thead td');
+  const first = cells.nth(0);
+  const second = cells.nth(1);
+  const original = (await first.boundingBox()).width;
+  await resizeColumn(page, first, -60);
+  const before = (await second.boundingBox()).width;
+  const grown = await resizeColumn(page, second, 75);
+  expect(Math.abs(grown - before - 75)).toBeLessThan(2);
+  const shrunk = await resizeColumn(page, second, -110);
+  expect(Math.abs(shrunk - grown + 110)).toBeLessThan(2);
+  const clicked = await resizeColumn(page, second, 0);
+  expect(Math.abs(clicked - shrunk)).toBeLessThan(2);
+  expect(Math.abs((await first.boundingBox()).width - original + 60)).toBeLessThan(2);
+});
+
+test('drag and drop reorders headers and their body data', async ({ page }) => {
+  await page.getByRole('button', { name: 'Drag & Drop', exact: true }).click();
+  const source = header(page, 'Nome (Drag Me)');
+  await source.locator('.drag-handle').dragTo(header(page, 'Email'));
+  await expect(page.locator('thead td')).toHaveText(['Cognome', 'Email', 'Nome (Drag Me)', 'Ruolo']);
+  await expect(bodyRows(page).first().locator('td').nth(0)).toHaveText(MOCK_USERS[0].lastName);
+  await expect(bodyRows(page).first().locator('td').nth(2)).toHaveText(MOCK_USERS[0].firstName);
+});
+
+test('a collapsed column can be expanded with its original data', async ({ page }) => {
+  await page.getByRole('button', { name: 'Collassabile', exact: true }).click();
+  const first = page.locator('thead td').first();
+  await first.getByRole('button', { name: 'Collassa colonna' }).click();
+  await expect(first).toHaveText('');
+  await expect(bodyRows(page).first().locator('td').first()).toHaveText('');
+  await first.dblclick();
+  await expect(first).toContainText('Nome');
+  await expect(bodyRows(page).first().locator('td').first()).toHaveText(MOCK_USERS[0].firstName);
+});
+
+test('column configuration hides, restores, reorders and resets columns', async ({ page }) => {
+  await page.getByRole('button', { name: 'Config. Colonne', exact: true }).click();
+  await page.getByRole('button', { name: 'Configura colonne', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  const firstItem = dialog.getByRole('listitem').first();
+  const toggle = firstItem.locator('input');
+  await toggle.uncheck();
+  await expect(page.locator('thead td')).toHaveCount(4);
+  await toggle.check();
+  await expect(page.locator('thead td')).toHaveCount(5);
+  await firstItem.getByRole('button', { name: 'Sposta giù' }).click();
+  await expect(page.locator('thead td').first()).toHaveText('Cognome');
+  await dialog.getByRole('button', { name: 'Ripristina Default' }).click();
+  await expect(page.locator('thead td')).toHaveText(['Nome', 'Cognome', 'Email', 'Ruolo', 'Salary']);
+  await dialog.getByRole('button', { name: 'Chiudi', exact: true }).click();
+  await expect(dialog).toBeHidden();
+});
+
+test('custom action uses the data of the clicked row', async ({ page }) => {
+  await page.getByRole('button', { name: 'Celle Custom', exact: true }).click();
+  const dialogEvent = page.waitForEvent('dialog');
+  const click = bodyRows(page).first().getByRole('button', { name: 'View', exact: true }).click();
+  const dialog = await dialogEvent;
+  expect(dialog.message()).toBe('Visiting ' + MOCK_USERS[0].city);
+  await dialog.accept();
+  await click;
+});

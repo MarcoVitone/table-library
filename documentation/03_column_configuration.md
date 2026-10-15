@@ -14,7 +14,9 @@ interface IColumnConfig<T> {
   id: string;               // Unique ID for the column
   label: string;            // Header label
   dataKey?: string;         // key in the data object to extract value from
-  width?: string;           // Fixed or min width (e.g. "200px", "10rem")
+  width?: string;           // Initial width (e.g. "200px", "10rem")
+  minWidth?: string | number; // Minimum resize width; numbers are pixels
+  isResizable?: boolean;    // Enable column resizing
 
   // Functionality
   type?: "text" | "number" | "date" | "status" | "action" | "input" | ...;
@@ -28,6 +30,10 @@ interface IColumnConfig<T> {
   component?: ElementType;          // Custom React Component for the cell
 }
 ```
+
+With resizing enabled, dragging the right edge changes the column width in both
+directions. Header and body stay aligned, and the other columns keep their
+current widths. The configured `minWidth` is respected (50 pixels by default).
 
 ## Supported Cell Types
 

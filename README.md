@@ -61,3 +61,29 @@ interactions, and client effects require a connected browser.
 
 Run `npm run build` and `npm run lint` separately for TypeScript, bundling, and
 lint checks once the application dependencies are installed.
+
+## Browser checks with Playwright
+
+Install the test runner and its dedicated Chromium browser once:
+
+```bash
+npm install --save-dev @playwright/test
+npm run test:e2e:install
+```
+
+Run the browser tests:
+
+```bash
+npm run test:e2e
+```
+
+The configuration builds the app, starts a dedicated local production server on
+port 4187, and runs 21 checks covering the nine demos, pagination, sorting,
+text and numeric filtering, selection, repeated column resizing and minimum
+widths, drag and drop, collapsing, column configuration, and custom actions.
+The dedicated server stops when the suite finishes. Each test uses a fresh
+browser context. Runtime JavaScript errors fail the test.
+
+On failure, screenshots, video, and traces are stored in `test-results/`.
+Open the HTML report with `npm run test:e2e:report`. Browser tests are separate
+from `npm test`; installing Playwright is required before they can run.

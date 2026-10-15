@@ -133,6 +133,7 @@ const BaseCell: FC<IBaseCellProps> = ({
     stickyHeader,
     rowStatus,
     setColumnLayout,
+    setColumnsLayout,
     enableColumnFilters,
   } = useTable(data);
 
@@ -277,15 +278,23 @@ const BaseCell: FC<IBaseCellProps> = ({
   });
 
   const handleResizeEnd = useCallback(
-    (newWidth: number) => {
-      if (data?.column?.id && setColumnLayout) {
+    (newWidth: number, columnWidths?: Record<string, number>) => {
+      if (columnWidths && setColumnsLayout) {
+        setColumnsLayout((previous) => previous.map((column) => {
+          const width = columnWidths[column.id];
+          return width === undefined ? column : {
+            ...column,
+            props: { ...column.props, width },
+          };
+        }));
+      } else if (data?.column?.id && setColumnLayout) {
         setColumnLayout(
           { props: { width: newWidth, isHidden: data.column.props.isHidden } },
           data.column.id
         );
       }
     },
-    [data?.column?.id, data?.column?.props?.isHidden, setColumnLayout]
+    [data?.column?.id, data?.column?.props?.isHidden, setColumnLayout, setColumnsLayout]
   );
 
   const justifyContent = useMemo(() => {
@@ -385,9 +394,13 @@ const BaseCell: FC<IBaseCellProps> = ({
       onClick={handleHeaderClick}
       onDoubleClick={handleHeaderDoubleClick}
       style={{
+        boxSizing: "border-box",
         width: currentWidth || "auto",
         minWidth: minWidthProp || currentWidth || "max-content",
-        maxWidth: ellipsis ? currentWidth || "auto" : "none",
+        maxWidth: typeof currentWidth === "number"
+          ? currentWidth
+          : ellipsis ? currentWidth || "auto" : "none",
+        overflow: typeof currentWidth === "number" ? overFlow ?? "hidden" : overFlow,
         opacity: isDraggingColumn ? 0.5 : 1,
         backgroundColor: cellBackgroundColor,
         borderTop: isDraggingColumn
@@ -408,6 +421,7 @@ const BaseCell: FC<IBaseCellProps> = ({
         padding: isCollapsed ? "0" : padding,
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
       }}
+      data-column-id={data?.column?.id}
       data-query-param={queryParam}
       isSticky={
         (type === "header" || area === "header") &&
@@ -452,7 +466,9 @@ const BaseCell: FC<IBaseCellProps> = ({
 
       {(type === "header" || area === "header") &&
         isResizable &&
-        !isCollapsed && <ColumnResizer onResizeEnd={handleResizeEnd} />}
+        !isCollapsed && colSpan === 1 && (
+          <ColumnResizer onResizeEnd={handleResizeEnd} minWidth={minWidthProp} />
+        )}
     </BaseCellComponent>
   );
 };
