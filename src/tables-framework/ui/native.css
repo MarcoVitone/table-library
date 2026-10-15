@@ -135,6 +135,18 @@
 .tbl-resizer:hover,.tbl-resizer:active {
   background-color: var(--table-primary,#004987)
 }
+.tbl-resizer:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--table-primary,#004987);
+  outline-offset: 2px
+}
+.tbl-state-cell {
+  padding: 2rem;
+  text-align: center
+}
+.tbl-cell-error { color: #b42318; font-size: .8125rem; margin-top: .25rem }
+.tbl-cell-saving { font-size: .8125rem; margin-top: .25rem }
+.tbl-input[aria-invalid=true] { border-color: #b42318 }
 .tbl-input,.tbl-select {
   font: inherit;
   font-size: .8125rem;

@@ -3,7 +3,7 @@ import { MOCK_USERS } from '../src/demo/mock-data.ts';
 
 const demos = ['Base', 'Paginazione', 'Ordina & Filtra', 'Celle Custom', 'Selezione', 'Drag & Drop', 'Ridimensionabile', 'Collassabile', 'Config. Colonne', 'Modifica celle'];
 const bodyRows = page => page.locator('tbody tr');
-const header = (page, label) => page.locator('thead td').filter({ has: page.getByText(label, { exact: true }) });
+const header = (page, label) => page.locator('thead th').filter({ has: page.getByText(label, { exact: true }) });
 const names = page => bodyRows(page).locator('td:first-child').allTextContents();
 const pageErrors = new WeakMap();
 
@@ -41,7 +41,7 @@ test('row colors combine conditional backgrounds with alternating rows', async (
     );
     expect(colors.every(color => color === expected)).toBe(true);
   }
-  await expect(page.locator('thead td').first()).toHaveCSS('background-color', 'rgb(245, 245, 245)');
+  await expect(page.locator('thead th').first()).toHaveCSS('background-color', 'rgb(245, 245, 245)');
 });
 
 test('pagination changes page and page size', async ({ page }) => {
@@ -57,7 +57,7 @@ test('pagination changes page and page size', async ({ page }) => {
 
 test('pagination keeps column widths stable across pages and page sizes', async ({ page }) => {
   await page.getByRole('button', { name: 'Paginazione', exact: true }).click();
-  const widths = () => page.locator('thead td').evaluateAll(cells =>
+  const widths = () => page.locator('thead th').evaluateAll(cells =>
     cells.map(cell => cell.getBoundingClientRect().width)
   );
   const initialWidths = await widths();
@@ -151,7 +151,7 @@ async function resizeColumn(page, column, delta) {
 
 test('resize grows and shrinks smoothly without moving the other columns', async ({ page }) => {
   await page.getByRole('button', { name: 'Ridimensionabile', exact: true }).click();
-  const cells = page.locator('thead td');
+  const cells = page.locator('thead th');
   const first = cells.nth(0);
   const start = await first.boundingBox();
   const neighbor = await cells.nth(1).boundingBox();
@@ -166,7 +166,7 @@ test('resize grows and shrinks smoothly without moving the other columns', async
 
 test('resize respects the configured minimum width', async ({ page }) => {
   await page.getByRole('button', { name: 'Ridimensionabile', exact: true }).click();
-  const first = page.locator('thead td').first();
+  const first = page.locator('thead th').first();
   const start = await first.boundingBox();
   const width = await resizeColumn(page, first, 100 - start.width - 40);
   expect(Math.abs(width - 100)).toBeLessThan(2);
@@ -176,7 +176,7 @@ test('resize respects the configured minimum width', async ({ page }) => {
 
 test('resize works on another column, supports repeated drags and a click without movement', async ({ page }) => {
   await page.getByRole('button', { name: 'Ridimensionabile', exact: true }).click();
-  const cells = page.locator('thead td');
+  const cells = page.locator('thead th');
   const first = cells.nth(0);
   const second = cells.nth(1);
   const original = (await first.boundingBox()).width;
@@ -195,14 +195,14 @@ test('drag and drop reorders headers and their body data', async ({ page }) => {
   await page.getByRole('button', { name: 'Drag & Drop', exact: true }).click();
   const source = header(page, 'Nome (Drag Me)');
   await source.locator('.drag-handle').dragTo(header(page, 'Email'));
-  await expect(page.locator('thead td')).toHaveText(['Cognome', 'Email', 'Nome (Drag Me)', 'Ruolo']);
+  await expect(page.locator('thead th')).toHaveText(['Cognome', 'Email', 'Nome (Drag Me)', 'Ruolo']);
   await expect(bodyRows(page).first().locator('td').nth(0)).toHaveText(MOCK_USERS[0].lastName);
   await expect(bodyRows(page).first().locator('td').nth(2)).toHaveText(MOCK_USERS[0].firstName);
 });
 
 test('a collapsed column can be expanded with its original data', async ({ page }) => {
   await page.getByRole('button', { name: 'Collassabile', exact: true }).click();
-  const first = page.locator('thead td').first();
+  const first = page.locator('thead th').first();
   await first.getByRole('button', { name: 'Collassa colonna' }).click();
   await expect(first).toHaveText('');
   await expect(bodyRows(page).first().locator('td').first()).toHaveText('');
@@ -218,13 +218,13 @@ test('column configuration hides, restores, reorders and resets columns', async 
   const firstItem = dialog.getByRole('listitem').first();
   const toggle = firstItem.locator('input');
   await toggle.uncheck();
-  await expect(page.locator('thead td')).toHaveCount(4);
+  await expect(page.locator('thead th')).toHaveCount(4);
   await toggle.check();
-  await expect(page.locator('thead td')).toHaveCount(5);
+  await expect(page.locator('thead th')).toHaveCount(5);
   await firstItem.getByRole('button', { name: 'Sposta giù' }).click();
-  await expect(page.locator('thead td').first()).toHaveText('Cognome');
+  await expect(page.locator('thead th').first()).toHaveText('Cognome');
   await dialog.getByRole('button', { name: 'Ripristina Default' }).click();
-  await expect(page.locator('thead td')).toHaveText(['Nome', 'Cognome', 'Email', 'Ruolo', 'Salary']);
+  await expect(page.locator('thead th')).toHaveText(['Nome', 'Cognome', 'Email', 'Ruolo', 'Salary']);
   await dialog.getByRole('button', { name: 'Chiudi', exact: true }).click();
   await expect(dialog).toBeHidden();
 });
@@ -290,7 +290,7 @@ test('native controls reflect external data and the configured theme', async ({p
   await expect(row.getByRole('spinbutton')).toHaveValue('42');
   await expect(row.getByRole('combobox',{name:'Ruolo',exact:true})).toHaveValue('Lettore');
   await expect(page.locator('output')).toHaveText('Nessuna modifica');
-  await expect(page.locator('thead td').first()).toHaveCSS('color','rgb(107, 39, 126)');
+  await expect(page.locator('thead th').first()).toHaveCSS('color','rgb(107, 39, 126)');
 });
 
 test('native dialogs trap keyboard focus, close with Escape and restore the opener', async ({page}) => {

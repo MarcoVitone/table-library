@@ -66,6 +66,8 @@ interface IStatusAPI {
 
 interface ISourceAPI {
   source: ISource | null;
+  isLoading?: boolean;
+  tableLabel?: string;
 }
 
 // *** HOOK API ***

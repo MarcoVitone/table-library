@@ -10,7 +10,8 @@ type TDemoPage =
   | "resizable"
   | "collapsible"
   | "column-config"
-  | "editing";
+  | "editing"
+  | "reliability";
 
 interface IDemoNavigationProps {
   activePage: TDemoPage;
@@ -32,6 +33,7 @@ const DemoNavigation: FC<IDemoNavigationProps> = ({
     { id: "collapsible", label: "Collassabile" },
     { id: "column-config", label: "Config. Colonne" },
     { id: "editing", label: "Modifica celle" },
+    { id: "reliability", label: "Stati e server" },
   ];
 
   return (

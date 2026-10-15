@@ -13,6 +13,10 @@ interface Props {
   disableClearable?: boolean;
   placeholder?: string;
   label?: string;
+  disabled?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
+  onCancel?: () => void;
 }
 export function Autocomplete({
   value,
@@ -22,7 +26,11 @@ export function Autocomplete({
   isOptionEqualToValue = (a, b) => a === b,
   disableClearable = false,
   placeholder,
-  label
+  label,
+  disabled = false,
+  invalid,
+  describedBy,
+  onCancel,
 }: Props) {
   const labelOf = (option: AutocompleteOption | null) => option === null ? '' : getOptionLabel(option);
   const [previousValue, setPreviousValue] = useState(value);
@@ -77,13 +85,14 @@ export function Autocomplete({
     });
   }, [open, activeIndex]);
   const choose = (event: SyntheticEvent, option: AutocompleteOption | null) => {
+    if (disabled) return;
     onChange(event, option);
     setQuery(labelOf(option));
     setOpen(false);
     input.current?.focus();
   };
   return <div className="tbl-combobox" ref={root}>
-  <input ref={input} className="tbl-input" role="combobox" aria-label={label || placeholder || 'Seleziona opzione'} aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} aria-activedescendant={open && activeIndex >= 0 ? id + '-' + activeIndex : undefined} autoComplete="off" placeholder={placeholder} value={query} onChange={event => {
+  <input ref={input} disabled={disabled} aria-invalid={invalid || undefined} aria-describedby={describedBy} className="tbl-input" role="combobox" aria-label={label || placeholder || 'Seleziona opzione'} aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} aria-activedescendant={open && activeIndex >= 0 ? id + '-' + activeIndex : undefined} autoComplete="off" placeholder={placeholder} value={query} onChange={event => {
       setQuery(event.target.value);
       setActive(0);
       setOpen(true);
@@ -108,6 +117,7 @@ export function Autocomplete({
         event.stopPropagation();
         setOpen(false);
         setQuery(labelOf(value));
+        onCancel?.();
       } else if (event.key === 'Tab') {
         setOpen(false);
         setQuery(labelOf(value));
@@ -117,15 +127,15 @@ export function Autocomplete({
       }
     }} />
   <div className="tbl-combobox-controls">
-   {!disableClearable && value !== null && <IconButton size="small" aria-label="Cancella selezione" onMouseDown={event => event.preventDefault()} onClick={event => choose(event, null)}><Close fontSize="inherit" /></IconButton>}
-   <IconButton size="small" aria-label={open ? 'Chiudi opzioni' : 'Apri opzioni'} tabIndex={-1} onMouseDown={event => event.preventDefault()} onClick={() => {
+   {!disableClearable && value !== null && <IconButton disabled={disabled} size="small" aria-label="Cancella selezione" onMouseDown={event => event.preventDefault()} onClick={event => choose(event, null)}><Close fontSize="inherit" /></IconButton>}
+   <IconButton disabled={disabled} size="small" aria-label={open ? 'Chiudi opzioni' : 'Apri opzioni'} tabIndex={-1} onMouseDown={event => event.preventDefault()} onClick={() => {
         input.current?.focus();
         setOpen(!open);
         setQuery('');
         setActive(0);
       }}><KeyboardArrowDown fontSize="inherit" /></IconButton>
   </div>
-  {open && typeof document !== 'undefined' && createPortal(<ul id={id} ref={list} style={themeVariables(theme)} className="tbl-combobox-list" role="listbox" aria-label={label || 'Opzioni'} onMouseDown={event => event.preventDefault()}>
+  {open && !disabled && typeof document !== 'undefined' && createPortal(<ul id={id} ref={list} style={themeVariables(theme)} className="tbl-combobox-list" role="listbox" aria-label={label || 'Opzioni'} onMouseDown={event => event.preventDefault()}>
    {filtered.length ? filtered.map((option, index) => <li id={id + '-' + index} key={index} role="option" aria-selected={value !== null && isOptionEqualToValue(option, value)} data-active={index === activeIndex} onMouseMove={() => setActive(index)} onClick={event => choose(event, option)}>{getOptionLabel(option)}</li>) : <li role="status" style={{
         padding: '.4rem .75rem'
       }}>Nessun risultato</li>}

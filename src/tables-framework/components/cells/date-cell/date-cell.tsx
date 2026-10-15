@@ -30,3 +30,4 @@ const DateCell: FC<IDateCellProps> = ({
 };
 
 export { DateCell };
+export type { IDateCellProps };

@@ -120,6 +120,24 @@ Internal CSS uses the `tbl-` prefix and is imported with the components. Ensure 
 
 Column settings and filters use the native `dialog` element with Escape handling, keyboard focus cycling, and focus restoration. Autocomplete uses a text input and an ARIA listbox, supports string/object options, arrow keys, Enter, Escape, clearing, and `disableClearable`. Expanded rows use native `details` and `summary` elements. Use browsers with native dialog/showModal support; browser checks currently run on Chromium.
 
+## Accessibility and keyboard interaction
+
+- Default header cells render as `<th scope="col">`; grouped headers use
+  `scope="colgroup"`. Sortable headers expose `aria-sort` and keep a native,
+  keyboard-operable sort button. Set `tableLabel` for an accessible table name.
+- Focus a column resize separator and use Left/Right for 10px changes,
+  Shift+Left/Right for 50px changes, or Home for the configured minimum.
+- Focus a drag handle and use Alt+Left/Right to move it between neighboring
+  movable columns. Focus stays on the control and its live status announces
+  the new position. Column settings also have keyboard-operable move buttons.
+- A collapsed header can be focused and expanded with Enter or Space.
+- Loading/empty messages use a live status; errors use an alert and an optional
+  retry button. Editing errors are associated with their input.
+
+Custom cell/row/table components should retain the corresponding semantics and
+forward the accessibility props. CSS selectors targeting header cells should
+use `thead th` or `[data-column-id]` instead of `thead td`.
+
 ## Layout & Sizing
 
 ### Fixed Widths

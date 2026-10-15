@@ -12,6 +12,7 @@ import { CollapsibleTable } from "./features/collapsible/CollapsibleTable";
 import { ColumnConfigTable } from "./features/column-config/ColumnConfigTable";
 
 import { EditingTable } from "./features/editing/EditingTable";
+import { ReliabilityTable } from "./features/reliability/ReliabilityTable";
 
 const DemoApp: FC = () => {
   const [activePage, setActivePage] = useState<TDemoPage>("basic");
@@ -35,6 +36,8 @@ const DemoApp: FC = () => {
         return <CollapsibleTable />;
       case "editing":
         return <EditingTable />;
+      case "reliability":
+        return <ReliabilityTable />;
       case "column-config":
         return <ColumnConfigTable />;
       default:

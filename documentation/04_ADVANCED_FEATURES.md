@@ -45,6 +45,78 @@ update the `data` prop. An empty sorting array means that sorting was cleared.
 The optional `headerProps.onSortClick` callback reports the column key and
 `"ASC"` or `"DESC"` when a direction is selected.
 
+## Unified client and server query
+
+Use one query object for page, page size, sorting and filters. A filter, sort
+or page-size change resets the page to zero in the same `onQueryChange` call.
+Column resizing/reordering/visibility do not change the query. Identical values
+do not trigger another notification. The callback is for changes, not an
+initial fetch: load data from an effect observing the query.
+
+```tsx
+import { useEffect, useState } from "react";
+import { DynamicTable, type ITableQuery } from "@/tables-framework/components";
+
+const [query, setQuery] = useState<ITableQuery>({
+  page: 0, pageSize: 25, sorting: [], filters: [],
+});
+const [rows, setRows] = useState<User[]>([]);
+const [total, setTotal] = useState(0);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+const [attempt, setAttempt] = useState(0);
+
+useEffect(() => {
+  const controller = new AbortController();
+  async function load() {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/users?query=" + encodeURIComponent(JSON.stringify(query)), {
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error("Unable to load users");
+      const result = await response.json(); // { items: User[], totalItems: number }
+      if (!controller.signal.aborted) {
+        setRows(result.items);
+        setTotal(result.totalItems);
+      }
+    } catch (error) {
+      if (!controller.signal.aborted) setError(error instanceof Error ? error.message : "Request failed");
+    } finally {
+      if (!controller.signal.aborted) setLoading(false);
+    }
+  }
+  void load();
+  return () => controller.abort();
+}, [query, attempt]);
+
+<DynamicTable
+  data={rows} columns={columns}
+  dataMode="server" totalItems={total}
+  query={query} onQueryChange={setQuery}
+  pagination={{ enabled: true, limitOptions: [10, 25, 50] }}
+  enableColumnFilters isLoading={loading} error={error}
+  onRetry={() => setAttempt(value => value + 1)}
+/>
+```
+
+Server mode renders the supplied rows in exactly their supplied order. It does
+not filter, sort or slice the page a second time, including when sort entries
+have `isServerSide: false`. The backend owns those operations and the matching
+record count. Page numbers are zero-based; `totalItems` is the count before
+pagination. Once loading finishes, a page beyond the supplied total is corrected
+with a query update. The host owns fetching, cancellation and stale-response
+protection; the table does not send network requests.
+
+For client processing keep `dataMode="client"` (the default) and supply all rows.
+Use `defaultQuery` instead of `query` for internal state with an optional
+`onQueryChange` observer. `query` is controlled: update it in the callback.
+Legacy `pagination.controlled`, `pagination.serverSide`, `layout` and
+`onLayoutChange` retain their behavior when unified query props are not used.
+Do not mix two controlled query sources. The existing server-side pagination
+option alone skips slicing; use the new server mode to delegate all operations.
+
 ## Filtering
 
 The table supports per-column filtering. Text search ignores case in both the

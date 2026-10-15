@@ -64,6 +64,14 @@ interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   onRowDoubleClick?: IRowNavigationConfig<T>;
   stickyHeader?: boolean;
   enableColumnFilters?: boolean;
+  /** Accessible name of the table. */
+  tableLabel?: string;
+  isLoading?: boolean;
+  error?: ReactNode;
+  onRetry?: () => void;
+  loadingContent?: ReactNode;
+  emptyContent?: ReactNode;
+  noResultsContent?: ReactNode;
 }
 
 const TableRenderer = <T,>({
@@ -85,6 +93,13 @@ const TableRenderer = <T,>({
   getRowStyle,
   stickyHeader = true,
   enableColumnFilters = false,
+  tableLabel,
+  isLoading = false,
+  error,
+  onRetry,
+  loadingContent = "Caricamento…",
+  emptyContent = "Nessun dato disponibile",
+  noResultsContent = "Nessun risultato per i filtri applicati",
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -204,6 +219,8 @@ const TableRenderer = <T,>({
       source,
       stickyHeader,
       enableColumnFilters,
+      isLoading,
+      tableLabel,
     };
   }, [
     memoizedParserAPI,
@@ -212,7 +229,23 @@ const TableRenderer = <T,>({
     source,
     stickyHeader,
     enableColumnFilters,
+    isLoading,
+    tableLabel,
   ]);
+
+  const hasError = error !== undefined && error !== null && error !== false;
+  const stateContent = isLoading ? loadingContent : hasError ? error
+    : parserAPI.filtering?.length ? noResultsContent : emptyContent;
+  const stateRow = (
+    <tr className="tbl-state-row">
+      <td colSpan={Math.max(1, source.columns.length)} className="tbl-state-cell">
+        <div role={hasError && !isLoading ? "alert" : "status"}>
+          {stateContent}
+          {hasError && !isLoading && onRetry && <button type="button" className="tbl-button" onClick={onRetry}>Riprova</button>}
+        </div>
+      </td>
+    </tr>
+  );
 
   return (
     <TableContext.Provider value={rendererAPI}>
@@ -222,10 +255,10 @@ const TableRenderer = <T,>({
         <TableElement>
           <HeaderElement>{header}</HeaderElement>
 
-          {!body.length && emptyNode ? (
+          {isLoading || hasError ? <BodyElement>{stateRow}</BodyElement> : !body.length && emptyNode ? (
             emptyNode
           ) : (
-            <BodyElement>{body}</BodyElement>
+            <BodyElement>{body.length ? body : stateRow}</BodyElement>
           )}
 
           {showFooter && <FooterElement>{footer}</FooterElement>}

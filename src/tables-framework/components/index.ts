@@ -36,3 +36,7 @@ export * from "./infinite-scroll/infinite-scroll";
 export { ThemeProvider, createTheme, useTheme, defaultTheme } from "../theme/theme";
 export type { TableTheme, ThemeOptions, Palette, PaletteColor } from "../theme/theme";
 export * from "./cells/autocomplete-cell.tsx/autocomplete-cell";
+export type { ITableQuery, ITableQueryProps } from "../defines/query.types";
+export type { ICellEditing, TCellValue } from "../defines/editing.types";
+export type { IStripedRowsConfig, IRowStyling } from "../defines/common.types";
+export { useTableQuery, normalizeTableQuery } from "../hooks/use-table-query/use-table-query";

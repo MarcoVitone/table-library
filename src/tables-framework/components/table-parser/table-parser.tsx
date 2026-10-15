@@ -36,6 +36,7 @@ interface ITableParserProps<T = unknown> extends TBase<T> {
   };
   idKey?: string;
   dataPagination?: IPagination;
+  dataMode?: "client" | "server";
   onDataCountChange?: (totalItems: number) => void;
   layout?: ITableLayout;
   onLayoutChange?: (newLayout: ITableLayout) => void;
@@ -53,6 +54,7 @@ const TableParser = <T,>({
   rows,
   idKey = "id",
   dataPagination,
+  dataMode = "client",
   onDataCountChange,
   layout: externalLayout = undefined,
   onLayoutChange = undefined,
@@ -98,6 +100,7 @@ const TableParser = <T,>({
     data: data as IDatum[],
     idKey,
     pagination: dataPagination,
+    dataMode,
   });
 
   useEffect(() => {

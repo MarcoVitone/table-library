@@ -64,6 +64,12 @@ interactions, and client effects require a connected browser.
 Run `npm run build` and `npm run lint` separately for TypeScript, bundling, and
 lint checks once the application dependencies are installed.
 
+Run `npm run test:types` for positive and negative compile checks of the public
+column and query APIs. See the documentation for unified server queries,
+loading/error/empty states, editor validation and keyboard interaction. The
+**Stati e server** demo exercises loading, retry and controlled server queries;
+**Modifica celle** includes validation and simulated asynchronous saves.
+
 ## Browser checks with Playwright
 
 Install the test runner and its dedicated Chromium browser once:
@@ -80,7 +86,7 @@ npm run test:e2e
 ```
 
 The configuration builds the app, starts a dedicated local production server on
-port 4187, and runs 29 checks covering the ten demos, pagination, sorting,
+port 4187, and runs browser checks covering the demos, pagination, sorting,
 text and numeric filtering, selection, repeated column resizing and minimum
 widths, drag and drop, collapsing, column configuration, and custom actions.
 The dedicated server stops when the suite finishes. Each test uses a fresh

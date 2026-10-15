@@ -41,6 +41,7 @@ interface IBaseCellProps extends ICellProps {
   fontColor?: string;
   backgroundColor?: string;
   rowBackgroundColor?: string;
+  rowSelectedColor?: string;
   fontSize?: string;
   bold?: string;
   padding?: string;
@@ -79,6 +80,7 @@ interface IBaseCellProps extends ICellProps {
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
+  component,
   variant,
   style: styleProp,
   noLeftBorder,
@@ -376,6 +378,20 @@ const BaseCell: FC<IBaseCellProps> = ({
 
   return (
     <BaseCellComponent
+      component={component ?? (area === "header" || type === "header" ? "th" : "td")}
+      scope={area === "header" || type === "header" ? (colSpan > 1 ? "colgroup" : "col") : undefined}
+      aria-sort={(area === "header" || type === "header") && sortable
+        ? dir === 1 ? "ascending" : dir === -1 ? "descending" : "none"
+        : undefined}
+      tabIndex={isCollapsed && (area === "header" || type === "header") ? 0 : undefined}
+      aria-label={isCollapsed && (area === "header" || type === "header")
+        ? `${data?.column?.label ?? "Colonna"}: premi Invio per espandere` : undefined}
+      onKeyDown={(event: React.KeyboardEvent) => {
+        if (isCollapsed && (area === "header" || type === "header") && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          handleExpandColumn();
+        }
+      }}
       ref={combinedRef}
       colSpan={colSpan}
       noLeft={!!noLeftBorder}
@@ -471,7 +487,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       {(type === "header" || area === "header") &&
         isResizable &&
         !isCollapsed && colSpan === 1 && (
-          <ColumnResizer onResizeEnd={handleResizeEnd} minWidth={minWidthProp} />
+          <ColumnResizer onResizeEnd={handleResizeEnd} minWidth={minWidthProp} width={currentWidth} label={data?.column?.label} />
         )}
     </BaseCellComponent>
   );

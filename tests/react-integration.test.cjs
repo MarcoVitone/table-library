@@ -61,7 +61,10 @@ test('server-side mode does not slice the supplied page a second time', () => {
   assert.match(html, /30/);
 });
 test('empty table renders without failing', () => {
-  assert.equal(bodyRows(render(DynamicTable, { data: [], columns })).length, 0);
+  const html = render(DynamicTable, { data: [], columns });
+  assert.match(html, /class="tbl-state-row"/);
+  assert.match(html, /Nessun dato disponibile/);
+  assert.doesNotMatch(html.match(/<tbody[\s\S]*?<\/tbody>/)[0], /class="tbl-row"/);
 });
 test('nested input cells render their current value with ID zero', () => {
   const html = render(DynamicTable, { data: [{ id: 0, profile: { name: 'Nested' } }], columns: [{ id: 'name', label: 'Name', dataKey: 'profile.name', type: 'input' }] });
@@ -123,7 +126,14 @@ test('selection API can select and clear a row with source ID zero', () => {
 
 const { InputCell } = require('../src/tables-framework/components/cells/input-cell/input-cell.tsx');
 const { AutocompleteCell } = require('../src/tables-framework/components/cells/autocomplete-cell.tsx/autocomplete-cell.tsx');
-function innerControl(cell) { return cell.props.children.props.children; }
+function innerControl(node) {
+  if (!React.isValidElement(node)) return undefined;
+  if ('value' in node.props && typeof node.props.onChange === 'function') return node;
+  for (const child of React.Children.toArray(node.props.children)) {
+    const control = innerControl(child);
+    if (control) return control;
+  }
+}
 test('input cell reflects externally updated data', () => {
   let displayed;
   function Probe() {

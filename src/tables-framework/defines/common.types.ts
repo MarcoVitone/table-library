@@ -292,6 +292,7 @@ interface IRowStatus {
   state: "ready" | "pending";
   isPinned: boolean;
   isSelected: boolean;
+  savingCellId?: string;
 }
 
 type TRowsStatus = Record<string, IRowStatus>;

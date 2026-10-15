@@ -56,11 +56,15 @@ const initialRows: EditingRow[] = [{
 export function EditingTable() {
   const [rows, setRows] = useState(initialRows);
   const [lastChange, setLastChange] = useState<EditingRow | null>(null);
+  const [asyncSave, setAsyncSave] = useState(false);
+  const [rejectSave, setRejectSave] = useState(false);
   const columns = useMemo<IColumnConfig<EditingRow>[]>(() => [{
     id: 'name',
     label: 'Nome',
     dataKey: 'name',
     type: 'input',
+    editable: row => row.id !== 1,
+    validate: value => String(value).trim() ? undefined : 'Il nome è obbligatorio',
     width: '160px',
     filterConfig: {
       type: 'text'
@@ -83,6 +87,8 @@ export function EditingTable() {
     label: 'Ruolo',
     dataKey: 'role',
     type: 'autocomplete',
+    validate: (value, row) => row.id === 2 && typeof value === 'object' && value?.id === 1
+      ? 'Ruolo non consentito' : undefined,
     width: '220px',
     autocompleteOptions: roles,
     getOptionLabel: option => typeof option === 'string' ? option : String(option.label),
@@ -158,6 +164,8 @@ export function EditingTable() {
     }
   }}>
   <p>Modifica i campi o scegli un ruolo. Le modifiche vengono restituite tramite <code>onDataChange</code>.</p>
+  <label><input type="checkbox" checked={asyncSave} onChange={event => setAsyncSave(event.target.checked)} />Salvataggio asincrono</label>
+  <label><input type="checkbox" checked={rejectSave} onChange={event => setRejectSave(event.target.checked)} />Simula errore salvataggio</label>
   <button type="button" onClick={() => {
       setRows(previous => previous.map((row, index) => index === 0 ? {
         ...row,
@@ -169,9 +177,16 @@ export function EditingTable() {
       } : row));
       setLastChange(null);
     }}>Aggiorna dati esterni</button>
-  <DynamicTable columns={columns} data={rows} enableColumnFilters enableColumnConfig isResizable maxHeight={420} onDataChange={(next, updated) => {
-      setRows(next);
-      setLastChange(updated);
+  <DynamicTable columns={columns} data={rows} enableColumnFilters enableColumnConfig isResizable maxHeight={420} onDataChange={(_next, updated) => {
+      const apply = () => {
+        if (rejectSave) throw new Error('Salvataggio rifiutato');
+        setRows(previous => previous.map(row => row.id === updated.id ? updated : row));
+        setLastChange(updated);
+      };
+      if (asyncSave) return new Promise<void>((resolve, reject) => setTimeout(() => {
+        try { apply(); resolve(); } catch (error) { reject(error); }
+      }, 600));
+      apply();
     }} />
   <output aria-label="Ultima modifica">{lastChange ? JSON.stringify(lastChange) : 'Nessuna modifica'}</output>
  </ThemeProvider>;

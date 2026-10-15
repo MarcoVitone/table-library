@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test": "node --test",
     "test:unit": "node --test tests/table-data.test.cjs",
+    "test:types": "tsc --noEmit -p tests/tsconfig.types.json",
     "preview": "vite preview",
     "test:e2e:install": "playwright install chromium",
     "test:e2e": "playwright test",

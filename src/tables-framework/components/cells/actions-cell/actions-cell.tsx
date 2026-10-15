@@ -10,25 +10,25 @@ interface IContext {
   isPinned: boolean | undefined;
 }
 
-interface IAction {
+interface IAction<T = Record<string, unknown>> {
   icon?: ReactNode;
   onAction: (
-    item: Record<string, unknown>,
+    item: T,
     context: IContext
   ) => void | Promise<unknown>;
   onPrompt?: (
-    item: Record<string, unknown>,
+    item: T,
     context: IContext
   ) => void | Promise<boolean>;
-  onEnd?: (item: Record<string, unknown>, context: IContext) => void;
+  onEnd?: (item: T, context: IContext) => void;
   variant?: ButtonProps["variant"];
   component?: "icon" | "button";
   label?: string;
   color?: ButtonProps["color"];
 }
 
-interface IActionsCellProps extends IBaseCellProps {
-  actions?: IAction[];
+interface IActionsCellProps<T = Record<string, unknown>> extends IBaseCellProps {
+  actions?: IAction<T>[];
   labelAfter?: boolean;
 }
 
@@ -115,6 +115,7 @@ const ActionsCell: FC<IActionsCellProps> = ({
 
             return (
               <IconButton
+                aria-label={actionLabel || label || "Azione riga"}
                 key={index + index}
                 disabled={isLoading}
                 onClick={handleAction}
