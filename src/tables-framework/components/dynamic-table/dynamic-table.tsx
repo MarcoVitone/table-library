@@ -354,12 +354,14 @@ const DynamicTable = <T extends object>({
     (rowId: string, colKey: string, newValue: string | number | boolean) => {
       if (!onDataChange) return;
 
-      // Find the row to update
-      const rowIndex = data.findIndex(
-        (item) =>
-          (item as Record<string, unknown>).id === rowId ||
-          (item as Record<string, unknown>)._id === rowId
-      );
+      // The parser serializes row IDs, so compare numeric IDs as strings too.
+      const matchesRowId = (id: unknown) =>
+        (typeof id === "string" || typeof id === "number") &&
+        String(id) === rowId;
+      const rowIndex = data.findIndex((item) => {
+        const row = item as Record<string, unknown>;
+        return matchesRowId(row.id) || matchesRowId(row._id);
+      });
 
       if (rowIndex === -1) return;
 
