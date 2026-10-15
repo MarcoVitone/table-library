@@ -512,14 +512,17 @@ const DynamicTable = <T extends object>({
             : {}),
         }}
       >
-        <BaseTable>{children}</BaseTable>
+        <BaseTable tableLayout={paginationEnabled ? "fixed" : undefined}>
+          {children}
+        </BaseTable>
       </div>
     ),
-    [maxHeight, externalBorderColor]
+    [maxHeight, externalBorderColor, paginationEnabled]
   );
 
   const tableChildren = useMemo(() => {
     return orderedColumns.map((col, index) => {
+      console.log({headerProp: col.headerProps})
       const CellComponent = getComponentByType(col.type);
       const HeaderComponent = col.type === "checkbox" ? CheckboxCell : BaseCell;
       const fixed = index < frozenColumnCount;
@@ -570,6 +573,7 @@ const DynamicTable = <T extends object>({
                 draggable: isDraggable,
                 enableHiding: isHideable,
                 dragHandleVisibility,
+                backgroundColor: col.headerProps?.backgroundColor,
               } as Partial<IBaseCellProps>,
             ]}
           />

@@ -39,6 +39,33 @@ test('pagination changes page and page size', async ({ page }) => {
   await expect(bodyRows(page).first()).toContainText(MOCK_USERS[0].firstName);
 });
 
+test('pagination keeps column widths stable across pages and page sizes', async ({ page }) => {
+  await page.getByRole('button', { name: 'Paginazione', exact: true }).click();
+  const widths = () => page.locator('thead td').evaluateAll(cells =>
+    cells.map(cell => cell.getBoundingClientRect().width)
+  );
+  const initialWidths = await widths();
+  const expectStableWidths = async () => {
+    await expect.poll(async () => {
+      const currentWidths = await widths();
+      return Math.max(...currentWidths.map((width, index) => Math.abs(width - initialWidths[index])));
+    }).toBeLessThan(1);
+  };
+
+  await page.getByRole('button', { name: 'Pagina successiva', exact: true }).click();
+  await expect(bodyRows(page).first()).toContainText(MOCK_USERS[5].firstName);
+  await expectStableWidths();
+  await page.getByRole('button', { name: 'Ultima pagina', exact: true }).click();
+  await expect(bodyRows(page).last()).toContainText(MOCK_USERS.at(-1).firstName);
+  await expectStableWidths();
+  await page.getByRole('button', { name: 'Prima pagina', exact: true }).click();
+  await expect(bodyRows(page).first()).toContainText(MOCK_USERS[0].firstName);
+  await expectStableWidths();
+  await page.getByRole('combobox').selectOption('10');
+  await expect(bodyRows(page)).toHaveCount(Math.min(10, MOCK_USERS.length));
+  await expectStableWidths();
+});
+
 test('sorting cycles through ascending, descending and original order', async ({ page }) => {
   await page.getByRole('button', { name: 'Ordina & Filtra', exact: true }).click();
   const nameHeader = header(page, 'Nome');

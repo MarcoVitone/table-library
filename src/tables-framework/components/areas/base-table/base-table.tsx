@@ -1,4 +1,4 @@
-import type { ElementType, FC, ReactNode } from "react";
+import type { CSSProperties, ElementType, FC, ReactNode } from "react";
 import { useContext } from "react";
 import { TableContext } from "@/tables-framework/components/table-renderer/table-renderer";
 
@@ -6,12 +6,14 @@ interface IBaseTableProps {
   component?: ElementType;
   children: ReactNode;
   className?: string;
+  tableLayout?: CSSProperties["tableLayout"];
 }
 
 const BaseTable: FC<IBaseTableProps> = ({
   component: Component = "table",
   children,
   className,
+  tableLayout,
 }) => {
   const { source } = useContext(TableContext);
   const widths = source?.columns.map((column) => column.props.width) ?? [];
@@ -26,7 +28,7 @@ const BaseTable: FC<IBaseTableProps> = ({
         borderCollapse: "separate",
         borderSpacing: "0",
         width: isSized ? numericWidths.reduce((sum, width) => sum + width, 0) : "100%",
-        tableLayout: isSized ? "fixed" : undefined,
+        tableLayout: isSized ? "fixed" : tableLayout,
       }}
       className={className}
     >

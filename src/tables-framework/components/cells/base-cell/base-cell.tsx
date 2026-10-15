@@ -402,26 +402,25 @@ const BaseCell: FC<IBaseCellProps> = ({
         minWidth: minWidthProp || currentWidth || "max-content",
         maxWidth: typeof currentWidth === "number"
           ? currentWidth
-          : ellipsis ? currentWidth || "auto" : "none",
-        overflow: typeof currentWidth === "number" ? overFlow ?? "hidden" : overFlow,
-        opacity: isDraggingColumn ? 0.5 : 1,
-        backgroundColor: cellBackgroundColor,
-        borderTop: isDraggingColumn
-          ? `2px dashed ${palette.neutral?.light || "#999"}`
-          : undefined,
-        borderRight: isDraggingColumn
-          ? `2px dashed ${palette.neutral?.light || "#999"}`
-          : undefined,
-        borderBottom: isDraggingColumn
-          ? `2px dashed ${palette.neutral?.light || "#999"}`
-          : undefined,
-        borderLeft:
-          isOver && !isDraggingColumn
-            ? `3px solid ${palette.primary.main}`
-            : isDraggingColumn
-            ? `2px dashed ${palette.neutral?.light || "#999"}`
-            : undefined,
-        padding: isCollapsed ? "0" : padding,
+          : maxWidth ?? (ellipsis ? currentWidth || "auto" : "none"),
+        // Only active layout and interaction states override the base styles.
+        ...(typeof currentWidth === "number"
+          ? { overflow: overFlow ?? "hidden" }
+          : {}),
+        ...(isDraggingColumn ? {
+          opacity: 0.5,
+          borderTop: `2px dashed ${palette.neutral?.light || "#999"}`,
+          borderRight: `2px dashed ${palette.neutral?.light || "#999"}`,
+          borderBottom: `2px dashed ${palette.neutral?.light || "#999"}`,
+          borderLeft: `2px dashed ${palette.neutral?.light || "#999"}`,
+        } : {}),
+        ...(cellBackgroundColor !== undefined
+          ? { backgroundColor: cellBackgroundColor }
+          : {}),
+        ...(isOver && !isDraggingColumn
+          ? { borderLeft: `3px solid ${palette.primary.main}` }
+          : {}),
+        ...(isCollapsed ? { padding: "0" } : {}),
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
         ...styleProp,
       }}
