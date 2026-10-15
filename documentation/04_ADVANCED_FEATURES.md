@@ -146,6 +146,65 @@ Number filters use numeric equality and support zero, negative numbers, and
 decimals. Clearing the input removes the filter; invalid or non-finite numbers
 do not replace the current filter.
 
+## Virtualization
+
+For thousands of loaded records without pagination, enable `virtualization`.
+Only the visible rows and an overscan buffer mount their React components.
+The feature is opt-in on both `DynamicTable` and `Table`.
+
+```tsx
+<DynamicTable
+  data={rows}
+  columns={columns}
+  maxHeight={500}
+  virtualization={{ rowHeight: 48, overscan: 5 }}
+  stripedRows
+  enableColumnFilters
+/>
+```
+
+| Setting | Default | Meaning |
+| :--- | :--- | :--- |
+| `height` | `maxHeight` on DynamicTable, otherwise `400` | Scroll viewport height in pixels or a CSS height such as `"60vh"`. |
+| `rowHeight` | `48` | Estimated/default row height in pixels. Choose a value close to ordinary rows. |
+| `overscan` | `5` | Extra mounted rows before and after the visible range. |
+
+Actual row heights are measured with `ResizeObserver`, so wrapped text,
+validation messages and expanded content can grow beyond the estimate. The
+height estimate is also the default CSS row height; an explicit row `style`
+can override it. Widths use fixed table layout to keep columns stable as their
+content leaves the viewport. Set column widths for predictable sizing.
+
+Filtering and sorting still process the complete dataset before windowing.
+Changing the visible record sequence (filter, sort, page or replaced dataset)
+resets scroll to the first record. Editing a value without changing the record
+sequence preserves scroll. With pagination enabled, the current page is
+virtualized; with server mode, only the supplied server page is available.
+Virtualization does not fetch records or eliminate the cost of parsing,
+filtering or sorting large arrays.
+
+Selection and export operate on the complete processed body, including
+unmounted rows. Alternating colors, `getRowStyle` indices and `aria-rowindex`
+use the full body index. `aria-rowcount` includes all loaded body rows plus
+headers and any enabled footer; spacer rows are hidden from accessibility APIs.
+`getRowStyle` should be pure, as it runs when a row enters the mounted window.
+
+Focused rows and built-in editors with unsaved drafts, validation errors or
+pending saves stay mounted outside the window until they can safely leave it.
+They add a small number of rows beyond the overscan buffer. Other local state
+in custom cells should be stored by stable record ID outside the cell if it
+must survive unmounting. Use stable, unique IDs via `idKey` as with normal tables.
+
+Custom rows must produce a top-level `<tr>` and forward `style`,
+`data-virtual-row`, `data-virtual-index` and `aria-rowindex` to it. Custom table
+components should avoid an additional scroll container: the virtual viewport
+owns scrolling in both directions. Cross-row `rowSpan` layouts are not
+supported. Use a constrained viewport height; percentage heights require a
+parent with a defined height.
+
+The **Virtualizzazione** demo uses 10,000 records, variable heights, fixed
+columns, selection, filtering and editable quantities without pagination.
+
 ## Pagination
 
 Client-side pagination runs after filtering and sorting the complete dataset. The

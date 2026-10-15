@@ -68,6 +68,7 @@ interface ISourceAPI {
   source: ISource | null;
   isLoading?: boolean;
   tableLabel?: string;
+  virtualRowCount?: number;
 }
 
 // *** HOOK API ***

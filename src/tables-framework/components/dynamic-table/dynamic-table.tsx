@@ -125,6 +125,7 @@ const DynamicTable = <T extends object>({
   totalItems: serverTotalItems,
   isLoading: externalIsLoading,
   layout: externalLayout,
+  virtualization,
   isResizable: globalResizable = false,
   // Estrai le nuove props (default false)
   enableColumnReorder = false,
@@ -158,6 +159,11 @@ const DynamicTable = <T extends object>({
   } = paginationConfig || {};
 
   const unifiedQuery = !!(query || defaultQuery || onQueryChange || dataMode === "server");
+  const isVirtualized = !!virtualization;
+  const resolvedVirtualization = useMemo(() => virtualization ? {
+    ...(typeof virtualization === "object" ? virtualization : {}),
+    height: (typeof virtualization === "object" ? virtualization.height : undefined) ?? maxHeight ?? 400,
+  } : false, [virtualization, maxHeight]);
 
   // Phase 3: Persistence hook
   const {
@@ -476,9 +482,9 @@ const DynamicTable = <T extends object>({
     ({ children }: { children: ReactNode }) => (
       <div
         style={{
-          overflowX: "auto",
-          overflowY: maxHeight ? "auto" : undefined,
-          maxHeight,
+          overflowX: isVirtualized ? undefined : "auto",
+          overflowY: !isVirtualized && maxHeight ? "auto" : undefined,
+          maxHeight: isVirtualized ? undefined : maxHeight,
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
@@ -495,7 +501,7 @@ const DynamicTable = <T extends object>({
         </BaseTable>
       </div>
     ),
-    [maxHeight, externalBorderColor, paginationEnabled]
+    [maxHeight, externalBorderColor, paginationEnabled, isVirtualized]
   );
 
   const tableChildren = useMemo(() => {
@@ -687,6 +693,7 @@ const DynamicTable = <T extends object>({
         {...passedTableProps}
         dataMode={dataMode}
         isLoading={isLoading}
+        virtualization={resolvedVirtualization}
         layout={useMemo(() => ({
           ...externalLayout,
           columnsLayout: externalLayout?.columnsLayout ?? internalColumnsLayout,

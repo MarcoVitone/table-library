@@ -7,13 +7,19 @@ import type {
 } from "@/tables-framework/defines/common.types";
 import { LinkWrapper } from "@/tables-framework/components/link-wrapper/link-wrapper";
 
+interface IRenderRowsOptions<T> extends IRowStyling<T> {
+  startIndex?: number;
+  virtualRowHeight?: number;
+  rowIndexOffset?: number;
+}
+
 function renderRows<T>(
   rows: IRow[],
   onRowDoubleClick?: IRowNavigationConfig<T>,
-  { stripedRows = false, getRowStyle }: IRowStyling<T> = {}
+  { stripedRows = false, getRowStyle, startIndex = 0, virtualRowHeight, rowIndexOffset = 0 }: IRenderRowsOptions<T> = {}
 ): (React.ReactElement | null)[] {
-  return rows.map((row, rowIndex) => {
-    // <-- Aggiungi rowIndex qui
+  return rows.map((row, indexInWindow) => {
+    const rowIndex = indexInWindow + startIndex;
     if (!row.component) {
       return null;
     }
@@ -34,6 +40,12 @@ function renderRows<T>(
     }
 
     let isEmptyRow = true;
+    if (virtualRowHeight !== undefined) rowStyle = { height: virtualRowHeight, ...rowStyle };
+    const virtualProps = virtualRowHeight === undefined ? {} : {
+      "data-virtual-row": row.id,
+      "data-virtual-index": rowIndex,
+      "aria-rowindex": rowIndexOffset + rowIndex + 1,
+    };
     const isFirstBodyRow = row.area === "body" && rowIndex === 0; // <-- Calcola se è la prima riga del body
 
     const children = row.cells.map((cell, index) => {
@@ -119,7 +131,7 @@ function renderRows<T>(
 
     if (typeof Row === "string") {
       return (
-        <Row key={row.id} style={rowStyle} onDoubleClick={handleDoubleClick}>
+        <Row {...virtualProps} key={row.id} style={rowStyle} onDoubleClick={handleDoubleClick}>
           {children}
         </Row>
       );
@@ -127,6 +139,7 @@ function renderRows<T>(
       return (
         <Row
           {...props}
+          {...virtualProps}
           style={rowStyle}
           key={row.id}
           data={row}

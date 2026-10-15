@@ -40,3 +40,4 @@ export type { ITableQuery, ITableQueryProps } from "../defines/query.types";
 export type { ICellEditing, TCellValue } from "../defines/editing.types";
 export type { IStripedRowsConfig, IRowStyling } from "../defines/common.types";
 export { useTableQuery, normalizeTableQuery } from "../hooks/use-table-query/use-table-query";
+export type { IVirtualizationConfig, TVirtualization } from "../defines/virtualization.types";

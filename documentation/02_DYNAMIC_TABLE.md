@@ -33,6 +33,12 @@ Below is the complete list of properties accepted by the `DynamicTable` componen
 | `enableColumnConfig`   | `boolean`             | `false`    | Shows a settings button to open the "Columns Configuration" modal. |
 | `enableColumnFilters`  | `boolean`             | `false`    | Enables filter inputs in column headers.                           |
 | `dragHandleVisibility` | `"always" \| "hover"` | `"always"` | Controls visibility of the drag handle for reordering.             |
+| `virtualization` | `boolean \| IVirtualizationConfig` | `false` | Mounts only visible body rows plus overscan and active editors. |
+
+`virtualization={true}` uses a 48px row-height estimate and five extra rows per
+side. The viewport height comes from `maxHeight` or defaults to 400px. Set
+`virtualization={{ height: 500, rowHeight: 48, overscan: 5 }}` to customize it.
+See [virtualization details](./04_ADVANCED_FEATURES.md#virtualization).
 
 ### Styling
 

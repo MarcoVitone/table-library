@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ICell } from "../../defines/common.types";
 import type { ICellEditing, TCellValue } from "../../defines/editing.types";
 import { useTable } from "../use-table/use-table";
+import { useRetainVirtualRow } from "../use-virtual-rows/virtualization-context";
 
 interface Options<V> extends ICellEditing<Record<string, unknown>, V> {
   data?: ICell;
@@ -15,6 +16,7 @@ export function useCellEditor<V extends TCellValue>({ data, sourceValue, onCellC
   const [previousSource, setPreviousSource] = useState(sourceValue);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  useRetainVirtualRow(data?.id, data?.row?.id, isSaving || !!error || !Object.is(value, sourceValue));
   const pending = useRef(false);
   const mounted = useRef(true);
   const latestSource = useRef(sourceValue);

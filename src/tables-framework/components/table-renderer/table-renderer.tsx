@@ -2,6 +2,7 @@ import type { ElementType, ReactNode } from "react";
 import {
   Fragment,
   createContext,
+  useCallback,
   isValidElement,
   useMemo,
   useEffect,
@@ -24,6 +25,9 @@ import type { TRowStatusMapper } from "./hooks/use-status/use-status.ts";
 import { useStatus } from "./hooks/use-status/use-status.ts";
 import { renderRows } from "./utils/render-rows/render-rows.tsx";
 import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table.tsx";
+import type { TVirtualization } from "@/tables-framework/defines/virtualization.types";
+import { useVirtualRows } from "@/tables-framework/hooks/use-virtual-rows/use-virtual-rows";
+import { VirtualRowRetentionContext } from "@/tables-framework/hooks/use-virtual-rows/virtualization-context";
 
 const defaultAPI = {
   tableLayout: null,
@@ -72,6 +76,7 @@ interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   loadingContent?: ReactNode;
   emptyContent?: ReactNode;
   noResultsContent?: ReactNode;
+  virtualization?: TVirtualization;
 }
 
 const TableRenderer = <T,>({
@@ -100,6 +105,7 @@ const TableRenderer = <T,>({
   loadingContent = "Caricamento…",
   emptyContent = "Nessun dato disponibile",
   noResultsContent = "Nessun risultato per i filtri applicati",
+  virtualization,
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -125,12 +131,8 @@ const TableRenderer = <T,>({
       if (currentSelectedIds !== prevSelectedIds.current) {
         prevSelectedIds.current = currentSelectedIds;
 
-        const selectedData = currentSelectedEntry
-          .map(([id]) => {
-            const row = source.body.rows.find((r) => r.id === id);
-            return row?.source?.full; // Assuming full data object is what user wants
-          })
-          .filter((item) => !!item);
+        const selectedData = source.body.rows.filter(row => rowsStatus[row.id]?.isSelected)
+          .map(row => row.source.full);
 
         onRowSelectionChange(selectedData as T[]);
       }
@@ -143,10 +145,48 @@ const TableRenderer = <T,>({
     [source.header.rows, onRowDoubleClick]
   );
 
-  const body = useMemo(
-    () => renderRows(source.body.rows, onRowDoubleClick, { stripedRows, getRowStyle }),
-    [source.body.rows, onRowDoubleClick, stripedRows, getRowStyle]
-  );
+  const [focusedRow, setFocusedRow] = useState<string | null>(null);
+  const [retainedCells, setRetainedCells] = useState(new Map<string, string>());
+  const retainRow = useCallback((cellId: string, rowId: string | null) => {
+    setRetainedCells(previous => {
+      if (rowId === null ? !previous.has(cellId) : previous.get(cellId) === rowId) return previous;
+      const next = new Map(previous);
+      if (rowId === null) next.delete(cellId); else next.set(cellId, rowId);
+      return next;
+    });
+  }, []);
+  const layoutKey = useMemo(() => JSON.stringify(source.columns.map(column => [column.id, column.props.width])), [source.columns]);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const virtual = useVirtualRows(source.body.rows, virtualization, stickyHeader, layoutKey, viewportRef);
+  const rowIndices = useMemo(() => new Map(virtual.enabled ? source.body.rows.map((row, index) => [row.id, index]) : []), [source.body.rows, virtual.enabled]);
+  const body = useMemo(() => {
+    if (!virtual.enabled) return renderRows(source.body.rows, onRowDoubleClick, { stripedRows, getRowStyle });
+    const indices = new Set<number>();
+    for (let index = virtual.start; index < virtual.end; index++) indices.add(index);
+    for (const id of [focusedRow, ...retainedCells.values()]) {
+      const index = id === null ? undefined : rowIndices.get(id);
+      if (index !== undefined) indices.add(index);
+    }
+    const nodes: ReactNode[] = [];
+    const spacer = (from: number, to: number) => {
+      const height = virtual.offsets[to] - virtual.offsets[from];
+      if (height <= 0) return;
+      nodes.push(<tr key={`virtual-gap-${from}`} className="tbl-virtual-spacer" aria-hidden="true" role="presentation">
+        <td colSpan={Math.max(1, source.columns.length)} style={{ height, padding: 0, border: 0, fontSize: 0, lineHeight: 0 }} />
+      </tr>);
+    };
+    let cursor = 0;
+    for (const index of [...indices].sort((a, b) => a - b)) {
+      spacer(cursor, index);
+      nodes.push(...renderRows([source.body.rows[index]], onRowDoubleClick, {
+        stripedRows, getRowStyle, startIndex: index, virtualRowHeight: virtual.rowHeight, rowIndexOffset: source.header.rows.length,
+      }));
+      cursor = index + 1;
+    }
+    spacer(cursor, source.body.rows.length);
+    return nodes;
+  }, [source.body.rows, source.columns.length, source.header.rows.length, onRowDoubleClick, stripedRows, getRowStyle,
+    virtual.enabled, virtual.start, virtual.end, virtual.offsets, virtual.rowHeight, focusedRow, retainedCells, rowIndices]);
 
   const footer = useMemo(
     () => renderRows(source.footer.rows, onRowDoubleClick),
@@ -221,6 +261,7 @@ const TableRenderer = <T,>({
       enableColumnFilters,
       isLoading,
       tableLabel,
+      virtualRowCount: virtual.enabled ? source.header.rows.length + source.body.rows.length + (showFooter ? source.footer.rows.length : 0) : undefined,
     };
   }, [
     memoizedParserAPI,
@@ -231,6 +272,8 @@ const TableRenderer = <T,>({
     enableColumnFilters,
     isLoading,
     tableLabel,
+    virtual.enabled,
+    showFooter,
   ]);
 
   const hasError = error !== undefined && error !== null && error !== false;
@@ -247,25 +290,34 @@ const TableRenderer = <T,>({
     </tr>
   );
 
+  const tableNode = (
+    <TableElement>
+      <HeaderElement>{header}</HeaderElement>
+      {isLoading || hasError ? <BodyElement>{stateRow}</BodyElement> : !source.body.rows.length && emptyNode ? (
+        emptyNode
+      ) : (
+        <BodyElement>{source.body.rows.length ? body : stateRow}</BodyElement>
+      )}
+      {showFooter && <FooterElement>{footer}</FooterElement>}
+    </TableElement>
+  );
   return (
     <TableContext.Provider value={rendererAPI}>
-      <Container>
-        {beforeNode}
-
-        <TableElement>
-          <HeaderElement>{header}</HeaderElement>
-
-          {isLoading || hasError ? <BodyElement>{stateRow}</BodyElement> : !body.length && emptyNode ? (
-            emptyNode
-          ) : (
-            <BodyElement>{body.length ? body : stateRow}</BodyElement>
-          )}
-
-          {showFooter && <FooterElement>{footer}</FooterElement>}
-        </TableElement>
-
-        {afterNode}
-      </Container>
+      <VirtualRowRetentionContext.Provider value={virtual.enabled ? retainRow : null}>
+        <Container>
+          {beforeNode}
+          {virtual.enabled ? <div ref={viewportRef} className="tbl-virtual-viewport"
+            role="region" aria-label={`${tableLabel ?? "Tabella"}: area scorribile`} tabIndex={0}
+            style={{ height: virtual.height, overflow: "auto", width: "100%", maxWidth: "100%", overflowAnchor: "none" }}
+            onFocusCapture={event => setFocusedRow((event.target as HTMLElement).closest<HTMLTableRowElement>("tr[data-virtual-row]")?.dataset.virtualRow ?? null)}
+            onBlurCapture={event => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setFocusedRow(null);
+            }}>
+            {tableNode}
+          </div> : tableNode}
+          {afterNode}
+        </Container>
+      </VirtualRowRetentionContext.Provider>
     </TableContext.Provider>
   );
 };

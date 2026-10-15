@@ -15,7 +15,7 @@ const BaseTable: FC<IBaseTableProps> = ({
   className,
   tableLayout,
 }) => {
-  const { source, isLoading, tableLabel } = useContext(TableContext);
+  const { source, isLoading, tableLabel, virtualRowCount } = useContext(TableContext);
   const widths = source?.columns.map((column) => column.props.width) ?? [];
   const numericWidths = widths.filter((width): width is number =>
     typeof width === "number" && Number.isFinite(width)
@@ -26,11 +26,12 @@ const BaseTable: FC<IBaseTableProps> = ({
     <Component
       aria-label={tableLabel}
       aria-busy={isLoading || undefined}
+      aria-rowcount={virtualRowCount}
       style={{
         borderCollapse: "separate",
         borderSpacing: "0",
         width: isSized ? numericWidths.reduce((sum, width) => sum + width, 0) : "100%",
-        tableLayout: isSized ? "fixed" : tableLayout,
+        tableLayout: isSized || virtualRowCount !== undefined ? "fixed" : tableLayout,
       }}
       className={className}
     >

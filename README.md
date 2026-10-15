@@ -11,6 +11,7 @@ A powerful, flexible, and completely data-driven React Table Library. Designed t
 - **Pagination**: Built-in pagination with persistence capabilities (localStorage).
 - **Sticky Headers & Columns**: Native support for freezing columns and headers.
 - **Customizable**: Easy theming and support for custom cell components.
+- **Virtualization**: Optional row windowing with measured heights for large loaded datasets.
 
 ## 📚 Documentation
 
@@ -69,6 +70,8 @@ column and query APIs. See the documentation for unified server queries,
 loading/error/empty states, editor validation and keyboard interaction. The
 **Stati e server** demo exercises loading, retry and controlled server queries;
 **Modifica celle** includes validation and simulated asynchronous saves.
+The **Virtualizzazione** demo renders 10,000 records with a bounded number of
+mounted rows, including selection, fixed columns and editing during scrolling.
 
 ## Browser checks with Playwright
 
