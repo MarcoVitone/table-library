@@ -77,6 +77,7 @@ export interface IColumnConfig<T = Record<string, unknown>> {
   symbolPosition?: TCurrencySymbolPosition;
   decimals?: number;
   width?: string;
+  minWidth?: string | number;
   // Status Props
   statusConfig?: TStatusConfig;
   renderStatus?: (value: unknown, color?: string) => ReactNode;
@@ -549,6 +550,7 @@ const DynamicTable = <T extends object>({
               HeaderComponent,
               {
                 ...col.headerProps,
+                minWidth: col.minWidth ?? col.headerProps?.minWidth,
                 showHeaderCheckbox: col.headerProps?.showHeaderCheckbox,
                 onHeaderClick: col.onHeaderClick
                   ? () => col.onHeaderClick?.(col.dataKey || col.id)
@@ -577,6 +579,7 @@ const DynamicTable = <T extends object>({
               CellComponent,
               {
                 ...col.bodyProps,
+                minWidth: col.minWidth ?? col.bodyProps?.minWidth,
                 fixed,
                 rowSelectedColor,
                 component: col.component,
