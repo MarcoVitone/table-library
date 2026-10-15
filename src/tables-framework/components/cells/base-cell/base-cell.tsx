@@ -1,7 +1,7 @@
 import type { ElementType, FC, ReactNode, Ref } from "react";
 import { useCallback, useMemo, useRef } from "react";
-import { ArrowUpward } from "@mui/icons-material";
-import { useTheme } from "@mui/material";
+import { ArrowUpward } from "@/tables-framework/ui/icons";
+import { useTheme } from "@/tables-framework/theme/theme";
 import type {
   IBorderConfig,
   ICellProps,
@@ -26,6 +26,8 @@ type TSortDirection = "ASC" | "DESC";
 
 interface IBaseCellProps extends ICellProps {
   component?: ElementType;
+  className?: string;
+  style?: React.CSSProperties;
   variant?: TVariant;
   noLeftBorder?: boolean;
   noRightBorder?: boolean;
@@ -77,6 +79,7 @@ interface IBaseCellProps extends ICellProps {
 
 const BaseCell: FC<IBaseCellProps> = ({
   variant,
+  style: styleProp,
   noLeftBorder,
   noRightBorder,
   noTopBorder,
@@ -420,6 +423,7 @@ const BaseCell: FC<IBaseCellProps> = ({
             : undefined,
         padding: isCollapsed ? "0" : padding,
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
+        ...styleProp,
       }}
       data-column-id={data?.column?.id}
       data-query-param={queryParam}

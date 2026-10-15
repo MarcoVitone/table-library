@@ -11,6 +11,8 @@ import { ResizableTable } from "./features/resizable/ResizableTable";
 import { CollapsibleTable } from "./features/collapsible/CollapsibleTable";
 import { ColumnConfigTable } from "./features/column-config/ColumnConfigTable";
 
+import { EditingTable } from "./features/editing/EditingTable";
+
 const DemoApp: FC = () => {
   const [activePage, setActivePage] = useState<TDemoPage>("basic");
   const content = useMemo(() => {
@@ -31,6 +33,8 @@ const DemoApp: FC = () => {
         return <ResizableTable />;
       case "collapsible":
         return <CollapsibleTable />;
+      case "editing":
+        return <EditingTable />;
       case "column-config":
         return <ColumnConfigTable />;
       default:

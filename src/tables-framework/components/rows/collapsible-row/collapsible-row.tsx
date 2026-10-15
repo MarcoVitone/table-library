@@ -1,8 +1,8 @@
 import type { FC, JSX } from "react";
 import React, { useCallback, useMemo } from "react";
-import { KeyboardArrowDown } from "@mui/icons-material";
-import type { AccordionProps } from "@mui/material";
-import { AccordionDetails, useTheme } from "@mui/material";
+import { KeyboardArrowDown } from "@/tables-framework/ui/icons";
+import type { AccordionProps } from "./styles/accordion/accordion.styles";
+import { useTheme } from "@/tables-framework/theme/theme";
 import type { IRowProps } from "@/tables-framework/defines/common.types.ts";
 import { ColBaseRow } from "./collapsible-row.styles.ts";
 import { CustomAccordion } from "./styles/accordion/accordion.styles.ts";
@@ -95,12 +95,12 @@ const CollapsibleRow: FC<ICollapsibleRowProps> = ({
               </tbody>
             </table>
           </CustomAccordionSummary>
-          <AccordionDetails>
+          <div className="tbl-accordion-details">
             <FlexBox>
               <CustomBar />
-              {children}
+              <table style={{width:"100%"}}><tbody><tr>{children}</tr></tbody></table>
             </FlexBox>
-          </AccordionDetails>
+          </div>
         </CustomAccordion>
       </td>
     </ColBaseRow>

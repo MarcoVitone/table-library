@@ -33,7 +33,7 @@ A comprehensive example demonstrating:
 
 ```tsx
 import { useState, useMemo } from "react";
-import { Check, Visibility, Edit, Delete } from "@mui/icons-material";
+import { Check, Visibility, Edit, Delete } from "@/tables-framework/ui/icons";
 import {
   DynamicTable,
   IColumnConfig,

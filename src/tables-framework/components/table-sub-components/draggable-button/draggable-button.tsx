@@ -1,5 +1,5 @@
-import { DragIndicator } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { DragIndicator } from "@/tables-framework/ui/icons";
+import { IconButton } from "@/tables-framework/ui/controls";
 import type { DragEvent } from "react";
 
 interface IDraggableButton {
@@ -16,6 +16,7 @@ const DraggableButton = ({
 }: IDraggableButton) => {
   return (
     <IconButton
+      aria-label="Trascina colonna"
       className="drag-handle"
       draggable={isDomDraggable}
       onDragStart={handleDragStart}

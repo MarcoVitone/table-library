@@ -1,59 +1,11 @@
 import { useEffect, useRef, useCallback } from "react";
-import styled from "@emotion/styled";
+import { nativeElement } from "@/tables-framework/ui/native-element";
 import type { IInfiniteScrollConfig } from "@/tables-framework/components/pagination/pagination.types";
 
-const LoadMoreContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-`;
-
-const LoadMoreButton = styled.button`
-  padding: 10px 24px;
-  border: 1px solid #1976d2;
-  border-radius: 4px;
-  background: #1976d2;
-  color: #fff;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    background: #1565c0;
-  }
-
-  &:disabled {
-    background: #ccc;
-    border-color: #ccc;
-    cursor: not-allowed;
-  }
-`;
-
-const EndMessage = styled.div`
-  text-align: center;
-  padding: 16px;
-  color: #666;
-  font-size: 14px;
-`;
-
-const Spinner = styled.div`
-  width: 24px;
-  height: 24px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #1976d2;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-`;
+const LoadMoreContainer=nativeElement('div','tbl-load-more',()=>({display:'flex',justifyContent:'center',alignItems:'center',padding:16}));
+const LoadMoreButton=nativeElement('button','tbl-button tbl-button-contained',()=>({padding:'10px 24px',fontSize:14}));
+const EndMessage=nativeElement('div','tbl-end-message',()=>({textAlign:'center',padding:16,color:'#666',fontSize:14}));
+const Spinner=nativeElement('div','tbl-spinner',()=>({width:24,height:24,border:'3px solid #f3f3f3',borderTopColor:'#1976d2',borderRadius:'50%',animation:'tbl-spin 1s linear infinite'}));
 
 interface IInfiniteScrollProps extends Omit<IInfiniteScrollConfig, "enabled"> {
   className?: string;

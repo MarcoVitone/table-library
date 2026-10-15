@@ -1,5 +1,5 @@
 import { type SyntheticEvent, type FC, useState } from "react";
-import { Autocomplete, TextField, type InputProps } from "@mui/material";
+import { Autocomplete } from "@/tables-framework/ui/autocomplete";
 import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { InputContainer } from "./autocomplete-cell.styles.tsx";
@@ -62,42 +62,12 @@ const AutocompleteCell: FC<IAutocompleteCellProps> = ({
               typeof option === "string" ? option : String(option?.label))
           }
           isOptionEqualToValue={isOptionEqualToValue}
-          disablePortal={false}
-          fullWidth
-          size="small"
           disableClearable={disableClearable}
-          renderInput={(params) => {
-            const { InputProps, ...restParams } = params;
-            return (
-              <TextField
-                {...restParams}
-                variant="standard"
-                placeholder={placeholder}
-                slotProps={{
-                  input: {
-                    ...InputProps,
-                    disableUnderline: true,
-                    style: { fontSize: "0.8125rem", padding: "0 0.5rem" },
-                  } as Partial<InputProps>,
-                }}
-              />
-            );
-          }}
-          sx={{
-            width: "100%",
-            minWidth: "100px",
-            flex: 1,
-            "& .MuiAutocomplete-inputRoot": {
-              padding: "0 !important",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-            },
-          }}
+          placeholder={placeholder}
+          label={data?.column?.label}
         />
       </InputContainer>
     </BaseCell>
   );
 };
-
 export { AutocompleteCell };

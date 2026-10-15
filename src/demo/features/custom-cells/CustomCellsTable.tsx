@@ -1,5 +1,5 @@
 import { useMemo, type FC } from "react";
-import { Check } from "@mui/icons-material";
+import { Check } from "@/tables-framework/ui/icons";
 import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
 import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
 import { type IBaseCellProps } from "@/tables-framework/components";

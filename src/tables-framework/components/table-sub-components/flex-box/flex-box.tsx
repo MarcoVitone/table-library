@@ -1,42 +1,33 @@
-import type { FC } from "react";
-import type { BoxProps } from "@mui/material";
-import { Box } from "@mui/material";
-
+import { createElement, type CSSProperties, type HTMLAttributes, type ElementType } from "react";
+import { domProps, sxStyle, type SxProps } from "@/tables-framework/ui/native-element";
 type TFlexBoxGap = string | number;
-
-type TFlexBoxDirection = "row" | "row-reverse" | "column" | "column-reverse";
-
-type TFlexBoxJustifyContent =
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "space-between"
-  | "space-around"
-  | "space-evenly";
-
-type TFlexBoxAlignItems =
-  | "stretch"
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "baseline";
-
-type TFlexBoxProps = {
+type TFlexBoxDirection = 'row' | 'row-reverse' | 'column' | 'column-reverse';
+type TFlexBoxJustifyContent = CSSProperties['justifyContent'];
+type TFlexBoxAlignItems = CSSProperties['alignItems'];
+type FlexStyles = Pick<CSSProperties, 'display' | 'flexDirection' | 'justifyContent' | 'alignItems' | 'gap' | 'padding' | 'margin' | 'width' | 'height' | 'minWidth' | 'maxWidth' | 'minHeight' | 'maxHeight' | 'flex' | 'flexWrap' | 'position' | 'color' | 'backgroundColor'>;
+export type BoxProps = HTMLAttributes<HTMLDivElement> & FlexStyles & {
   direction?: TFlexBoxDirection;
-} & BoxProps;
-
-const FlexBox: FC<TFlexBoxProps> = ({ direction = "row", ...props }) => {
-  return (
-    <Box display={"flex"} flexDirection={direction} {...props}>
-      {props.children}
-    </Box>
-  );
+  component?: ElementType;
+  sx?: SxProps;
 };
-
-export type {
-  TFlexBoxAlignItems,
-  TFlexBoxDirection,
-  TFlexBoxGap,
-  TFlexBoxJustifyContent,
-};
-export { FlexBox };
+const styleKeys = new Set('display flexDirection justifyContent alignItems gap padding margin width height minWidth maxWidth minHeight maxHeight flex flexWrap position color backgroundColor'.split(' '));
+export function FlexBox({
+  direction = 'row',
+  component = 'div',
+  sx,
+  style,
+  ...props
+}: BoxProps) {
+  const styles = Object.fromEntries(Object.entries(props).filter(([key]) => styleKeys.has(key)));
+  return createElement(component, {
+    ...domProps(props),
+    style: {
+      display: 'flex',
+      flexDirection: direction,
+      ...styles,
+      ...sxStyle(sx),
+      ...style
+    }
+  });
+}
+export type { TFlexBoxGap, TFlexBoxDirection, TFlexBoxJustifyContent, TFlexBoxAlignItems };

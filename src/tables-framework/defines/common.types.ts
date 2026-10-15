@@ -6,7 +6,7 @@ import type {
 } from "react";
 import type { IColumnProps } from "@/tables-framework/components/table-parser/components/column/column.tsx";
 import type { IColumnGroupProps } from "@/tables-framework/components/table-parser/components/column-group/column-group.tsx";
-import type { CSSProperties } from "@mui/material";
+import type { CSSProperties } from "react";
 
 // *** CORE ***
 

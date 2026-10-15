@@ -41,7 +41,9 @@ const MyTable = () => {
 
 ## 🛠️ Development
 
-This project uses **React** + **TypeScript** + **Vite**.
+This project uses **React** + **TypeScript** + **Vite**. Its UI uses native HTML, scoped CSS, and SVG icons; Material UI and Emotion are not required.
+
+See [Theming and migration notes](./documentation/06_THEMING_AND_STYLING.md) for the native theme provider and Material-specific styling differences.
 
 ```bash
 npm install
@@ -78,11 +80,13 @@ npm run test:e2e
 ```
 
 The configuration builds the app, starts a dedicated local production server on
-port 4187, and runs 21 checks covering the nine demos, pagination, sorting,
+port 4187, and runs 29 checks covering the ten demos, pagination, sorting,
 text and numeric filtering, selection, repeated column resizing and minimum
 widths, drag and drop, collapsing, column configuration, and custom actions.
 The dedicated server stops when the suite finishes. Each test uses a fresh
-browser context. Runtime JavaScript errors fail the test.
+browser context. Additional native UI checks cover input editing, autocomplete,
+external data updates, themes, typed select filters, keyboard focus, Escape,
+and pagination in a narrow viewport. Runtime JavaScript errors fail the test.
 
 On failure, screenshots, video, and traces are stored in `test-results/`.
 Open the HTML report with `npm run test:e2e:report`. Browser tests are separate

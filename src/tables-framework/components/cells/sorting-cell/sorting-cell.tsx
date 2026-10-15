@@ -1,13 +1,13 @@
 import type { FC, ReactNode } from "react";
 import { useCallback, useEffect, useMemo } from "react";
-import { useTheme } from "@mui/material";
+import { useTheme } from "@/tables-framework/theme/theme";
 import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { SortingBaseCell } from "./sorting-cell.styles.ts";
 import type {
   TAlignment,
   TDirection,
 } from "@/tables-framework/defines/common.types.ts";
-import { ArrowUpward } from "@mui/icons-material";
+import { ArrowUpward } from "@/tables-framework/ui/icons";
 import { animated } from "@react-spring/web";
 import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 import { useSpring } from "@/tables-framework/hooks/use-spring/use-spring.ts";

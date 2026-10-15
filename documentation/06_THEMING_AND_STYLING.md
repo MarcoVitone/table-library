@@ -1,6 +1,6 @@
 # 6. Theming and Styling
 
-The table framework is designed to integrate seamlessly with **Material UI (MUI)**. It respects the global theme while offering granular control via props.
+The table framework uses native HTML controls, scoped CSS, and its own React theme context. Material UI and Emotion are not required.
 
 ## Borders
 
@@ -45,31 +45,45 @@ Customize the background color of selected rows:
 />
 ```
 
-### Theme Integration
+### Native theme
 
-The components use the MUI `Theme` access. For example, the `StatusCell` and generic text cells will try to use palette colors if configured.
-
-If you are using a custom theme, ensure your `ThemeProvider` wraps the application.
+Import the provider from the table framework. The default theme works without a provider.
 
 ```tsx
-import { ThemeProvider } from "@mui/material/styles";
-import { defaultTheme } from "@/tables-framework/theme/theme";
+import { ThemeProvider, createTheme } from "@/tables-framework/theme/theme";
+
+const theme = createTheme({
+  palette: {
+    primary: { main: "#6b277e", dark: "#6b277e" },
+    background: { paper: "#ffffff" },
+  },
+  typography: { fontFamily: "Arial, sans-serif" },
+});
 
 const App = () => (
-  <ThemeProvider theme={defaultTheme}>
+  <ThemeProvider theme={theme}>
     <MyTable />
   </ThemeProvider>
 );
 ```
 
-#### Custom Palette
+Partial palette and typography objects are merged with defaults. Each theme is independent; creating or editing one does not mutate another. The palette retains primary, secondary, error, info, success, warning, neutral, blue, green, text, background, and divider entries.
 
-The library's internal theme extends the standard MUI palette with:
+Native dialogs and autocomplete option lists keep this theme when rendered through a portal. The components also set local CSS variables: `--table-primary`, `--table-surface`, and `--table-text`.
 
-- `neutral`: Grayscales for text and backgrounds.
-- `blue`, `green`: Custom primary/secondary variations.
+### Migrating from Material UI
 
-You can override these in your own theme creation if you want to change the library's default look globally.
+The public table, column, filtering, sorting, selection, pagination, editing, and layout props are unchanged. TableButton retains its variations, variant, color, size, icons, disabled state, className, style, and HTML/ARIA attributes. Checkbox callbacks retain `onChange(event, checked)`. Status chips retain labels, colors, icons, and delete callbacks.
+
+Use the framework's ThemeProvider in place of the Material provider for these components. Existing palette and typography values can be reused. Material-specific `components.Mui*` overrides, `.Mui*` CSS selectors, ripple effects, and arbitrary Material slot components are not implemented by the native UI.
+
+The compatibility `sx` prop accepts flat CSS properties and spacing shorthands (`m`, `mx`, `my`, `p`, `px`, `py`, and their directional variants). Numeric shorthand spacing uses 8px units. Nested selectors, responsive arrays, theme callback functions, and Material palette paths in `sx` should be converted to a CSS class, a normal `style` object, or native theme values.
+
+Internal CSS uses the `tbl-` prefix and is imported with the components. Ensure your bundler includes CSS imports when consuming the source. There is no application-wide CSS reset. Icons can be any React node, including your own SVGs.
+
+### Browser behavior
+
+Column settings and filters use the native `dialog` element with Escape handling, keyboard focus cycling, and focus restoration. Autocomplete uses a text input and an ARIA listbox, supports string/object options, arrow keys, Enter, Escape, clearing, and `disableClearable`. Expanded rows use native `details` and `summary` elements. Use browsers with native dialog/showModal support; browser checks currently run on Chromium.
 
 ## Layout & Sizing
 

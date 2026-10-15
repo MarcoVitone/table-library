@@ -32,3 +32,7 @@ export * from "./dynamic-table/dynamic-table";
 export * from "./pagination/pagination";
 export * from "./pagination/pagination.types";
 export * from "./infinite-scroll/infinite-scroll";
+
+export { ThemeProvider, createTheme, useTheme, defaultTheme } from "../theme/theme";
+export type { TableTheme, ThemeOptions, Palette, PaletteColor } from "../theme/theme";
+export * from "./cells/autocomplete-cell.tsx/autocomplete-cell";

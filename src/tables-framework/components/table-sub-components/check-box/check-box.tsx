@@ -1,6 +1,6 @@
 import type { FC } from "react";
-import { Check } from "@mui/icons-material";
-import type { CheckboxProps as MUICheckboxProps } from "@mui/material";
+import { Check } from "@/tables-framework/ui/icons";
+import type { CheckboxProps as NativeCheckboxProps } from "@/tables-framework/ui/controls";
 import { Checkbox } from "./check-box.styles.ts";
 
 type TTableCheckboxState = "default" | "output";
@@ -10,7 +10,7 @@ interface ICustomProps {
   checked?: boolean;
 }
 
-type TTableCheckboxProps = MUICheckboxProps & ICustomProps;
+type TTableCheckboxProps = NativeCheckboxProps & ICustomProps;
 
 const TableCheckbox: FC<TTableCheckboxProps> = ({
   state = "default",

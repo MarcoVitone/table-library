@@ -5,9 +5,11 @@ import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 
 interface IBaseRowProps extends IRowProps {
   isStepFour?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-const BaseRow: FC<IBaseRowProps> = ({ data, isStepFour = false, children }) => {
+const BaseRow: FC<IBaseRowProps> = ({ data, isStepFour = false, children, ...rest }) => {
   const { rowStatus } = useTable(data);
 
   const isSelected = !!rowStatus && rowStatus.isSelected;
@@ -23,7 +25,7 @@ const BaseRow: FC<IBaseRowProps> = ({ data, isStepFour = false, children }) => {
   const isSaved = (data.source.full.isSaved as boolean) ?? undefined;
 
   return (
-    <BaseTr
+    <BaseTr {...rest}
       isSelected={isSelected}
       isLoading={isLoading}
       isConfigured={isConfigured}

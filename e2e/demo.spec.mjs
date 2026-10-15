@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { MOCK_USERS } from '../src/demo/mock-data.ts';
 
-const demos = ['Base', 'Paginazione', 'Ordina & Filtra', 'Celle Custom', 'Selezione', 'Drag & Drop', 'Ridimensionabile', 'Collassabile', 'Config. Colonne'];
+const demos = ['Base', 'Paginazione', 'Ordina & Filtra', 'Celle Custom', 'Selezione', 'Drag & Drop', 'Ridimensionabile', 'Collassabile', 'Config. Colonne', 'Modifica celle'];
 const bodyRows = page => page.locator('tbody tr');
 const header = (page, label) => page.locator('thead td').filter({ has: page.getByText(label, { exact: true }) });
 const names = page => bodyRows(page).locator('td:first-child').allTextContents();
@@ -194,4 +194,131 @@ test('custom action uses the data of the clicked row', async ({ page }) => {
   expect(dialog.message()).toBe('Visiting ' + MOCK_USERS[0].city);
   await dialog.accept();
   await click;
+});
+
+
+const lastEdit = async page => JSON.parse(await page.locator('output[aria-label="Ultima modifica"]').textContent());
+
+test('native inputs commit text, numbers and clearing through onDataChange', async ({page}) => {
+  await page.getByRole('button',{name:'Modifica celle',exact:true}).click();
+  const row=bodyRows(page).first();
+  const name=row.locator('td').nth(0).locator('input');
+  const number=row.getByRole('spinbutton');
+  await name.fill('Anna modificata');
+  await name.press('Tab');
+  await expect.poll(()=>lastEdit(page)).toMatchObject({id:0,name:'Anna modificata'});
+  await number.fill('-12.5');
+  await number.press('Tab');
+  await expect.poll(()=>lastEdit(page)).toMatchObject({amount:-12.5});
+  await number.fill('0');
+  await number.press('Tab');
+  await expect.poll(()=>lastEdit(page)).toMatchObject({amount:0});
+  await number.fill('');
+  await number.press('Tab');
+  await expect.poll(()=>lastEdit(page)).toMatchObject({amount:''});
+});
+
+test('native autocomplete searches object options, selects by keyboard and clears', async ({page}) => {
+  await page.getByRole('button',{name:'Modifica celle',exact:true}).click();
+  const row=bodyRows(page).first();
+  const field=row.getByRole('combobox',{name:'Ruolo',exact:true});
+  await field.fill('EDI');
+  await expect(page.getByRole('option',{name:'Editor',exact:true})).toBeVisible();
+  await field.press('ArrowDown');
+  await field.press('Enter');
+  await expect.poll(()=>lastEdit(page)).toMatchObject({role:{id:2,label:'Editor'}});
+  await expect(field).toHaveValue('Editor');
+  await expect(field).toHaveAttribute('aria-expanded','false');
+  await row.locator('td').nth(2).getByRole('button',{name:'Cancella selezione'}).click();
+  await expect.poll(()=>lastEdit(page)).toMatchObject({role:null});
+  await expect(field).toHaveValue('');
+  const required=row.getByRole('combobox',{name:'Ruolo obbligatorio',exact:true});
+  await expect(row.locator('td').nth(3).getByRole('button',{name:'Cancella selezione'})).toHaveCount(0);
+  await required.fill('lett');
+  await page.getByRole('option',{name:'Lettore',exact:true}).click();
+  await expect.poll(()=>lastEdit(page)).toMatchObject({requiredRole:'Lettore'});
+});
+
+test('native controls reflect external data and the configured theme', async ({page}) => {
+  await page.getByRole('button',{name:'Modifica celle',exact:true}).click();
+  await page.getByRole('button',{name:'Aggiorna dati esterni',exact:true}).click();
+  const row=bodyRows(page).first();
+  await expect(row.locator('td').nth(0).locator('input')).toHaveValue('Aggiornata');
+  await expect(row.getByRole('spinbutton')).toHaveValue('42');
+  await expect(row.getByRole('combobox',{name:'Ruolo',exact:true})).toHaveValue('Lettore');
+  await expect(page.locator('output')).toHaveText('Nessuna modifica');
+  await expect(page.locator('thead td').first()).toHaveCSS('color','rgb(107, 39, 126)');
+});
+
+test('native dialogs trap keyboard focus, close with Escape and restore the opener', async ({page}) => {
+  await page.getByRole('button',{name:'Config. Colonne',exact:true}).click();
+  const opener=page.getByRole('button',{name:'Configura colonne',exact:true});
+  await opener.click();
+  const dialog=page.getByRole('dialog');
+  await dialog.getByRole('button',{name:'Chiudi',exact:true}).focus();
+  await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button',{name:'Chiudi configurazione',exact:true})).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('button',{name:'Chiudi',exact:true})).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(opener).toBeFocused();
+  await page.getByRole('button',{name:'Ordina & Filtra',exact:true}).click();
+  const nameHeader=header(page,'Nome');
+  await nameHeader.hover();
+  const filter=nameHeader.locator('.filter-icon');
+  await filter.click();
+  await expect(page.getByRole('textbox')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(filter).toBeFocused();
+});
+
+test('native select filters preserve zero, false, multiple options and dates', async ({page}) => {
+  await page.getByRole('button',{name:'Modifica celle',exact:true}).click();
+  async function openFilter(label){const cell=header(page,label);await cell.hover();await cell.locator('.filter-icon').click();return page.getByRole('dialog');}
+  let dialog=await openFilter('Livello');
+  await dialog.getByRole('combobox').selectOption('0');
+  await expect(bodyRows(page)).toHaveCount(1);
+  await expect(bodyRows(page).first().locator('td').nth(0).locator('input')).toHaveValue('Anna');
+  await dialog.getByRole('button',{name:'Reset',exact:true}).click();
+  dialog=await openFilter('Attivo');
+  await dialog.getByRole('combobox').selectOption('1');
+  await expect(bodyRows(page)).toHaveCount(2);
+  await dialog.getByRole('button',{name:'Reset',exact:true}).click();
+  dialog=await openFilter('Team');
+  await dialog.getByRole('listbox').selectOption(['0','2']);
+  await expect(bodyRows(page)).toHaveCount(2);
+  await expect(bodyRows(page).last().locator('td').nth(0).locator('input')).toHaveValue('Carla');
+  await dialog.getByRole('button',{name:'Reset',exact:true}).click();
+  dialog=await openFilter('Data');
+  await dialog.locator('input[type="date"]').fill('2026-01-11');
+  await expect(bodyRows(page)).toHaveCount(1);
+  await expect(bodyRows(page).first().locator('td').nth(0).locator('input')).toHaveValue('Bruno');
+  await dialog.getByRole('button',{name:'Reset',exact:true}).click();
+  await expect(bodyRows(page)).toHaveCount(3);
+});
+
+
+test('native autocomplete cancels unmatched text without changing the selected value',async({page})=>{
+ await page.getByRole('button',{name:'Modifica celle',exact:true}).click();
+ const field=bodyRows(page).first().getByRole('combobox',{name:'Ruolo',exact:true});
+ await field.fill('nessuna corrispondenza');
+ await expect(page.getByRole('status').filter({hasText:'Nessun risultato'})).toBeVisible();
+ await field.press('Escape');
+ await expect(field).toHaveValue('Amministratore');
+ await expect(field).toBeFocused();
+ await field.fill('altra ricerca');
+ await page.getByRole('heading',{name:'Framework Tabelle - Demo'}).click();
+ await expect(field).toHaveValue('Amministratore');
+ await expect(field).toHaveAttribute('aria-expanded','false');
+ await expect(page.locator('output')).toHaveText('Nessuna modifica');
+});
+
+test('native pagination stays within a narrow viewport',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.getByRole('button',{name:'Paginazione',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBeLessThanOrEqual(1);
+ await page.getByRole('button',{name:'Pagina successiva',exact:true}).click();
+ await expect(bodyRows(page).first()).toContainText(MOCK_USERS[5].firstName);
 });

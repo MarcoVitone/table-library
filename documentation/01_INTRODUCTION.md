@@ -18,16 +18,12 @@ To use the library in your React project, ensure you have the necessary dependen
 
 ### Core Dependencies
 
-The library relies on **React**, **MUI (Material UI)**, and **Emotion**.
+The UI uses **React**, native HTML, and CSS. Material UI and Emotion are not required. Existing data, date, translation, and animation dependencies remain listed in package.json.
+
+For this repository, install the dependencies with:
 
 ```bash
-npm install @mui/material @mui/icons-material @emotion/react @emotion/styled date-fns
-```
-
-If you haven't already, install React and React DOM (version 18 or higher):
-
-```bash
-npm install react react-dom
+npm install
 ```
 
 ## Quick Start

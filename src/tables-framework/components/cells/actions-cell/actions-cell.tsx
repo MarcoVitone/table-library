@@ -1,5 +1,5 @@
-import { Button, IconButton } from "@mui/material";
-import type { ButtonProps } from "@mui/material";
+import { Button, IconButton } from "@/tables-framework/ui/controls";
+import type { ButtonProps } from "@/tables-framework/ui/controls";
 import type { FC, ReactNode } from "react";
 import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";

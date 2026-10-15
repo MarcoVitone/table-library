@@ -1,6 +1,6 @@
 import type { FC, MouseEventHandler, ReactNode } from "react";
-import { ArrowBackIosNewOutlined, ArrowForwardIos } from "@mui/icons-material";
-import type { ButtonProps as MUIButtonProps } from "@mui/material";
+import { ArrowBackIosNewOutlined, ArrowForwardIos } from "@/tables-framework/ui/icons";
+import type { ButtonProps as NativeButtonProps } from "@/tables-framework/ui/controls";
 import { Button, IconButton } from "./button.styles.ts";
 
 type TButtonStatus = "default" | "disabled";
@@ -54,7 +54,7 @@ type TButtonProps =
   | TChipButtonProps
   | TChipFiltersButtonProps;
 
-type TExtendedButtonProps = MUIButtonProps & TButtonProps;
+type TExtendedButtonProps = NativeButtonProps & TButtonProps;
 
 const TableButton: FC<TExtendedButtonProps> = ({
   label,
@@ -68,7 +68,9 @@ const TableButton: FC<TExtendedButtonProps> = ({
     <>
       {variation === "icon-only" ? (
         <IconButton
-          disabled={status === "disabled"}
+          {...props}
+          aria-label={props["aria-label"] || label}
+          disabled={status === "disabled" || props.disabled}
           status={"default"}
           variation={"default"}
           onClick={onClick}
@@ -80,7 +82,7 @@ const TableButton: FC<TExtendedButtonProps> = ({
           status={status}
           variation={variation}
           {...props}
-          disabled={!!(status === "disabled" && variation !== "chip-style")}
+          disabled={!!props.disabled || !!(status === "disabled" && variation !== "chip-style")}
           startIcon={
             variation === "default-icon-left" ? (
               <ArrowBackIosNewOutlined />

@@ -60,6 +60,7 @@ const InputCell: FC<IInputCellProps> = ({
     <BaseCell data={data} {...rest}>
       <InputContainer>
         <InputComponent
+          aria-label={data?.column?.label}
           type={inputType}
           height={inputHeight}
           width={inputWidth}
