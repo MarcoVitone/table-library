@@ -110,6 +110,11 @@ Renders a set of buttons/icons for operations (Edit, Delete, etc.).
 
 Renders an editable input field.
 
+`dataKey` supports nested objects and arrays, such as `profile.name` and
+`items[0].name`. With `DynamicTable`, edits are reported through `onDataChange`
+using a new data array and updated row. Objects and arrays along the edited
+path are copied; the original row and unrelated branches remain unchanged.
+
 - **Config**:
   - `inputType`: `"text" | "number" | "date" | "email"`
   - `onCellChange`: `(val, cellConfig) => void`
