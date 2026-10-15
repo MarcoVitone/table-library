@@ -10,6 +10,7 @@ import type {
   IPagination,
 } from "@/tables-framework/defines/common.types";
 import { useChangeEvent } from "@/tables-framework/hooks/use-change-event/use-change-event";
+import { serializeTableState } from "@/tables-framework/utils/table-state/table-state";
 
 const DEFAULT_SORTING: TSorting = [];
 const DEFAULT_FILTERING: TFiltering = [];
@@ -118,9 +119,9 @@ function useLayout({
    * SYNC STATE WITH PROPS (Render-time update pattern)
    * -----------------------------------------------------------------------------------------------*/
   const [prevDefaultsJson, setPrevDefaultsJson] = useState(
-    JSON.stringify(defaults)
+    serializeTableState(defaults)
   );
-  const currentDefaultsJson = JSON.stringify(defaults);
+  const currentDefaultsJson = serializeTableState(defaults);
 
   if (prevDefaultsJson !== currentDefaultsJson) {
     const previousDefaults = JSON.parse(prevDefaultsJson) as typeof defaults;
@@ -128,24 +129,24 @@ function useLayout({
 
     // Column layout feedback must not reset filtering, sorting or pagination.
     if (
-      JSON.stringify(previousDefaults.columnsLayout) !==
-      JSON.stringify(defaults.columnsLayout)
+      serializeTableState(previousDefaults.columnsLayout) !==
+      serializeTableState(defaults.columnsLayout)
     ) {
       setColumnsLayout(defaults.columnsLayout);
     }
     if (
-      JSON.stringify(previousDefaults.sorting) !== JSON.stringify(defaults.sorting)
+      serializeTableState(previousDefaults.sorting) !== serializeTableState(defaults.sorting)
     ) {
       setSorting(defaults.sorting);
     }
     if (
-      JSON.stringify(previousDefaults.filtering) !== JSON.stringify(defaults.filtering)
+      serializeTableState(previousDefaults.filtering) !== serializeTableState(defaults.filtering)
     ) {
       setFiltering(defaults.filtering);
     }
     if (
-      JSON.stringify(previousDefaults.pagination) !==
-      JSON.stringify(defaults.pagination)
+      serializeTableState(previousDefaults.pagination) !==
+      serializeTableState(defaults.pagination)
     ) {
       setPagination(defaults.pagination);
     }

@@ -35,6 +35,8 @@ Below is the complete list of properties accepted by the `DynamicTable` componen
 | `dragHandleVisibility` | `"always" \| "hover"` | `"always"` | Controls visibility of the drag handle for reordering.             |
 | `virtualization` | `boolean \| IVirtualizationConfig` | `false` | Mounts only visible body rows plus overscan and active editors. |
 | `globalSearch` | `boolean \| IGlobalSearchConfig` | `false` | Displays one search field for multiple data columns. See [global search](./04_ADVANCED_FEATURES.md#global-search). |
+| `savedViews` | `ISavedViewsConfig` | — | Named snapshots of filters, sorting, columns, search and page size. See [saved views](./04_ADVANCED_FEATURES.md#saved-views). |
+| `bulkActions` | `IBulkAction<T>[]` | — | Toolbar actions for selected records, including async feedback. Requires row selection. See [bulk actions](./04_ADVANCED_FEATURES.md#bulk-actions). |
 
 `virtualization={true}` uses a 48px row-height estimate and five extra rows per
 side. The viewport height comes from `maxHeight` or defaults to 400px. Set

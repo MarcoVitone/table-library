@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import type { ITableQuery, ITableQueryProps } from "../../defines/query.types";
+import { serializeTableState } from "../../utils/table-state/table-state";
 
 export function normalizeTableQuery(query: Partial<ITableQuery>): ITableQuery {
   return {
@@ -15,12 +16,12 @@ export function useTableQuery({ query, defaultQuery, onQueryChange }: ITableQuer
   const [internalQuery, setInternalQuery] = useState(() => normalizeTableQuery(defaultQuery ?? {}));
   const current = useMemo(() => query ? normalizeTableQuery(query) : internalQuery, [query, internalQuery]);
   const update = useCallback((patch: Partial<ITableQuery>) => {
-    const changesQuery = (patch.sorting !== undefined && JSON.stringify(patch.sorting) !== JSON.stringify(current.sorting))
-      || (patch.filters !== undefined && JSON.stringify(patch.filters) !== JSON.stringify(current.filters))
+    const changesQuery = (patch.sorting !== undefined && serializeTableState(patch.sorting) !== serializeTableState(current.sorting))
+      || (patch.filters !== undefined && serializeTableState(patch.filters) !== serializeTableState(current.filters))
       || (patch.pageSize !== undefined && patch.pageSize !== current.pageSize)
       || (patch.search !== undefined && patch.search !== (current.search ?? ""));
     const next = normalizeTableQuery({ ...current, ...patch, ...(changesQuery ? { page: 0 } : {}) });
-    if (JSON.stringify(next) === JSON.stringify(current)) return;
+    if (serializeTableState(next) === serializeTableState(current)) return;
     if (!query) setInternalQuery(next);
     onQueryChange?.(next);
   }, [current, query, onQueryChange]);

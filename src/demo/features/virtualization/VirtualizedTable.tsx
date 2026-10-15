@@ -12,6 +12,7 @@ const initialRows: VirtualRow[] = Array.from({ length: 10000 }, (_, id) => ({
 export function VirtualizedTable() {
   const [rows, setRows] = useState(initialRows);
   const [selected, setSelected] = useState(0);
+  const [bulkCount, setBulkCount] = useState(0);
   const [compact, setCompact] = useState(false);
   const [asyncSave, setAsyncSave] = useState(false);
   const [rejectSave, setRejectSave] = useState(false);
@@ -37,6 +38,7 @@ export function VirtualizedTable() {
     <DynamicTable data={rows} columns={columns} tableLabel="Righe virtualizzate"
       maxHeight={compact ? 240 : 400} virtualization={{ rowHeight: 48, overscan: 4 }}
       globalSearch enableColumnFilters isResizable stripedRows onRowSelectionChange={selectedRows => setSelected(selectedRows.length)}
+      bulkActions={[{ id: "count", label: "Conta selezionate", onAction: selectedRows => setBulkCount(selectedRows.length) }]}
       onDataChange={(_next, updated) => {
         const apply = () => {
           if (rejectSave) throw new Error("Salvataggio rifiutato");
@@ -49,6 +51,7 @@ export function VirtualizedTable() {
         apply();
       }} />
     <output aria-label="Righe selezionate virtuali">{selected}</output>
+    <output aria-label="Righe elaborate virtuali">{bulkCount}</output>
     <output aria-label="Ultima modifica virtuale">{lastEdit ? JSON.stringify(lastEdit) : "Nessuna modifica"}</output>
   </>;
 }

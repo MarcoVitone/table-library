@@ -42,3 +42,6 @@ export type { IStripedRowsConfig, IRowStyling } from "../defines/common.types";
 export { useTableQuery, normalizeTableQuery } from "../hooks/use-table-query/use-table-query";
 export type { IVirtualizationConfig, TVirtualization } from "../defines/virtualization.types";
 export type { IGlobalSearchConfig, TGlobalSearch } from "../defines/global-search.types";
+export type { ITableViewState, ISavedTableView, ISavedViewsConfig } from "../defines/saved-views.types";
+export type { IBulkAction, IBulkActionContext } from "../defines/bulk-actions.types";
+export { parseSavedViews, serializeSavedViews } from "../utils/saved-views/saved-views";

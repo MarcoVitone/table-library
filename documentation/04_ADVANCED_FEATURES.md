@@ -308,6 +308,12 @@ pagination={{
 
 ## Row Selection
 
+Selection applies to the current processed body: the current page when paginated,
+the supplied page in server mode, or all matching records without pagination.
+Virtualization only limits mounted rows; it does not limit selection. Rows that
+leave that body after paging/filtering are removed from selection. Selections
+are not accumulated across pages or saved in a named view.
+
 ### Modes
 
 - **Single/Multi**: Handled by the check of checkboxes.
@@ -334,6 +340,128 @@ Listen to changes:
   onRowSelectionChange={(selectedRows) => console.log(selectedRows)}
 />
 ```
+
+## Saved views
+
+Use `savedViews` to manage named snapshots of the current filters, sorting,
+column order/width/visibility (including collapsed widths), global search and
+page size. A snapshot contains configuration, not records or row selections.
+
+```tsx
+<DynamicTable
+  data={users} columns={columns}
+  savedViews={{ key: "users-table" }}
+  enableColumnFilters enableColumnConfig isResizable globalSearch
+  pagination={{ enabled: true, limitOptions: [10, 25, 50] }}
+/>
+```
+
+The controls save a new view, apply a selected view, update/rename it explicitly,
+or delete it. Names are trimmed and must be nonempty and unique, ignoring case.
+Selecting a view applies it immediately; **Applica vista** reapplies the selected
+snapshot after manual changes. **Vista modificata** indicates an unsaved change.
+Deleting a saved view leaves the current table configuration in place.
+
+| `ISavedViewsConfig` property | Behavior |
+| :--- | :--- |
+| `key` | Required namespace, unique to the table/account. |
+| `storage` | `"localStorage"` by default, `"sessionStorage"`, or `false` for memory only. |
+| `defaultViews` | Initial list if no stored list exists. |
+| `views` | Controlled list. When supplied, browser storage is skipped. |
+| `onViewsChange` | Receives the complete list after save/update/delete. Update `views` here when controlled. |
+| `onViewApply` | Receives the reconciled view after an apply request. |
+
+Saved lists use `table_views_<key>` with a versioned storage format. They coexist
+with the existing `pagination_<key>` persistence; neither overwrites the other's
+storage. On reload the saved list is available for selection; the last named
+view is not automatically applied. Existing pagination/layout persistence
+continues to restore its own settings. Storage failures leave in-memory editing
+available and show an error. Invalid/incompatible stored lists fall back to
+`defaultViews` or an empty list.
+
+For external persistence, control the list:
+
+```tsx
+import { type ISavedTableView, parseSavedViews, serializeSavedViews } from "@/tables-framework/components";
+
+const [views, setViews] = useState<ISavedTableView[]>([]);
+
+<DynamicTable data={users} columns={columns}
+  savedViews={{ key: "users", views, onViewsChange: setViews }} />
+
+// These helpers preserve RegExp filter values and validate the stored schema.
+const serialized = serializeSavedViews(views);
+const restored = parseSavedViews(serialized); // Throws on invalid input.
+```
+
+`ISavedTableView` is `{ id, name, state }`; `state` contains `columnsLayout`,
+`sorting`, `filters`, `pageSize` and optional `search`. Filters retain their value
+types, including regular expressions. Snapshots are copied, so later edits do
+not mutate the saved configuration. Applying a view keeps surviving saved
+columns in order, drops removed column IDs and appends new columns. Filters and
+sort entries referencing missing data keys/column IDs/query parameters are
+discarded. Change the storage `key` when switching to a different table schema.
+
+Applying always starts at page zero. With unified query state, search, filters,
+sorting, page size and page zero are sent together in one `onQueryChange` call;
+the host must accept the new controlled query and controlled layout/search
+values through their existing callbacks. Server mode keeps fetching in the host.
+Legacy pagination/layout APIs remain supported. Use `globalSearch` when restoring
+search in legacy mode. The column configuration reset button retains its existing
+column-only behavior.
+
+## Bulk actions
+
+Pass `bulkActions` and provide a checkbox column (or another existing selection
+control). The toolbar appears when rows are selected, outside the scroll viewport.
+Actions receive the original current records as `T[]`.
+
+```tsx
+<DynamicTable
+  data={users}
+  columns={[
+    { id: "select", label: "Select", type: "checkbox", width: 48 },
+    { id: "name", label: "Name" },
+  ]}
+  bulkActions={[{
+    id: "archive",
+    label: "Archive selected",
+    disabled: selected => selected.every(user => user.archived),
+    clearSelectionOnSuccess: true,
+    onAction: async selected => {
+      await archiveUsers(selected.map(user => user.id));
+      // Update the table's data or reload the server page in the host.
+    },
+  }]}
+/>
+```
+
+| `IBulkAction<T>` property | Behavior |
+| :--- | :--- |
+| `id` | Unique action identifier. |
+| `label` | Button text and accessible name. |
+| `icon` | Optional React node before the label. |
+| `onAction` | `(rows: T[], context: IBulkActionContext) => void \| Promise<void>`. |
+| `disabled` | Boolean or predicate receiving the currently selected records. |
+| `clearSelectionOnSuccess` | Defaults to `false`; clears only the rows processed by a successful action. |
+
+`context.clearSelection()` also clears only the selection captured when that
+action started. This avoids clearing new selections made during an async request.
+**Deseleziona tutte** clears the current selection manually. Returning a promise
+shows a pending state and disables all action buttons until completion. A lock
+prevents duplicate execution. Synchronous throws and promise rejections show an
+inline error and allow retry; automatic clearing runs only after success.
+Action buttons are disabled while table data is loading or an error is shown.
+
+The library does not perform an operation on the records itself: callbacks own
+updates, requests and any application-specific confirmation. Actions use the
+current selection scope described above, so server pagination operates on the
+supplied page. Without pagination, virtualized select-all includes every
+matching record, including rows outside the viewport.
+
+`bulkActions` is also available on `Table` and `TableRenderer`. The **Viste e
+azioni** demo combines views, legacy/unified queries and asynchronous actions;
+**Virtualizzazione** demonstrates actions on 10,000 selected rows.
 
 ## Column Management
 

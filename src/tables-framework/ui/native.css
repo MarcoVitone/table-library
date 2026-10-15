@@ -359,3 +359,24 @@
 .tbl-accordion-details {
   padding: 1rem
 }
+.tbl-feature-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: .5rem 0;
+}
+.tbl-feature-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35rem;
+  max-width: 100%;
+}
+.tbl-feature-toolbar input,.tbl-feature-toolbar select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.tbl-bulk-actions {
+  margin-bottom: .5rem;
+}

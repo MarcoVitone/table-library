@@ -40,6 +40,8 @@ import type { TCellValue } from "@/tables-framework/defines/editing.types";
 import type { ITableQuery, ITableQueryProps } from "@/tables-framework/defines/query.types";
 import { useTableQuery } from "@/tables-framework/hooks/use-table-query/use-table-query";
 import type { TGlobalSearch } from "@/tables-framework/defines/global-search.types";
+import type { ISavedTableView, ISavedViewsConfig } from "@/tables-framework/defines/saved-views.types";
+import { SavedViewsToolbar } from "../table-sub-components/saved-views-toolbar/saved-views-toolbar";
 export type { IColumnConfig } from "@/tables-framework/defines/column-config";
 import { TableToolbar } from "@/tables-framework/components/table-sub-components/table-toolbar/table-toolbar";
 import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns-config-modal/columns-config-modal";
@@ -91,6 +93,7 @@ export interface IDynamicTableProps<T>
   dragHandleVisibility?: "always" | "hover";
   enableColumnFilters?: boolean;
   globalSearch?: TGlobalSearch;
+  savedViews?: ISavedViewsConfig;
 }
 
 const CELL_COMPONENTS: Record<string, ElementType> = {
@@ -129,6 +132,7 @@ const DynamicTable = <T extends object>({
   layout: externalLayout,
   virtualization,
   globalSearch = false,
+  savedViews,
   isResizable: globalResizable = false,
   // Estrai le nuove props (default false)
   enableColumnReorder = false,
@@ -474,6 +478,18 @@ const DynamicTable = <T extends object>({
 
   const tableExtensions = (
     <>
+      {savedViews && <SavedViewsToolbar key={`${savedViews.storage ?? "localStorage"}:${savedViews.key}`}
+        config={savedViews} columns={columns} search={searchTerm} pageSize={limit} onApply={(view: ISavedTableView) => {
+          setInternalColumnsLayout(view.state.columnsLayout);
+          if (persistence?.enabled) persistState({ columnsLayout: view.state.columnsLayout });
+          if (unifiedQuery) updateQuery({ page: 0, pageSize: view.state.pageSize,
+            sorting: view.state.sorting, filters: view.state.filters, search: view.state.search ?? "" });
+          else {
+            handleLimitChange(view.state.pageSize);
+            if (searchConfig?.value === undefined) setInternalSearch(view.state.search ?? "");
+          }
+          if (searchTerm !== (view.state.search ?? "")) searchConfig?.onChange?.(view.state.search ?? "");
+        }} />}
       {/* TOOLBAR */}
       {enableColumnConfig && (
         <TableToolbar

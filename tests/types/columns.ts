@@ -32,6 +32,9 @@ const props: IDynamicTableProps<Row> = {
   onDataChange: async (_next, row) => { row.name.toUpperCase(); },
   virtualization: { height: "50vh", rowHeight: 48, overscan: 5 },
   globalSearch: { columns: ["name"], value: "test", onChange: value => { value.toUpperCase(); } },
+  savedViews: { key: "users", storage: "sessionStorage", onViewsChange: views => { void views[0]?.state.columnsLayout; } },
+  bulkActions: [{ id: "edit", label: "Edit", disabled: rows => rows.some(row => row.locked),
+    onAction: async (rows, { clearSelection }) => { rows[0]?.name.toUpperCase(); clearSelection(); }, clearSelectionOnSuccess: true }],
 };
 // @ts-expect-error Virtualization uses a numeric estimate in pixels.
 const invalidVirtualization: IDynamicTableProps<Row> = { data: [], columns: valid, virtualization: { rowHeight: "48px" } };
@@ -39,4 +42,9 @@ void invalidVirtualization;
 // @ts-expect-error Search columns must be data key strings.
 const invalidSearch: IDynamicTableProps<Row> = { data: [], columns: valid, globalSearch: { columns: [3] } };
 void invalidSearch;
+// @ts-expect-error Bulk action records keep the table's row type.
+const invalidBulk: IDynamicTableProps<Row> = { data: [], columns: valid, bulkActions: [{ id: "x", label: "X", onAction: (rows: number[]) => { void rows; } }] };
+// @ts-expect-error Saved views need a unique storage key.
+const invalidViews: IDynamicTableProps<Row> = { data: [], columns: valid, savedViews: {} };
+void [invalidBulk, invalidViews];
 void [valid, invalidCurrency, invalidActions, missingCustom, invalidInput, invalidValidator, props];

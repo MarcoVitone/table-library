@@ -12,6 +12,8 @@ A powerful, flexible, and completely data-driven React Table Library. Designed t
 - **Sticky Headers & Columns**: Native support for freezing columns and headers.
 - **Customizable**: Easy theming and support for custom cell components.
 - **Virtualization**: Optional row windowing with measured heights for large loaded datasets.
+- **Saved Views**: Named filters, sorting, column layouts, search and page size with browser or controlled persistence.
+- **Bulk Actions**: Typed actions on selected records, with async pending/error feedback.
 
 ## 📚 Documentation
 
@@ -76,6 +78,9 @@ The **Ricerca globale** demo searches multiple columns through one field. Enable
 it with `globalSearch` or configure `globalSearch={{ columns: ["name", "email"] }}`.
 Search composes with column filters, pagination and virtualization; server
 queries include the optional `search` field.
+The **Viste e azioni** demo adds named saved views with `savedViews={{ key: "users" }}`
+and selected-row actions through `bulkActions`. Views coexist with pagination
+persistence; actions support promises, retries and optional selection clearing.
 
 ## Browser checks with Playwright
 

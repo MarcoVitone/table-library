@@ -13,7 +13,8 @@ type TDemoPage =
   | "editing"
   | "reliability"
   | "virtualization"
-  | "global-search";
+  | "global-search"
+  | "views-actions";
 
 interface IDemoNavigationProps {
   activePage: TDemoPage;
@@ -38,6 +39,7 @@ const DemoNavigation: FC<IDemoNavigationProps> = ({
     { id: "reliability", label: "Stati e server" },
     { id: "virtualization", label: "Virtualizzazione" },
     { id: "global-search", label: "Ricerca globale" },
+    { id: "views-actions", label: "Viste e azioni" },
   ];
 
   return (

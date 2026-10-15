@@ -28,6 +28,9 @@ import { BaseTable } from "@/tables-framework/components/areas/base-table/base-t
 import type { TVirtualization } from "@/tables-framework/defines/virtualization.types";
 import { useVirtualRows } from "@/tables-framework/hooks/use-virtual-rows/use-virtual-rows";
 import { VirtualRowRetentionContext } from "@/tables-framework/hooks/use-virtual-rows/virtualization-context";
+import type { IBulkAction } from "@/tables-framework/defines/bulk-actions.types";
+import { BulkActionsToolbar } from "../table-sub-components/bulk-actions-toolbar/bulk-actions-toolbar";
+import { serializeTableState } from "@/tables-framework/utils/table-state/table-state";
 
 const defaultAPI = {
   tableLayout: null,
@@ -77,6 +80,7 @@ interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   emptyContent?: ReactNode;
   noResultsContent?: ReactNode;
   searchTerm?: string;
+  bulkActions?: IBulkAction<T>[];
   virtualization?: TVirtualization;
 }
 
@@ -108,6 +112,7 @@ const TableRenderer = <T,>({
   noResultsContent = "Nessun risultato per i filtri applicati",
   virtualization,
   searchTerm = "",
+  bulkActions,
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -242,7 +247,7 @@ const TableRenderer = <T,>({
    * -----------------------------------------------------------------------------------------------*/
   // PARSER API (Deep check)
   const [memoizedParserAPI, setMemoizedParserAPI] = useState(parserAPI);
-  if (JSON.stringify(memoizedParserAPI) !== JSON.stringify(parserAPI)) {
+  if (serializeTableState(memoizedParserAPI) !== serializeTableState(parserAPI)) {
     setMemoizedParserAPI(parserAPI);
   }
 
@@ -308,6 +313,7 @@ const TableRenderer = <T,>({
       <VirtualRowRetentionContext.Provider value={virtual.enabled ? retainRow : null}>
         <Container>
           {beforeNode}
+          {bulkActions && <BulkActionsToolbar actions={bulkActions} disabled={isLoading || hasError} />}
           {virtual.enabled ? <div ref={viewportRef} className="tbl-virtual-viewport"
             role="region" aria-label={`${tableLabel ?? "Tabella"}: area scorribile`} tabIndex={0}
             style={{ height: virtual.height, overflow: "auto", width: "100%", maxWidth: "100%", overflowAnchor: "none" }}
