@@ -1,11 +1,11 @@
 {
-  "name": "prova",
-  "private": true,
-  "version": "0.0.0",
+  "name": "fabulous-table-library",
+  "private": false,
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --config vite.lib.config.ts --configLoader runner",
     "lint": "eslint .",
     "test": "node --test",
     "test:unit": "node --test tests/table-data.test.cjs",
@@ -13,7 +13,11 @@
     "preview": "vite preview",
     "test:e2e:install": "playwright install chromium",
     "test:e2e": "playwright test",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "build:demo": "tsc -b && vite build --configLoader runner",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run lint && npm run test:types && npm test",
+    "test:package": "npm run build && node scripts/verify-package.mjs"
   },
   "dependencies": {
     "@react-spring/web": "^10.0.3",
@@ -21,12 +25,11 @@
     "date-fns-tz": "^3.2.0",
     "dayjs": "^1.11.19",
     "i18next": "^25.7.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
     "react-i18next": "^16.3.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@microsoft/api-extractor": "^7.59.4",
     "@playwright/test": "^1.64.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
@@ -38,6 +41,38 @@
     "globals": "^16.5.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
-  }
+    "vite": "^7.2.4",
+    "vite-plugin-dts": "^5.1.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "description": "Configurable React tables with sorting, filtering, editing, pagination and virtualization.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "documentation"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "license": "MIT"
 }

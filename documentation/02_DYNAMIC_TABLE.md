@@ -5,7 +5,7 @@ The `DynamicTable` is the core component of the library. It orchestrates data re
 ## Imports
 
 ```typescript
-import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { DynamicTable } from "fabulous-table-library";
 ```
 
 ## Props

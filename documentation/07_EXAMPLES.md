@@ -5,7 +5,7 @@
 A minimal example to get started.
 
 ```tsx
-import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { DynamicTable } from "fabulous-table-library";
 
 const BasicTable = () => {
   const data = [
@@ -33,12 +33,12 @@ A comprehensive example demonstrating:
 
 ```tsx
 import { useState, useMemo } from "react";
-import { Check, Visibility, Edit, Delete } from "@/tables-framework/ui/icons";
+import { Check, Visibility, Edit, Delete } from "fabulous-table-library";
 import {
   DynamicTable,
   IColumnConfig,
-} from "@/tables-framework/components/dynamic-table/dynamic-table";
-import { useTable } from "@/tables-framework/components";
+} from "fabulous-table-library";
+import { useTable } from "fabulous-table-library";
 
 const ComplexTable = () => {
   const [users, setUsers] = useState(MOCK_USERS);

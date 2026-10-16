@@ -21,7 +21,7 @@ Detailed documentation is available in the `documentation/` folder:
 
 1.  [**Introduction**](./documentation/01_INTRODUCTION.md) - Installation and Quick Start.
 2.  [**DynamicTable Component**](./documentation/02_DYNAMIC_TABLE.md) - Core component API and props.
-3.  [**Column Configuration**](./documentation/03_COLUMN_CONFIGURATION.md) - How to define columns and use different cell types.
+3.  [**Column Configuration**](./documentation/03_column_configuration.md) - How to define columns and use different cell types.
 4.  [**Advanced Features**](./documentation/04_ADVANCED_FEATURES.md) - Sorting, Filtering, Pagination, and Column Management.
 5.  [**Hooks**](./documentation/05_HOOKS.md) - Programmatic control via `useTable`.
 6.  [**Theming and Styling**](./documentation/06_THEMING_AND_STYLING.md) - Customizing borders, colors, and layouts.
@@ -30,11 +30,12 @@ Detailed documentation is available in the `documentation/` folder:
 ## 📦 Quick Start
 
 ```tsx
-import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { DynamicTable, type IColumnConfig } from "fabulous-table-library";
+import "fabulous-table-library/style.css";
 
 const MyTable = () => {
   const data = [{ id: 1, name: "Hello World" }];
-  const columns = [
+  const columns: IColumnConfig<{ id: number; name: string }>[] = [
     { id: "name", label: "Title", dataKey: "name", type: "text" },
   ];
 
@@ -109,3 +110,11 @@ and pagination in a narrow viewport. Runtime JavaScript errors fail the test.
 On failure, screenshots, video, and traces are stored in `test-results/`.
 Open the HTML report with `npm run test:e2e:report`. Browser tests are separate
 from `npm test`; installing Playwright is required before they can run.
+
+## Build and npm publication
+
+See [the publishing guide](./documentation/08_PUBLISHING.md) for building, testing and publishing the npm package. The demo uses a separate build directory.
+
+## License
+
+MIT. See [LICENSE](./LICENSE).

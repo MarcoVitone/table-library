@@ -85,7 +85,7 @@ on each original data object. Both props are also available on `Table`.
 Import the provider from the table framework. The default theme works without a provider.
 
 ```tsx
-import { ThemeProvider, createTheme } from "@/tables-framework/theme/theme";
+import { ThemeProvider, createTheme } from "fabulous-table-library";
 
 const theme = createTheme({
   palette: {

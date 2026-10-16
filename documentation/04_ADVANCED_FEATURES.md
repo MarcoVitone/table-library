@@ -55,7 +55,7 @@ initial fetch: load data from an effect observing the query.
 
 ```tsx
 import { useEffect, useState } from "react";
-import { DynamicTable, type ITableQuery } from "@/tables-framework/components";
+import { DynamicTable, type ITableQuery } from "fabulous-table-library";
 
 const [query, setQuery] = useState<ITableQuery>({
   page: 0, pageSize: 25, sorting: [], filters: [],
@@ -382,7 +382,7 @@ available and show an error. Invalid/incompatible stored lists fall back to
 For external persistence, control the list:
 
 ```tsx
-import { type ISavedTableView, parseSavedViews, serializeSavedViews } from "@/tables-framework/components";
+import { type ISavedTableView, parseSavedViews, serializeSavedViews } from "fabulous-table-library";
 
 const [views, setViews] = useState<ISavedTableView[]>([]);
 

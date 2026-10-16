@@ -138,3 +138,6 @@ vite.config.ts.timestamp-*
 # Playwright browser-test artifacts
 playwright-report/
 test-results/
+
+# Standalone demo build
+dist-demo/

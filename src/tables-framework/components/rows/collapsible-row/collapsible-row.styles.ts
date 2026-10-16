@@ -1,6 +1,6 @@
-import { createElement, type ComponentProps } from "react";
+import { createElement, type ComponentProps, type ReactElement } from "react";
 import { BaseRow } from "../base-row/base-row";
-export function ColBaseRow(props: ComponentProps<typeof BaseRow>) {
+export function ColBaseRow(props: ComponentProps<typeof BaseRow>): ReactElement {
   return createElement(BaseRow, {
     ...props,
     style: {
