@@ -25,31 +25,21 @@ The build externalizes runtime dependencies, including React and its JSX
 runtime. Type declarations are emitted for both module formats with portable relative
 imports; they do not require the repository's internal path aliases.
 
-## Check the actual package
+## Create the package archive
 
 ```bash
-npm run lint
-npm run test:types
-npm test
-npm run test:package
 npm pack --dry-run
 npm pack
 ```
 
-The package check extracts the real npm archive into a temporary consumer and
-checks ES module/CommonJS rendering, both TypeScript declaration formats and
-CSS bundling. Runtime/type dependencies come from the development installation;
-the package itself comes exclusively from the archive. The check requires tar
-(available on current Windows, macOS and Linux installations).
-
-The archive is named fabulous-table-library-1.0.0.tgz at the current version.
+The archive is named fabulous-table-library-2.0.0.tgz at the current version.
 Only dist, documentation, README, LICENSE and package metadata are distributed. The
 prepack hook rebuilds the library when npm pack or npm publish runs.
 
 To try the archive in another React application:
 
 ```bash
-npm install /path/to/fabulous-table-library-1.0.0.tgz
+npm install /path/to/fabulous-table-library-2.0.0.tgz
 ```
 
 ```tsx
@@ -76,9 +66,12 @@ npm login
 npm publish --access public
 ```
 
-The prepublishOnly hook runs lint, the public type checks and the Node tests;
-prepack then rebuilds the package. Each published name/version combination is
+The prepack hook rebuilds the package. Each published name/version combination is
 unique: increment the version before publishing a subsequent release.
+
+The README links to documentation on the repository's `main` branch. Merge and
+push the release documentation to `main` before publishing, preserving the exact
+filename casing used by those links.
 
 ```bash
 npm version patch
@@ -95,4 +88,4 @@ npm run preview
 ```
 
 The standalone demo is written to dist-demo and is not included in the npm
-package. Playwright continues to build and serve this demo separately.
+package.

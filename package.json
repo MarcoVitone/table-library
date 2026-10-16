@@ -1,7 +1,7 @@
 {
   "name": "fabulous-table-library",
   "private": false,
-  "version": "1.0.1",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -43,6 +43,14 @@
     "vite-plugin-dts": "^5.1.2"
   },
   "description": "Configurable React tables with sorting, filtering, editing, pagination and virtualization.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarcoVitone/table-library.git"
+  },
+  "homepage": "https://github.com/MarcoVitone/table-library#readme",
+  "bugs": {
+    "url": "https://github.com/MarcoVitone/table-library/issues"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.mts",

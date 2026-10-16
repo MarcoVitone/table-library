@@ -17,15 +17,15 @@ A powerful, flexible, and completely data-driven React Table Library. Designed t
 
 ## 📚 Documentation
 
-Detailed documentation is available in the `documentation/` folder:
+Detailed documentation is available on GitHub and included in the package's `documentation/` folder:
 
-1.  [**Introduction**](./documentation/01_INTRODUCTION.md) - Installation and Quick Start.
-2.  [**DynamicTable Component**](./documentation/02_DYNAMIC_TABLE.md) - Core component API and props.
-3.  [**Column Configuration**](./documentation/03_column_configuration.md) - How to define columns and use different cell types.
-4.  [**Advanced Features**](./documentation/04_ADVANCED_FEATURES.md) - Sorting, Filtering, Pagination, and Column Management.
-5.  [**Hooks**](./documentation/05_HOOKS.md) - Programmatic control via `useTable`.
-6.  [**Theming and Styling**](./documentation/06_THEMING_AND_STYLING.md) - Customizing borders, colors, and layouts.
-7.  [**Practical Examples**](./documentation/07_EXAMPLES.md) - Copy-pasteable code examples.
+1.  [**Introduction**](https://github.com/MarcoVitone/table-library/blob/main/documentation/01_INTRODUCTION.md) - Installation and Quick Start.
+2.  [**DynamicTable Component**](https://github.com/MarcoVitone/table-library/blob/main/documentation/02_DYNAMIC_TABLE.md) - Core component API and props.
+3.  [**Column Configuration**](https://github.com/MarcoVitone/table-library/blob/main/documentation/03_column_configuration.md) - How to define columns and use different cell types.
+4.  [**Advanced Features**](https://github.com/MarcoVitone/table-library/blob/main/documentation/04_ADVANCED_FEATURES.md) - Sorting, Filtering, Pagination, and Column Management.
+5.  [**Hooks**](https://github.com/MarcoVitone/table-library/blob/main/documentation/05_HOOKS.md) - Programmatic control via `useTable`.
+6.  [**Theming and Styling**](https://github.com/MarcoVitone/table-library/blob/main/documentation/06_THEMING_AND_STYLING.md) - Customizing borders, colors, and layouts.
+7.  [**Practical Examples**](https://github.com/MarcoVitone/table-library/blob/main/documentation/07_EXAMPLES.md) - Copy-pasteable code examples.
 
 ## 📦 Quick Start
 
@@ -47,74 +47,28 @@ const MyTable = () => {
 
 This project uses **React** + **TypeScript** + **Vite**. Its UI uses native HTML, scoped CSS, and SVG icons; Material UI and Emotion are not required.
 
-See [Theming and migration notes](./documentation/06_THEMING_AND_STYLING.md) for the native theme provider and Material-specific styling differences.
+See [Theming and migration notes](https://github.com/MarcoVitone/table-library/blob/main/documentation/06_THEMING_AND_STYLING.md) for the native theme provider and Material-specific styling differences.
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Regression checks
+## Upgrading to 2.0
 
-Run `npm test` with Node.js 22.13 or newer after installing dependencies. The
-suite includes isolated data tests and integration tests using real React, table
-components, and hooks. It covers all demo renderings, pagination, filtering,
-sorting, row identity, editing, and changes to externally supplied cell values.
+Date cells now use native JavaScript `Date` and `Intl.DateTimeFormat`. The
+default remains `dd/MM/yyyy` in `Europe/Rome`. Common format patterns are
+supported; the complete token syntax of the previous formatter is no longer
+available. You can also pass native formatting options, `locale` and `timeZone`.
 
-`npm run test:unit` runs only the isolated data tests without application
-dependencies. Integration tests use server rendering; browser layout, pointer
-interactions, and client effects require a connected browser.
-
-Run `npm run build` and `npm run lint` separately for TypeScript, bundling, and
-lint checks once the application dependencies are installed.
-
-Run `npm run test:types` for positive and negative compile checks of the public
-column and query APIs. See the documentation for unified server queries,
-loading/error/empty states, editor validation and keyboard interaction. The
-**Stati e server** demo exercises loading, retry and controlled server queries;
-**Modifica celle** includes validation and simulated asynchronous saves.
-The **Virtualizzazione** demo renders 10,000 records with a bounded number of
-mounted rows, including selection, fixed columns and editing during scrolling.
-The **Ricerca globale** demo searches multiple columns through one field. Enable
-it with `globalSearch` or configure `globalSearch={{ columns: ["name", "email"] }}`.
-Search composes with column filters, pagination and virtualization; server
-queries include the optional `search` field.
-The **Viste e azioni** demo adds named saved views with `savedViews={{ key: "users" }}`
-and selected-row actions through `bulkActions`. Views coexist with pagination
-persistence; actions support promises, retries and optional selection clearing.
-
-## Browser checks with Playwright
-
-Install the test runner and its dedicated Chromium browser once:
-
-```bash
-npm install --save-dev @playwright/test
-npm run test:e2e:install
-```
-
-Run the browser tests:
-
-```bash
-npm run test:e2e
-```
-
-The configuration builds the app, starts a dedicated local production server on
-port 4187, and runs browser checks covering the demos, pagination, sorting,
-text and numeric filtering, selection, repeated column resizing and minimum
-widths, drag and drop, collapsing, column configuration, and custom actions.
-The dedicated server stops when the suite finishes. Each test uses a fresh
-browser context. Additional native UI checks cover input editing, autocomplete,
-external data updates, themes, typed select filters, keyboard focus, Escape,
-and pagination in a narrow viewport. Runtime JavaScript errors fail the test.
-
-On failure, screenshots, video, and traces are stored in `test-results/`.
-Open the HTML report with `npm run test:e2e:report`. Browser tests are separate
-from `npm test`; installing Playwright is required before they can run.
-
-## Build and npm publication
-
-See [the publishing guide](./documentation/08_PUBLISHING.md) for building, testing and publishing the npm package. The demo uses a separate build directory.
+Strings follow JavaScript date parsing. Prefer ISO 8601 with an explicit offset
+for instants, timestamps in milliseconds, or `Date` objects. ISO date-only
+strings are parsed at midnight UTC; date-time strings without an offset use
+the host's local timezone. Use text or custom cells for values already formatted
+by your application. See
+[date cell configuration](https://github.com/MarcoVitone/table-library/blob/main/documentation/03_column_configuration.md#7-date)
+for supported tokens and examples.
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT. See [LICENSE](https://github.com/MarcoVitone/table-library/blob/main/LICENSE).

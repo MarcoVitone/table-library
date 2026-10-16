@@ -30,7 +30,8 @@ Import the stylesheet once in your application:
 import "fabulous-table-library/style.css";
 ```
 
-The UI uses **React**, native HTML, and CSS. Material UI and Emotion are not required. Existing data, date, translation, and animation dependencies remain listed in package.json.
+The UI uses **React**, native HTML, and CSS. Material UI and Emotion are not required.
+Dates use native JavaScript `Date` and `Intl.DateTimeFormat`; no date library is required.
 
 For this repository, install the dependencies with:
 
