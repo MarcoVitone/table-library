@@ -10,6 +10,9 @@ const valid: IColumnConfig<Row>[] = [
   }] } },
   { id: "status", label: "Status", type: "status", bodyProps: { labelKey: "name", getLabel: value => String(value) } },
   { id: "date", label: "Date", type: "date", bodyProps: { format: "yyyy-MM-dd" } },
+  { id: "nativeDate", label: "Date", type: "date", bodyProps: {
+    locale: "it-IT", timeZone: "Europe/Rome", format: { dateStyle: "long", timeStyle: "short" },
+  } },
   { id: "currency", label: "Amount", type: "currency", decimals: 2, bodyProps: { currencySymbol: "$" } },
   { id: "auto", label: "Role", type: "autocomplete", autocompleteOptions: ["Admin"],
     validate: (value, row) => value === row.name ? undefined : "Select a role" },

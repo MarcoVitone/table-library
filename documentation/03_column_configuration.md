@@ -154,7 +154,39 @@ Renders a selectable dropdown (Combobox).
 
 ### 7. Date
 
-Formats a date string/object (requires `date-fns` integration if utilizing built-in helpers, or passes raw if custom). Defaults to standard locale formatting.
+Formats strings, timestamps in milliseconds and `Date` objects using native
+`Date` and `Intl.DateTimeFormat`, with no date library dependency. Missing,
+blank and invalid values render empty; timestamp zero is valid.
+
+Configure via `bodyProps`:
+
+- `format`: a pattern (default `"dd/MM/yyyy"`) or native `Intl.DateTimeFormatOptions`.
+- `timeZone`: IANA timezone (default `"Europe/Rome"`), including automatic daylight saving adjustments.
+- `locale`: locale for native formatting and month/weekday names (default `"en-US"`).
+
+Supported pattern tokens: `yyyy`, `yy`, `M`, `MM`, `MMM`, `MMMM`, `d`, `dd`,
+`E`, `EE`, `EEE`, `EEEE`, `H`, `HH`, `h`, `hh`, `m`, `mm`, `s`, `ss`, `SSS`,
+`a`. Quote literal text with single quotes (`"yyyy-MM-dd'T'HH:mm:ss"`); use
+`''` for a literal apostrophe. Other tokens throw `RangeError`; the complete
+token syntax of the previous formatter is no longer supported. For localized
+styles and timezone labels, use native options:
+
+```typescript
+{
+  id: "createdAt", label: "Created", type: "date",
+  bodyProps: {
+    locale: "it-IT",
+    timeZone: "Europe/Rome",
+    format: { dateStyle: "long", timeStyle: "short" },
+  },
+}
+```
+
+Native options may also specify `timeZone`, taking precedence over the cell's
+`timeZone`. Strings follow JavaScript `Date` parsing: prefer ISO 8601 with `Z`
+or an explicit offset for instants. ISO date-only strings (`"2026-10-16"`) are
+parsed at midnight UTC; date-time strings without an offset use the host's
+local timezone. Avoid ambiguous strings such as `"16/10/2026"`.
 
 ### Column type inference
 
