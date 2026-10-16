@@ -53,7 +53,6 @@ export function nativeElement<T extends keyof HTMLElementTagNameMap, P extends o
       className?: string;
     };
     // React createElement forwards this ref; it does not read ref.current.
-    // eslint-disable-next-line react-hooks/refs
     return createElement(component ?? as ?? tag, {
       ...domProps(rest),
       ref,

@@ -312,7 +312,10 @@ const DynamicTable = <T extends object>({
     if (!paginationEnabled || serverSide?.enabled || isLoading || tableProps.error) return;
     if (dataMode === "server" && serverTotalItems === undefined) return;
     const lastPage = Math.max(0, totalPages - 1);
-    if (currentPage > lastPage) handlePageChange(lastPage);
+    if (currentPage <= lastPage) return;
+    // Reconcile changing totals in a separate frame and cancel stale corrections.
+    const frame = requestAnimationFrame(() => handlePageChange(lastPage));
+    return () => cancelAnimationFrame(frame);
   }, [
     paginationEnabled,
     serverSide?.enabled,

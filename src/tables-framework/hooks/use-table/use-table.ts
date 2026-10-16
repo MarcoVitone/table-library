@@ -1,5 +1,5 @@
 import { useContext, useMemo, useCallback } from "react";
-import { TableContext } from "@/tables-framework/components/table-renderer/table-renderer";
+import { TableContext } from "@/tables-framework/components/table-renderer/table-context";
 import type {
   TFullTableAPI,
   TSetColumnLayout,

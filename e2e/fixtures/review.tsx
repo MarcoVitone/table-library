@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { DynamicTable, type IColumnConfig } from "../../src/tables-framework/components/dynamic-table/dynamic-table";
 import { useTable } from "../../src/tables-framework/hooks/use-table/use-table";
@@ -29,9 +29,15 @@ export function Selection() {
 export function App() {
   const [data, setData] = useState(initialRows);
   const [idKey, setIdKey] = useState("uuid");
+  const measuredRef = useRef<HTMLTableCellElement>(null);
+  const [measuredTag, setMeasuredTag] = useState("");
+  const measuredColumns = useMemo(() => columns.map(column => column.id === "note"
+    ? { ...column, bodyProps: { measuredRef } } : column), [measuredRef]);
   return <div style={{ width: 480 }}>
     <button onClick={() => setIdKey("id")}>Use id</button>
-    <DynamicTable data={data} columns={columns} idKey={idKey} maxHeight={240} isResizable
+    <button onClick={() => setMeasuredTag(measuredRef.current?.tagName ?? "none")}>Read measured ref</button>
+    <output aria-label="Measured tag">{measuredTag}</output>
+    <DynamicTable data={data} columns={measuredColumns} idKey={idKey} maxHeight={240} isResizable
       enableColumnReorder enableColumnConfig tableLabel="Regression"
       pagination={{ enabled: true, limit: 5, persistence: { enabled: true, key: "review-browser" } }}
       onDataChange={next => setData(next)} before={<Controls />} after={<Selection />} />

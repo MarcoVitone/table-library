@@ -1,7 +1,6 @@
 import type { ElementType, ReactNode } from "react";
 import {
   Fragment,
-  createContext,
   useCallback,
   isValidElement,
   useMemo,
@@ -29,29 +28,8 @@ import type { TVirtualization } from "@/tables-framework/defines/virtualization.
 import { useVirtualRows } from "@/tables-framework/hooks/use-virtual-rows/use-virtual-rows";
 import { VirtualRowRetentionContext } from "@/tables-framework/hooks/use-virtual-rows/virtualization-context";
 import type { IBulkAction } from "@/tables-framework/defines/bulk-actions.types";
+import { defaultAPI, TableContext } from "./table-context";
 import { BulkActionsToolbar } from "../table-sub-components/bulk-actions-toolbar/bulk-actions-toolbar";
-
-const defaultAPI = {
-  tableLayout: null,
-  columnsLayout: null,
-  setColumnsLayout: null,
-  sorting: null,
-  setSorting: null,
-  filtering: null,
-  setFiltering: null,
-  pagination: null,
-  setPagination: null,
-  resetLayout: null,
-  exportCSV: null,
-  exportJSON: null,
-  rowsStatus: null,
-  setRowsStatus: null,
-  source: null,
-  stickyHeader: true,
-  enableColumnFilters: false,
-};
-
-const TableContext = createContext<TTableRendererAPI>(defaultAPI);
 
 interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   source: ISource;

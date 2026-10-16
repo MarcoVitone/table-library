@@ -1,5 +1,5 @@
 import type { ElementType, FC, ReactNode, Ref } from "react";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
 import { ArrowUpward } from "@/tables-framework/ui/icons";
 import { useTheme } from "@/tables-framework/theme/theme";
 import type {
@@ -179,22 +179,7 @@ const BaseCell: FC<IBaseCellProps> = ({
     [isCollapsed, handleExpandColumn]
   );
 
-  const combinedRef = useCallback(
-    (node: HTMLTableCellElement | null) => {
-      // Aggiorna il ref interno
-      innerRef.current = node;
-
-      // Aggiorna il ref del genitore (measuredRef)
-      if (measuredRef) {
-        if (typeof measuredRef === "function") {
-          measuredRef(node);
-        } else {
-          measuredRef.current = node;
-        }
-      }
-    },
-    [measuredRef]
-  );
+  useImperativeHandle(measuredRef, () => innerRef.current!);
 
   const {
     draggable: isDomDraggable,
@@ -300,7 +285,7 @@ const BaseCell: FC<IBaseCellProps> = ({
         );
       }
     },
-    [data?.column?.id, data?.column?.props?.isHidden, setColumnLayout, setColumnsLayout]
+    [data, setColumnLayout, setColumnsLayout]
   );
 
   const justifyContent = useMemo(() => {
@@ -325,7 +310,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       );
     }
     return null;
-  }, [type, area, enableColumnFilters, data?.column, isCollapsed]);
+  }, [type, area, enableColumnFilters, data, isCollapsed]);
 
   const cellContent = useMemo(() => {
     if (isCollapsed) {
@@ -392,7 +377,7 @@ const BaseCell: FC<IBaseCellProps> = ({
           handleExpandColumn();
         }
       }}
-      ref={combinedRef}
+      ref={innerRef}
       colSpan={colSpan}
       noLeft={!!noLeftBorder}
       noRight={!!noRightBorder}

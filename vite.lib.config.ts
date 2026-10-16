@@ -23,7 +23,6 @@ export default defineConfig({
         { dir: resolve(root, "dist"), moduleFormat: "esm" },
         { dir: resolve(root, "dist"), moduleFormat: "cjs" },
       ],
-      bundleTypes: true,
       afterDiagnostic(diagnostics) {
         if (diagnostics.some(diagnostic => diagnostic.category === 1)) {
           throw new Error("Cannot publish declarations with TypeScript errors.");

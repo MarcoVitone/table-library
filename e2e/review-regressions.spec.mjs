@@ -105,3 +105,14 @@ test('fixed columns retain identity and measured offsets after reorder, resize a
   await expect.poll(() => header(page, 'note').evaluate(cell => getComputedStyle(cell).left)).toBe('0px');
   await expect.poll(() => bodyCell(page, 'note').evaluate(cell => getComputedStyle(cell).left)).toBe('0px');
 });
+
+test('object measurement refs expose the cell and clear when the column is hidden', async ({ page }) => {
+  await page.goto('/__review__');
+  await page.getByRole('button', { name: 'Read measured ref', exact: true }).click();
+  await expect(page.getByLabel('Measured tag', { exact: true })).toHaveText('TD');
+  await page.getByRole('button', { name: /configura colonne/i }).click();
+  await page.getByRole('dialog').getByRole('switch', { name: /Note/ }).uncheck();
+  await page.getByRole('button', { name: 'Chiudi', exact: true }).click();
+  await page.getByRole('button', { name: 'Read measured ref', exact: true }).click();
+  await expect(page.getByLabel('Measured tag', { exact: true })).toHaveText('none');
+});

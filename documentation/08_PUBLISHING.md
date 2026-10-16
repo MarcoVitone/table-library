@@ -17,12 +17,13 @@ The npm build writes only the library to dist:
 
 - index.js: ES module.
 - index.cjs: CommonJS module.
-- index.d.mts and index.d.cts: declarations for both module formats.
+- index.d.mts and index.d.cts: declaration entry points for both module formats.
+- Nested declaration files: the public API and its referenced types.
 - style.css: the table stylesheet.
 
 The build externalizes runtime dependencies, including React and its JSX
-runtime. Type declarations are bundled and do not require the repository's
-internal path aliases.
+runtime. Type declarations are emitted for both module formats with portable relative
+imports; they do not require the repository's internal path aliases.
 
 ## Check the actual package
 
