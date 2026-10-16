@@ -6,8 +6,6 @@ const root = path.resolve(__dirname, '../..');
 const sourceRoot = path.join(root, 'src');
 const resolveFilename = Module._resolveFilename;
 Module._resolveFilename = function(request, parent, ...rest) {
-  // Load the real icons lazily, matching the production bundler's named imports.
-  if (request === '@mui/icons-material') return path.join(__dirname, 'icons.cjs');
   let candidate;
   if (request.startsWith('@/')) candidate = path.join(sourceRoot, request.slice(2));
   else if (parent?.filename.startsWith(sourceRoot) && request.startsWith('.')) candidate = path.resolve(path.dirname(parent.filename), request);

@@ -6,7 +6,7 @@ import type {
 } from "react";
 import type { IColumnProps } from "@/tables-framework/components/table-parser/components/column/column.tsx";
 import type { IColumnGroupProps } from "@/tables-framework/components/table-parser/components/column-group/column-group.tsx";
-import type { CSSProperties } from "@mui/material";
+import type { CSSProperties } from "react";
 
 // *** CORE ***
 
@@ -222,6 +222,20 @@ interface IRowProps {
   children: ReactNode;
 }
 
+export interface IStripedRowsConfig {
+  /** Background of the first, third, ... visible body rows. Default: #ffffff. */
+  oddColor?: string;
+  /** Background of the second, fourth, ... visible body rows. Default: #f5f7fa. */
+  evenColor?: string;
+}
+
+export interface IRowStyling<T = unknown> {
+  /** Alternating body row backgrounds; restarts on each page. Default: false. */
+  stripedRows?: boolean | IStripedRowsConfig;
+  /** Original row data and zero-based visible page index, after filtering/sorting. */
+  getRowStyle?: (row: T, rowIndex: number) => CSSProperties | null | undefined;
+}
+
 type TElementCombo = [ElementType, Record<string, unknown>];
 
 type TCellCombo<T = IUnknownProps> = [
@@ -278,6 +292,7 @@ interface IRowStatus {
   state: "ready" | "pending";
   isPinned: boolean;
   isSelected: boolean;
+  savingCellId?: string;
 }
 
 type TRowsStatus = Record<string, IRowStatus>;

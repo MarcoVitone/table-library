@@ -37,7 +37,7 @@ const ids = result => Array.from(result.columns[0].data, cell => cell.source.id)
 const values = result => Array.from(result.columns[0].data, cell => cell.value);
 const plain = value => JSON.parse(JSON.stringify(value));
 const sortBy = (dir = 'asc', key = 'value') => [{ key, dir, isServerSide: false }];
-function edit(data, rowId, colKey, newValue, enabled = true) {
+function edit(data, rowId, colKey, newValue, enabled = true, idKey = 'id') {
   const source = fs.readFileSync(path.join(root, 'src/tables-framework/components/dynamic-table/dynamic-table.tsx'), 'utf8');
   const start = source.indexOf('  const handleCellChange = useCallback(');
   const end = source.indexOf('  const measureColumn', start);
@@ -45,7 +45,7 @@ function edit(data, rowId, colKey, newValue, enabled = true) {
   const code = stripTypeScriptTypes(source.slice(start, end));
   const calls = [];
   const handler = vm.runInNewContext(code + ';handleCellChange', {
-    useCallback: fn => fn, data, setValueAtPath,
+    useCallback: fn => fn, data, idKey, setValueAtPath, ObjectUtils: { flatten }, StringUtils: { serialize },
     onDataChange: enabled ? (...args) => calls.push(args) : undefined,
   });
   handler(rowId, colKey, newValue);
@@ -199,7 +199,7 @@ test('top-level editing with numeric ID zero remains supported', () => {
   assert.equal(updated.id, 0);
 });
 test('string _id editing remains supported', () => {
-  const [[, updated]] = edit([{ _id: 'abc', name: 'Before' }], 'abc', 'name', 'After');
+  const [[, updated]] = edit([{ _id: 'abc', name: 'Before' }], 'abc', 'name', 'After', true, '_id');
   assert.equal(updated.name, 'After');
 });
 test('unknown IDs and missing edit callback remain safe', () => {

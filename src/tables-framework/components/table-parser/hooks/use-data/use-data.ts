@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { createSearchAccessor, matchesGlobalSearch, normalizeSearch } from "@/tables-framework/utils/global-search/global-search";
 import type {
   IColumn,
   ITableLayout,
@@ -19,9 +20,12 @@ interface IProps {
   data: IDatum[];
   idKey: string;
   pagination?: IPagination;
+  dataMode?: "client" | "server";
+  searchTerm?: string;
+  searchColumns?: string[];
 }
 
-function useData({ columns, tableLayout, data, idKey, pagination }: IProps) {
+function useData({ columns, tableLayout, data, idKey, pagination, dataMode = "client", searchTerm = "", searchColumns }: IProps) {
   const sources = useMemo<IDataSource[]>(() => {
     return data.map((full) => {
       const flat = ObjectUtils.flatten(full, true) as IFlatDatum;
@@ -35,10 +39,25 @@ function useData({ columns, tableLayout, data, idKey, pagination }: IProps) {
     });
   }, [data, idKey]);
 
+  // Keep the search index stable while typing and resizing/reordering columns.
+  const keysSignature = JSON.stringify(searchColumns ?? columns.map(column => column.dataKey));
+  const searchKeys = useMemo<string[]>(() => JSON.parse(keysSignature), [keysSignature]);
+  const searchEnabled = dataMode !== "server" && !!searchTerm.trim();
+  const searchIndex = useMemo(() => {
+    if (!searchEnabled) return null;
+    const read = createSearchAccessor(searchKeys);
+    return sources.map(source => read(source.full));
+  }, [sources, searchKeys, searchEnabled]);
+  const searched = useMemo(() => {
+    if (!searchIndex) return sources;
+    const tokens = normalizeSearch(searchTerm).trim().split(/\s+/).filter(Boolean);
+    return sources.filter((_, index) => matchesGlobalSearch(searchIndex[index], tokens));
+  }, [sources, searchIndex, searchTerm]);
+
   const filtered = useMemo<IDataSource[]>(() => {
-    if (tableLayout.filtering?.length) {
+    if (dataMode !== "server" && tableLayout.filtering?.length) {
       const filters = tableLayout.filtering;
-      return sources.filter(({ flat }) => {
+      return searched.filter(({ flat }) => {
         return filters.every(({ key, op, val: value }) => {
           const _content = flat[key];
           const val = typeof value == "boolean" ? value.toString() : value;
@@ -91,13 +110,14 @@ function useData({ columns, tableLayout, data, idKey, pagination }: IProps) {
         });
       });
     } else {
-      return sources;
+      return searched;
     }
-  }, [sources, tableLayout.filtering]);
+  }, [searched, tableLayout.filtering, dataMode]);
 
   const sorted = useMemo<IDataSource[]>(() => {
     if (
       tableLayout.sorting?.length &&
+      dataMode !== "server" &&
       !tableLayout.sorting.some((i) => i.isServerSide)
     ) {
       return [...filtered].sort(
@@ -106,13 +126,13 @@ function useData({ columns, tableLayout, data, idKey, pagination }: IProps) {
     } else {
       return filtered;
     }
-  }, [filtered, tableLayout.sorting]);
+  }, [filtered, tableLayout.sorting, dataMode]);
 
   // Filter and sort the complete dataset before selecting the current page.
   const paginated = useMemo(() => {
-    if (!pagination || pagination.limit === null) return sorted;
+    if (dataMode === "server" || !pagination || pagination.limit === null) return sorted;
     return sorted.slice(pagination.offset, pagination.offset + pagination.limit);
-  }, [sorted, pagination]);
+  }, [sorted, pagination, dataMode]);
 
   const loadedColumns = useMemo<IColumn[]>(() => {
     return columns.map((c) => {

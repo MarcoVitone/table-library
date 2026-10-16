@@ -1,6 +1,6 @@
 import type { CSSProperties, FC, ReactElement } from "react";
-import { Circle } from "@mui/icons-material";
-import type { ChipProps as MUIChipProps } from "@mui/material";
+import { Circle } from "@/tables-framework/ui/icons";
+import type { ChipProps as NativeChipProps } from "@/tables-framework/ui/controls";
 import { Chip } from "./chip.styles.ts";
 
 interface IChipProps {
@@ -13,7 +13,7 @@ interface IChipProps {
   className?: string;
 }
 
-const TableStatusChip: FC<IChipProps & Omit<MUIChipProps, "label">> = ({
+const TableStatusChip: FC<IChipProps & Omit<NativeChipProps, "label">> = ({
   label,
   backgroundColor,
   textColor,

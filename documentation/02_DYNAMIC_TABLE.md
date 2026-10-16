@@ -5,7 +5,7 @@ The `DynamicTable` is the core component of the library. It orchestrates data re
 ## Imports
 
 ```typescript
-import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { DynamicTable } from "fabulous-table-library";
 ```
 
 ## Props
@@ -33,6 +33,15 @@ Below is the complete list of properties accepted by the `DynamicTable` componen
 | `enableColumnConfig`   | `boolean`             | `false`    | Shows a settings button to open the "Columns Configuration" modal. |
 | `enableColumnFilters`  | `boolean`             | `false`    | Enables filter inputs in column headers.                           |
 | `dragHandleVisibility` | `"always" \| "hover"` | `"always"` | Controls visibility of the drag handle for reordering.             |
+| `virtualization` | `boolean \| IVirtualizationConfig` | `false` | Mounts only visible body rows plus overscan and active editors. |
+| `globalSearch` | `boolean \| IGlobalSearchConfig` | `false` | Displays one search field for multiple data columns. See [global search](./04_ADVANCED_FEATURES.md#global-search). |
+| `savedViews` | `ISavedViewsConfig` | — | Named snapshots of filters, sorting, columns, search and page size. See [saved views](./04_ADVANCED_FEATURES.md#saved-views). |
+| `bulkActions` | `IBulkAction<T>[]` | — | Toolbar actions for selected records, including async feedback. Requires row selection. See [bulk actions](./04_ADVANCED_FEATURES.md#bulk-actions). |
+
+`virtualization={true}` uses a 48px row-height estimate and five extra rows per
+side. The viewport height comes from `maxHeight` or defaults to 400px. Set
+`virtualization={{ height: 500, rowHeight: 48, overscan: 5 }}` to customize it.
+See [virtualization details](./04_ADVANCED_FEATURES.md#virtualization).
 
 ### Styling
 
@@ -40,6 +49,14 @@ Below is the complete list of properties accepted by the `DynamicTable` componen
 | :------------- | :-------------- | :---------------------------------------------------- |
 | `headerBorder` | `IBorderConfig` | Configuration for header cell borders (bottom/right). |
 | `bodyBorder`   | `IBorderConfig` | Configuration for body cell borders (bottom/right).   |
+| `stripedRows` | `boolean \| IStripedRowsConfig` | Alternating body row backgrounds. Default: `false`. |
+| `getRowStyle` | `(row: T, rowIndex: number) => CSSProperties \| null \| undefined` | Styles based on the original row data and zero-based visible page index. |
+
+`stripedRows={true}` uses `#ffffff` for the first/third rows and `#f5f7fa` for
+the second/fourth rows. Customize them with
+`stripedRows={{ oddColor: "#ffffff", evenColor: "#eef4ff" }}`.
+`getRowStyle` overrides the alternating styles; return `undefined` or `null`
+to keep them. See [row styling examples](./06_THEMING_AND_STYLING.md#conditional-and-alternating-rows).
 
 #### `IBorderConfig` Interface
 
@@ -52,11 +69,64 @@ interface IBorderConfig {
 }
 ```
 
+### Loading, errors and empty results
+
+These props work with or without pagination and are also available on `Table`:
+
+| Prop | Type | Default / behavior |
+| :--- | :--- | :--- |
+| `tableLabel` | `string` | Accessible name of the table. |
+| `isLoading` | `boolean` | `false`; shows a loading row and sets `aria-busy`. |
+| `error` | `ReactNode` | An error message or component; `null`/`undefined`/`false` clears it. |
+| `onRetry` | `() => void` | Displays a **Riprova** button when an error is shown. |
+| `loadingContent` | `ReactNode` | `Caricamento…` |
+| `emptyContent` | `ReactNode` | `Nessun dato disponibile` |
+| `noResultsContent` | `ReactNode` | `Nessun risultato per i filtri applicati` |
+
+Priority is loading, error, then data or the appropriate empty state. Loading
+and errors replace stale body rows. The header stays available. Empty messages
+span the visible columns and use valid table markup. Active filters select the
+no-results message. The existing `empty` prop remains a complete custom empty
+renderer; it takes priority over the built-in empty messages.
+
+Top-level `isLoading` takes priority over legacy
+`pagination.serverSide.isLoading`. Pass a rendered message such as
+`error={requestError?.message}` rather than an `Error` object.
+
+```tsx
+<DynamicTable
+  data={rows}
+  columns={columns}
+  tableLabel="Customers"
+  isLoading={isLoading}
+  error={errorMessage}
+  onRetry={reload}
+  emptyContent="No customers yet"
+  noResultsContent="No matching customers"
+/>
+```
+
+### Unified query state
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `dataMode` | `"client" \| "server"` | Defaults to `client`. Server mode skips all local filtering, sorting and pagination. |
+| `query` | `ITableQuery` | Controlled page, page size, sorting and filters. |
+| `defaultQuery` | `Partial<ITableQuery>` | Initial values for an uncontrolled query. |
+| `onQueryChange` | `(query: ITableQuery) => void` | One combined update for a user action. |
+| `totalItems` | `number` | Total matching records supplied by the server, before pagination. |
+
+See [the server example](./04_ADVANCED_FEATURES.md#unified-client-and-server-query).
+The unified API is enabled by `query`, `defaultQuery`, `onQueryChange` or
+`dataMode="server"`. It takes priority over legacy pagination control and layout
+sorting/filtering; use one source of truth. Existing pagination APIs continue
+to work when the unified API is not used.
+
 ### Events
 
 | Prop                   | Type                                    | Description                                                  |
 | :--------------------- | :-------------------------------------- | :----------------------------------------------------------- |
-| `onDataChange`         | `(newData: T[], updatedRow: T) => void` | Triggered when a cell value is edited (e.g., via InputCell). |
+| `onDataChange`         | `(newData: T[], updatedRow: T) => void \| Promise<void>` | Accepted edit; return a promise to expose saving/error state. |
 | `onRowSelectionChange` | `(selectedData: T[]) => void`           | Triggered when row selection changes.                        |
 | `onRowDoubleClick`     | `IRowNavigationConfig`                  | Configuration for row double-click actions.                  |
 

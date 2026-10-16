@@ -11,6 +11,12 @@ import { ResizableTable } from "./features/resizable/ResizableTable";
 import { CollapsibleTable } from "./features/collapsible/CollapsibleTable";
 import { ColumnConfigTable } from "./features/column-config/ColumnConfigTable";
 
+import { EditingTable } from "./features/editing/EditingTable";
+import { ReliabilityTable } from "./features/reliability/ReliabilityTable";
+import { VirtualizedTable } from "./features/virtualization/VirtualizedTable";
+import { GlobalSearchTable } from "./features/global-search/GlobalSearchTable";
+import { ViewsActionsTable } from "./features/views-actions/ViewsActionsTable";
+
 const DemoApp: FC = () => {
   const [activePage, setActivePage] = useState<TDemoPage>("basic");
   const content = useMemo(() => {
@@ -31,6 +37,16 @@ const DemoApp: FC = () => {
         return <ResizableTable />;
       case "collapsible":
         return <CollapsibleTable />;
+      case "editing":
+        return <EditingTable />;
+      case "reliability":
+        return <ReliabilityTable />;
+      case "virtualization":
+        return <VirtualizedTable />;
+      case "global-search":
+        return <GlobalSearchTable />;
+      case "views-actions":
+        return <ViewsActionsTable />;
       case "column-config":
         return <ColumnConfigTable />;
       default:

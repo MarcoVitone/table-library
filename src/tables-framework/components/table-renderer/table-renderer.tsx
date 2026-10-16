@@ -1,7 +1,7 @@
 import type { ElementType, ReactNode } from "react";
 import {
   Fragment,
-  createContext,
+  useCallback,
   isValidElement,
   useMemo,
   useEffect,
@@ -14,6 +14,7 @@ import type {
 } from "@/tables-framework/defines/api.types.ts";
 import type {
   IRowNavigationConfig,
+  IRowStyling,
   ISource,
 } from "@/tables-framework/defines/common.types.ts";
 import { BaseBody } from "@/tables-framework/components/areas/base-body/base-body.tsx";
@@ -23,30 +24,14 @@ import type { TRowStatusMapper } from "./hooks/use-status/use-status.ts";
 import { useStatus } from "./hooks/use-status/use-status.ts";
 import { renderRows } from "./utils/render-rows/render-rows.tsx";
 import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table.tsx";
+import type { TVirtualization } from "@/tables-framework/defines/virtualization.types";
+import { useVirtualRows } from "@/tables-framework/hooks/use-virtual-rows/use-virtual-rows";
+import { VirtualRowRetentionContext } from "@/tables-framework/hooks/use-virtual-rows/virtualization-context";
+import type { IBulkAction } from "@/tables-framework/defines/bulk-actions.types";
+import { defaultAPI, TableContext } from "./table-context";
+import { BulkActionsToolbar } from "../table-sub-components/bulk-actions-toolbar/bulk-actions-toolbar";
 
-const defaultAPI = {
-  tableLayout: null,
-  columnsLayout: null,
-  setColumnsLayout: null,
-  sorting: null,
-  setSorting: null,
-  filtering: null,
-  setFiltering: null,
-  pagination: null,
-  setPagination: null,
-  resetLayout: null,
-  exportCSV: null,
-  exportJSON: null,
-  rowsStatus: null,
-  setRowsStatus: null,
-  source: null,
-  stickyHeader: true,
-  enableColumnFilters: false,
-};
-
-const TableContext = createContext<TTableRendererAPI>(defaultAPI);
-
-interface ITableRendererProps<T = unknown> {
+interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   source: ISource;
   table?: ElementType;
   header?: ElementType;
@@ -63,6 +48,17 @@ interface ITableRendererProps<T = unknown> {
   onRowDoubleClick?: IRowNavigationConfig<T>;
   stickyHeader?: boolean;
   enableColumnFilters?: boolean;
+  /** Accessible name of the table. */
+  tableLabel?: string;
+  isLoading?: boolean;
+  error?: ReactNode;
+  onRetry?: () => void;
+  loadingContent?: ReactNode;
+  emptyContent?: ReactNode;
+  noResultsContent?: ReactNode;
+  searchTerm?: string;
+  bulkActions?: IBulkAction<T>[];
+  virtualization?: TVirtualization;
 }
 
 const TableRenderer = <T,>({
@@ -80,8 +76,20 @@ const TableRenderer = <T,>({
   showFooter = false,
   onRowSelectionChange,
   onRowDoubleClick,
+  stripedRows = false,
+  getRowStyle,
   stickyHeader = true,
   enableColumnFilters = false,
+  tableLabel,
+  isLoading = false,
+  error,
+  onRetry,
+  loadingContent = "Caricamento…",
+  emptyContent = "Nessun dato disponibile",
+  noResultsContent = "Nessun risultato per i filtri applicati",
+  virtualization,
+  searchTerm = "",
+  bulkActions,
 }: ITableRendererProps<T>) => {
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
@@ -107,12 +115,8 @@ const TableRenderer = <T,>({
       if (currentSelectedIds !== prevSelectedIds.current) {
         prevSelectedIds.current = currentSelectedIds;
 
-        const selectedData = currentSelectedEntry
-          .map(([id]) => {
-            const row = source.body.rows.find((r) => r.id === id);
-            return row?.source?.full; // Assuming full data object is what user wants
-          })
-          .filter((item) => !!item);
+        const selectedData = source.body.rows.filter(row => rowsStatus[row.id]?.isSelected)
+          .map(row => row.source.full);
 
         onRowSelectionChange(selectedData as T[]);
       }
@@ -125,10 +129,48 @@ const TableRenderer = <T,>({
     [source.header.rows, onRowDoubleClick]
   );
 
-  const body = useMemo(
-    () => renderRows(source.body.rows, onRowDoubleClick),
-    [source.body.rows, onRowDoubleClick]
-  );
+  const [focusedRow, setFocusedRow] = useState<string | null>(null);
+  const [retainedCells, setRetainedCells] = useState(new Map<string, string>());
+  const retainRow = useCallback((cellId: string, rowId: string | null) => {
+    setRetainedCells(previous => {
+      if (rowId === null ? !previous.has(cellId) : previous.get(cellId) === rowId) return previous;
+      const next = new Map(previous);
+      if (rowId === null) next.delete(cellId); else next.set(cellId, rowId);
+      return next;
+    });
+  }, []);
+  const layoutKey = useMemo(() => JSON.stringify(source.columns.map(column => [column.id, column.props.width])), [source.columns]);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const virtual = useVirtualRows(source.body.rows, virtualization, stickyHeader, layoutKey, viewportRef);
+  const rowIndices = useMemo(() => new Map(virtual.enabled ? source.body.rows.map((row, index) => [row.id, index]) : []), [source.body.rows, virtual.enabled]);
+  const body = useMemo(() => {
+    if (!virtual.enabled) return renderRows(source.body.rows, onRowDoubleClick, { stripedRows, getRowStyle });
+    const indices = new Set<number>();
+    for (let index = virtual.start; index < virtual.end; index++) indices.add(index);
+    for (const id of [focusedRow, ...retainedCells.values()]) {
+      const index = id === null ? undefined : rowIndices.get(id);
+      if (index !== undefined) indices.add(index);
+    }
+    const nodes: ReactNode[] = [];
+    const spacer = (from: number, to: number) => {
+      const height = virtual.offsets[to] - virtual.offsets[from];
+      if (height <= 0) return;
+      nodes.push(<tr key={`virtual-gap-${from}`} className="tbl-virtual-spacer" aria-hidden="true" role="presentation">
+        <td colSpan={Math.max(1, source.columns.length)} style={{ height, padding: 0, border: 0, fontSize: 0, lineHeight: 0 }} />
+      </tr>);
+    };
+    let cursor = 0;
+    for (const index of [...indices].sort((a, b) => a - b)) {
+      spacer(cursor, index);
+      nodes.push(...renderRows([source.body.rows[index]], onRowDoubleClick, {
+        stripedRows, getRowStyle, startIndex: index, virtualRowHeight: virtual.rowHeight, rowIndexOffset: source.header.rows.length,
+      }));
+      cursor = index + 1;
+    }
+    spacer(cursor, source.body.rows.length);
+    return nodes;
+  }, [source.body.rows, source.columns.length, source.header.rows.length, onRowDoubleClick, stripedRows, getRowStyle,
+    virtual.enabled, virtual.start, virtual.end, virtual.offsets, virtual.rowHeight, focusedRow, retainedCells, rowIndices]);
 
   const footer = useMemo(
     () => renderRows(source.footer.rows, onRowDoubleClick),
@@ -180,12 +222,6 @@ const TableRenderer = <T,>({
   /* -------------------------------------------------------------------------------------------------
    * MEMOIZED API
    * -----------------------------------------------------------------------------------------------*/
-  // PARSER API (Deep check)
-  const [memoizedParserAPI, setMemoizedParserAPI] = useState(parserAPI);
-  if (JSON.stringify(memoizedParserAPI) !== JSON.stringify(parserAPI)) {
-    setMemoizedParserAPI(parserAPI);
-  }
-
   // ROWS STATUS (Deep check)
   const [memoizedRowsStatus, setMemoizedRowsStatus] = useState(rowsStatus);
   if (JSON.stringify(memoizedRowsStatus) !== JSON.stringify(rowsStatus)) {
@@ -195,41 +231,72 @@ const TableRenderer = <T,>({
   const rendererAPI = useMemo<TTableRendererAPI>(() => {
     return {
       ...defaultAPI,
-      ...memoizedParserAPI,
+      ...parserAPI,
       rowsStatus: memoizedRowsStatus,
       setRowsStatus,
       source,
       stickyHeader,
       enableColumnFilters,
+      isLoading,
+      tableLabel,
+      virtualRowCount: virtual.enabled ? source.header.rows.length + source.body.rows.length + (showFooter ? source.footer.rows.length : 0) : undefined,
     };
   }, [
-    memoizedParserAPI,
+    parserAPI,
     memoizedRowsStatus,
     setRowsStatus,
     source,
     stickyHeader,
     enableColumnFilters,
+    isLoading,
+    tableLabel,
+    virtual.enabled,
+    showFooter,
   ]);
 
+  const hasError = error !== undefined && error !== null && error !== false;
+  const stateContent = isLoading ? loadingContent : hasError ? error
+    : parserAPI.filtering?.length || searchTerm.trim() ? noResultsContent : emptyContent;
+  const stateRow = (
+    <tr className="tbl-state-row">
+      <td colSpan={Math.max(1, source.columns.length)} className="tbl-state-cell">
+        <div role={hasError && !isLoading ? "alert" : "status"}>
+          {stateContent}
+          {hasError && !isLoading && onRetry && <button type="button" className="tbl-button" onClick={onRetry}>Riprova</button>}
+        </div>
+      </td>
+    </tr>
+  );
+
+  const tableNode = (
+    <TableElement>
+      <HeaderElement>{header}</HeaderElement>
+      {isLoading || hasError ? <BodyElement>{stateRow}</BodyElement> : !source.body.rows.length && emptyNode ? (
+        emptyNode
+      ) : (
+        <BodyElement>{source.body.rows.length ? body : stateRow}</BodyElement>
+      )}
+      {showFooter && <FooterElement>{footer}</FooterElement>}
+    </TableElement>
+  );
   return (
     <TableContext.Provider value={rendererAPI}>
-      <Container>
-        {beforeNode}
-
-        <TableElement>
-          <HeaderElement>{header}</HeaderElement>
-
-          {!body.length && emptyNode ? (
-            emptyNode
-          ) : (
-            <BodyElement>{body}</BodyElement>
-          )}
-
-          {showFooter && <FooterElement>{footer}</FooterElement>}
-        </TableElement>
-
-        {afterNode}
-      </Container>
+      <VirtualRowRetentionContext.Provider value={virtual.enabled ? retainRow : null}>
+        <Container>
+          {beforeNode}
+          {bulkActions && <BulkActionsToolbar actions={bulkActions} disabled={isLoading || hasError} />}
+          {virtual.enabled ? <div ref={viewportRef} className="tbl-virtual-viewport"
+            role="region" aria-label={`${tableLabel ?? "Tabella"}: area scorribile`} tabIndex={0}
+            style={{ height: virtual.height, overflow: "auto", width: "100%", maxWidth: "100%", overflowAnchor: "none" }}
+            onFocusCapture={event => setFocusedRow((event.target as HTMLElement).closest<HTMLTableRowElement>("tr[data-virtual-row]")?.dataset.virtualRow ?? null)}
+            onBlurCapture={event => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setFocusedRow(null);
+            }}>
+            {tableNode}
+          </div> : tableNode}
+          {afterNode}
+        </Container>
+      </VirtualRowRetentionContext.Provider>
     </TableContext.Provider>
   );
 };

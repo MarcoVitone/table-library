@@ -1,5 +1,5 @@
 import {
-  useRef,
+  useState,
   useMemo,
   Children,
   isValidElement,
@@ -33,23 +33,15 @@ interface IProps {
 }
 
 function useParser({ src, freeze }: IProps) {
-  const srcRef = useRef(src);
-
-  const memoized = useMemo(() => {
-    if (freeze) {
-      return srcRef.current;
-    }
-
-    return (srcRef.current = src);
-  }, [freeze, src]);
+  const [cachedSource, setCachedSource] = useState(src);
+  if (!freeze && cachedSource !== src) setCachedSource(src);
+  const memoized = freeze ? cachedSource : src;
 
   /* -------------------------------------------------------------------------------------------------
    * PARSING
    * -----------------------------------------------------------------------------------------------*/
 
-  const prevOutputRef = useRef<IColumn[]>([]);
-
-  return useMemo(() => {
+  const parsed = useMemo(() => {
     // PARSE JSX STRUCTURE AND CREATE COLUMN DESCRIPTORS
 
     const output: IColumn[] = [];
@@ -130,14 +122,13 @@ function useParser({ src, freeze }: IProps) {
       );
     }
 
-    if (ObjectUtils.deepEqual(output, prevOutputRef.current)) {
-      return prevOutputRef.current;
-    }
-
-    prevOutputRef.current = output;
-
     return output;
   }, [memoized]);
+
+  const [previous, setPrevious] = useState(parsed);
+  const output = parsed === previous || ObjectUtils.deepEqual(parsed, previous) ? previous : parsed;
+  if (output !== previous) setPrevious(output);
+  return output;
 }
 
 export { useParser };

@@ -126,3 +126,4 @@ const StatusCell: FC<IStatusCellProps> = ({
 };
 
 export { StatusCell };
+export type { IStatusCellProps };

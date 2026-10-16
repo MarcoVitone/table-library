@@ -1,5 +1,5 @@
 import { useContext, useMemo, useCallback } from "react";
-import { TableContext } from "@/tables-framework/components/table-renderer/table-renderer";
+import { TableContext } from "@/tables-framework/components/table-renderer/table-context";
 import type {
   TFullTableAPI,
   TSetColumnLayout,
@@ -111,17 +111,7 @@ function useTable(data?: ICell | IRow): TFullTableAPI {
 
   const selectedRows = useMemo<IRow[] | null>(() => {
     if (rowsStatus && source) {
-      return Object.entries(rowsStatus).reduce<IRow[]>((acc, [id, status]) => {
-        if (status.isSelected) {
-          const row = source.body.rows.find((r) => r.id === id);
-
-          if (row) {
-            acc.push(row);
-          }
-        }
-
-        return acc;
-      }, []);
+      return source.body.rows.filter(row => rowsStatus[row.id]?.isSelected);
     } else {
       return null;
     }

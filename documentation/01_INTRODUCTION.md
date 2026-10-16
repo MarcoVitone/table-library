@@ -16,18 +16,27 @@ Welcome to the official documentation of **Table Library**, a powerful and flexi
 
 To use the library in your React project, ensure you have the necessary dependencies installed.
 
-### Core Dependencies
+### Install the published package
 
-The library relies on **React**, **MUI (Material UI)**, and **Emotion**.
+Install with React 19.2 or newer within React 19:
 
 ```bash
-npm install @mui/material @mui/icons-material @emotion/react @emotion/styled date-fns
+npm install fabulous-table-library
 ```
 
-If you haven't already, install React and React DOM (version 18 or higher):
+Import the stylesheet once in your application:
+
+```typescript
+import "fabulous-table-library/style.css";
+```
+
+The UI uses **React**, native HTML, and CSS. Material UI and Emotion are not required.
+Dates use native JavaScript `Date` and `Intl.DateTimeFormat`; no date library is required.
+
+For this repository, install the dependencies with:
 
 ```bash
-npm install react react-dom
+npm install
 ```
 
 ## Quick Start
@@ -50,7 +59,7 @@ const myData = [
 Define the column structure using the `IColumnConfig` interface.
 
 ```typescript
-import { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { IColumnConfig } from "fabulous-table-library";
 
 const myColumns: IColumnConfig[] = [
   {
@@ -73,7 +82,7 @@ const myColumns: IColumnConfig[] = [
 Use the `DynamicTable` component by passing `data` and `columns`.
 
 ```tsx
-import { DynamicTable } from "@/tables-framework/components/dynamic-table/dynamic-table";
+import { DynamicTable } from "fabulous-table-library";
 
 const MyTable = () => {
   return (

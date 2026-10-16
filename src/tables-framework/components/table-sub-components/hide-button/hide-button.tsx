@@ -1,33 +1,21 @@
-import { VisibilityOff } from "@mui/icons-material";
-import { IconButton, Tooltip } from "@mui/material";
-import type { Palette } from "@mui/material/styles";
-
+import { VisibilityOff } from "@/tables-framework/ui/icons";
+import { IconButton } from "@/tables-framework/ui/controls";
+import type { Palette } from "@/tables-framework/theme/theme";
 interface IHideButton {
-  handleCollapseColumn: (e: React.MouseEvent<Element, MouseEvent>) => void;
+  handleCollapseColumn: (event: React.MouseEvent<Element, MouseEvent>) => void;
   palette: Palette;
   title: string;
 }
-
-const HideButton = ({ handleCollapseColumn, palette, title }: IHideButton) => {
-  return (
-    <Tooltip title={title} className={"hide-button"}>
-      <IconButton
-        size="small"
-        onClick={handleCollapseColumn}
-        sx={{
-          padding: "2px",
-          marginLeft: "4px",
-          opacity: 0.5,
-          "&:hover": {
-            opacity: 1,
-            color: palette.primary.main,
-          },
-        }}
-      >
-        <VisibilityOff fontSize="inherit" style={{ fontSize: "1rem" }} />
-      </IconButton>
-    </Tooltip>
-  );
-};
-
-export { HideButton };
+export function HideButton({
+  handleCollapseColumn,
+  palette,
+  title
+}: IHideButton) {
+  return <IconButton className="hide-button" title={title} aria-label={title} size="small" onClick={handleCollapseColumn} style={{
+    padding: 2,
+    marginLeft: 4,
+    color: palette.primary.main
+  }}><VisibilityOff fontSize="inherit" style={{
+      fontSize: '1rem'
+    }} /></IconButton>;
+}

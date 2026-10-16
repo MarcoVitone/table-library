@@ -1,37 +1,33 @@
-import { AccordionSummary } from "@mui/material";
-import { css, styled } from "@mui/material/styles";
-import type { IStyleFromProps } from "@/tables-framework/theme/common.types";
-
-const stylesFromProps: IStyleFromProps = {
-  shouldForwardProp: () => true,
-};
-
-const CustomAccordionSummary = styled(
-  AccordionSummary,
-  stylesFromProps
-)(() =>
-  css({
-    paddingLeft: 0,
-    paddingRight: 0,
-    marginLeft: 0,
-    borderRadius: 0,
-    width: "100%",
-    ".MuiAccordionSummary-content": {
+import { createElement, type HTMLAttributes, type ReactNode } from "react";
+import { nativeElement } from "@/tables-framework/ui/native-element";
+export function CustomAccordionSummary({
+  expandIcon,
+  children,
+  style,
+  ...props
+}: HTMLAttributes<HTMLElement> & {
+  expandIcon?: ReactNode;
+}) {
+  return createElement('summary', {
+    ...props,
+    className: ['tbl-accordion-summary', props.className].filter(Boolean).join(' '),
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      width: '100%',
+      padding: 0,
       margin: 0,
-      height: "auto",
-    },
-  })
-);
-
-const CustomBar = styled(
-  "div",
-  stylesFromProps
-)(({ theme }) =>
-  css({
-    width: "0.2rem",
-    backgroundColor: theme.palette.secondary.main,
-    marginRight: "0.5rem",
-  })
-);
-
-export { CustomAccordionSummary, CustomBar };
+      cursor: 'pointer',
+      ...style
+    }
+  }, children, createElement('span', {
+    className: 'tbl-accordion-arrow'
+  }, expandIcon));
+}
+export const CustomBar = nativeElement('div', 'tbl-accordion-bar', ({
+  theme
+}) => ({
+  width: '.2rem',
+  backgroundColor: theme.palette.secondary.main,
+  marginRight: '.5rem'
+}));

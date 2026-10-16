@@ -5,10 +5,21 @@ import { ResizerHandle } from "./column-resizer.styles.ts";
 interface IColumnResizerProps {
   onResizeEnd: (newWidth: number, columnWidths?: Record<string, number>) => void;
   minWidth?: string | number;
+  width?: string | number | null;
+  label?: string;
 }
 
-const ColumnResizer: FC<IColumnResizerProps> = ({ onResizeEnd, minWidth = 50 }) => {
+const ColumnResizer: FC<IColumnResizerProps> = ({ onResizeEnd, minWidth = 50, width, label }) => {
   const [isResizing, setIsResizing] = useState(false);
+  const handleRef = useRef<HTMLDivElement>(null);
+  const [measuredWidth, setMeasuredWidth] = useState<number>();
+  useEffect(() => {
+    const header = handleRef.current?.closest("th, td");
+    if (!header || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => setMeasuredWidth(Math.round(header.getBoundingClientRect().width)));
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
   const resizeRef = useRef({
     startX: 0,
     startWidth: 0,
@@ -119,9 +130,34 @@ const ColumnResizer: FC<IColumnResizerProps> = ({ onResizeEnd, minWidth = 50 }) 
 
   return (
     <ResizerHandle
+      ref={handleRef}
       role="separator"
-      aria-label="Ridimensiona colonna"
+      aria-label={label ? `Ridimensiona colonna ${label}` : "Ridimensiona colonna"}
       aria-orientation="vertical"
+      aria-valuemin={typeof minWidth === "number" ? minWidth : undefined}
+      aria-valuenow={measuredWidth ?? (typeof width === "number" ? Math.round(width) : undefined)}
+      aria-valuetext={measuredWidth !== undefined ? `${measuredWidth} pixel`
+        : typeof width === "number" ? `${Math.round(width)} pixel` : "Larghezza automatica"}
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home"].includes(event.key)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const header = event.currentTarget.closest<HTMLTableCellElement>("th, td");
+        const table = header?.closest("table");
+        const id = header?.dataset.columnId;
+        if (!header || !table || !id) return;
+        const computedMinimum = getComputedStyle(header).minWidth;
+        const minimum = typeof minWidth === "number" ? minWidth
+          : computedMinimum.endsWith("px") ? Number.parseFloat(computedMinimum) : 50;
+        const widths = Object.fromEntries(Array.from(table.querySelectorAll<HTMLTableCellElement>("thead [data-column-id]"))
+          .filter(cell => cell.colSpan === 1)
+          .map(cell => [cell.dataset.columnId!, cell.getBoundingClientRect().width]));
+        const step = event.shiftKey ? 50 : 10;
+        widths[id] = event.key === "Home" ? minimum
+          : Math.max(minimum, header.getBoundingClientRect().width + (event.key === "ArrowRight" ? step : -step));
+        onResizeEnd(widths[id], widths);
+      }}
       onMouseDown={handleMouseDown}
       onClick={(event) => event.stopPropagation()}
     />

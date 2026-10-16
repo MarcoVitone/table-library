@@ -1,49 +1,25 @@
-import { css, styled } from "@mui/material/styles";
-import { BaseCell } from "@/tables-framework/components/cells/base-cell/base-cell.jsx";
-import type { IStyleFromProps } from "@/tables-framework/theme/common.types.js";
-import type {
-  TAlignment,
-  TDirection,
-} from "@/tables-framework/defines/common.types.ts";
-
-interface ISortingBaseCell {
+import { createElement, type CSSProperties } from "react";
+import { BaseCell, type IBaseCellProps } from "../base-cell/base-cell";
+import type { TDirection } from "@/tables-framework/defines/common.types";
+export function SortingBaseCell({
+  direction,
+  disabled,
+  textAlignment,
+  padding,
+  ...props
+}: IBaseCellProps & {
   direction: TDirection;
   disabled: boolean;
-  textAlignment?: TAlignment;
-  padding?: string;
-}
-
-const sortingStylesFromProps: IStyleFromProps = {
-  shouldForwardProp: (prop) =>
-    prop !== "direction" &&
-    prop !== "disabled" &&
-    prop !== "textAlignment" &&
-    prop !== "padding",
-};
-
-const SortingBaseCell = styled(
-  BaseCell,
-  sortingStylesFromProps
-)<ISortingBaseCell>(({ direction, disabled, textAlignment, padding }) => {
-  let contentPosition = "center";
-  if (textAlignment === "left") {
-    contentPosition = "flex-start";
-  } else if (textAlignment === "right") {
-    contentPosition = "flex-end";
-  }
-
-  return css({
-    padding: padding ? padding : "0.5rem",
-    "& > span": {
-      display: "flex",
-      gap: "4px",
-      justifyContent: contentPosition,
-      flexDirection: direction,
-      alignItems: "center",
-      cursor: disabled ? "not-allowed" : "pointer",
-      whiteSpace: "pre-line",
-    },
+}) {
+  return createElement(BaseCell, {
+    ...props,
+    textAlignment,
+    padding: padding || '.5rem',
+    className: ['tbl-sorting-cell', props.className].filter(Boolean).join(' '),
+    style: {
+      '--sort-direction': direction,
+      '--sort-align': textAlignment === 'left' ? 'flex-start' : textAlignment === 'right' ? 'flex-end' : 'center',
+      '--sort-cursor': disabled ? 'not-allowed' : 'pointer'
+    } as CSSProperties
   });
-});
-
-export { SortingBaseCell };
+}

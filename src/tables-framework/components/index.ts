@@ -32,3 +32,16 @@ export * from "./dynamic-table/dynamic-table";
 export * from "./pagination/pagination";
 export * from "./pagination/pagination.types";
 export * from "./infinite-scroll/infinite-scroll";
+
+export { ThemeProvider, createTheme, useTheme, defaultTheme } from "../theme/theme";
+export type { TableTheme, ThemeOptions, Palette, PaletteColor } from "../theme/theme";
+export * from "./cells/autocomplete-cell.tsx/autocomplete-cell";
+export type { ITableQuery, ITableQueryProps } from "../defines/query.types";
+export type { ICellEditing, TCellValue } from "../defines/editing.types";
+export type { IStripedRowsConfig, IRowStyling } from "../defines/common.types";
+export { useTableQuery, normalizeTableQuery } from "../hooks/use-table-query/use-table-query";
+export type { IVirtualizationConfig, TVirtualization } from "../defines/virtualization.types";
+export type { IGlobalSearchConfig, TGlobalSearch } from "../defines/global-search.types";
+export type { ITableViewState, ISavedTableView, ISavedViewsConfig } from "../defines/saved-views.types";
+export type { IBulkAction, IBulkActionContext } from "../defines/bulk-actions.types";
+export { parseSavedViews, serializeSavedViews } from "../utils/saved-views/saved-views";

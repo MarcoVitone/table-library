@@ -1,13 +1,5 @@
-import { css, styled } from "@mui/material/styles";
-
-import type {
-  TAlignment,
-  TtextTransform,
-  IBorderConfig,
-} from "@/tables-framework/defines/common.types.ts";
-import type { IStyleFromProps } from "@/tables-framework/theme/common.types.ts";
-import { convertHexToRGBA } from "@/tables-framework/utils/index.ts";
-
+import { nativeElement } from "@/tables-framework/ui/native-element";
+import type { TAlignment, TtextTransform, IBorderConfig } from "@/tables-framework/defines/common.types";
 interface IBaseCellProps {
   noLeft?: boolean;
   noRight?: boolean;
@@ -19,6 +11,7 @@ interface IBaseCellProps {
   textTransform?: TtextTransform;
   fontColor?: string;
   backgroundColor?: string;
+  rowBackgroundColor?: string;
   fontSize?: string;
   padding?: string;
   overFlow?: string;
@@ -42,179 +35,27 @@ interface IBaseCellProps {
   isDragging?: boolean;
   draggable?: boolean;
 }
-
-const stylesFromProps: IStyleFromProps = {
-  shouldForwardProp: (prop) =>
-    prop !== "noLeft" &&
-    prop !== "noRight" &&
-    prop !== "noTop" &&
-    prop !== "noBorder" &&
-    prop !== "borderColor" &&
-    prop !== "bold" &&
-    prop !== "textPosition" &&
-    prop !== "textTransform" &&
-    prop !== "fontColor" &&
-    prop !== "backgroundColor" &&
-    prop !== "fontSize" &&
-    prop !== "padding" &&
-    prop !== "overFlow" &&
-    prop !== "textOverflow" &&
-    prop !== "isSorted" &&
-    prop !== "backgroundColorSort" &&
-    prop !== "isSortActive" &&
-    prop !== "showHeaderCheckbox" &&
-    prop !== "isSticky" &&
-    prop !== "isFirstRow" &&
-    prop !== "fixed" &&
-    prop !== "fixedColumn" &&
-    prop !== "isSelected" &&
-    prop !== "rowSelectedColor" &&
-    prop !== "wrapText" &&
-    prop !== "ellipsis" &&
-    prop !== "maxWidth" &&
-    prop !== "borderRight" &&
-    prop !== "borderBottom" &&
-    prop !== "borderTop" &&
-    prop !== "borderLeft" &&
-    prop !== "stickyLeft" &&
-    prop !== "isDragging" &&
-    prop !== "draggable" &&
-    prop !== "draggable" &&
-    // Props non-DOM da escludere
-    prop !== "inputType" &&
-    prop !== "inputHeight" &&
-    prop !== "inputWidth" &&
-    prop !== "currencySymbol" &&
-    prop !== "symbolPosition" &&
-    prop !== "statusConfig" &&
-    prop !== "renderStatus" &&
-    prop !== "decimals" &&
-    prop !== "getOptionLabel" &&
-    prop !== "isOptionEqualToValue" &&
-    prop !== "disableClearable" &&
-    prop !== "onCellChange",
-};
-
-const BaseCellComponent = styled(
-  "td",
-  stylesFromProps
-)<IBaseCellProps>(
-  ({
-    borderColor,
-    bold,
-    textPosition = "left",
-    textTransform,
-    fontColor,
-    backgroundColor,
-    fontSize,
-    padding,
-    overFlow,
-    textOverflow,
-    isSorted,
-    backgroundColorSort,
-    isSortActive,
-    theme,
-    isSticky,
-    fixed,
-    isSelected,
-    rowSelectedColor,
-    wrapText,
-    ellipsis,
-    maxWidth,
-    borderRight,
-    borderBottom,
-    borderTop,
-    borderLeft,
-    stickyLeft,
-    isDragging,
-  }) => {
-    const defaultBorderColor = convertHexToRGBA(
-      theme?.palette?.primary?.dark,
-      0.6
-    );
-    const finalBorderColor = borderColor || defaultBorderColor;
-    const selectedStyles = {
-      outlineStyle: "none" as const,
-      outlineColor: theme.palette.secondary.dark,
-      outlineWidth: 1,
-      backgroundColor: rowSelectedColor || "rgba(0, 73, 135, 0.1)",
-    };
-
-    return css({
-      borderLeft: borderLeft?.show
-        ? `${borderLeft.width || "1px"} ${borderLeft.style || "solid"} ${
-            borderLeft.color || finalBorderColor
-          }`
-        : "none",
-      borderTop: borderTop?.show
-        ? `${borderTop.width || "1px"} ${borderTop.style || "solid"} ${
-            borderTop.color || finalBorderColor
-          }`
-        : "none",
-      borderRight: borderRight?.show
-        ? `${borderRight.width || "1px"} ${borderRight.style || "solid"} ${
-            borderRight.color || finalBorderColor
-          }`
-        : "none",
-      borderBottom: borderBottom?.show
-        ? `${borderBottom.width || "1px"} ${borderBottom.style || "solid"} ${
-            borderBottom.color || finalBorderColor
-          }`
-        : "none",
-      padding: padding || "0.5rem 0.75rem",
-      color: fontColor || theme.palette.primary.dark,
-      backgroundColor: isSorted
-        ? backgroundColorSort
-        : backgroundColor || (backgroundColor && isSticky)
-        ? backgroundColor
-        : fixed && !backgroundColor
-        ? "#FFFFFF"
-        : "transparent",
-      fontWeight: bold ? "bold" : "normal",
-      textAlign: textPosition,
-      textTransform: textTransform,
-      fontSize: fontSize || "1rem",
-      fontFamily: theme.typography.body1.fontFamily,
-      whiteSpace: ellipsis ? "nowrap" : wrapText ? "normal" : "nowrap",
-      maxWidth: maxWidth,
-      overflow: ellipsis ? "hidden" : overFlow,
-      textOverflow: ellipsis ? "ellipsis" : textOverflow,
-      position: isSticky || fixed ? "sticky" : "relative",
-      top: isSticky ? "0" : undefined,
-      left: fixed ? stickyLeft || "0" : undefined,
-      zIndex: fixed && isSticky ? 40 : fixed ? 30 : isSticky ? 10 : undefined,
-      boxShadow: undefined,
-      opacity: isDragging ? 0.5 : 1,
-      "& .sort-icon": {
-        opacity: isSortActive ? 1 : 0,
-        transition: "opacity 0.2s",
-      },
-      "& .hide-button": {
-        opacity: 0,
-        transition: "opacity 0.2s",
-      },
-      "& .filter-icon": {
-        opacity: 0,
-        transition: "opacity 0.2s",
-      },
-      "& .filter-icon.active, & .filter-icon.open": {
-        opacity: 1,
-      },
-      "&:hover .sort-icon": {
-        opacity: 1,
-      },
-      "&:hover .drag-handle": {
-        opacity: 1,
-      },
-      "&:hover .hide-button": {
-        opacity: 1,
-      },
-      "&:hover .filter-icon": {
-        opacity: 1,
-      },
-      ...(isSelected ? selectedStyles : {}),
-    });
-  }
-);
-
-export { BaseCellComponent };
+const border = (config: IBorderConfig | undefined, fallback: string) => config?.show ? [config.width || '1px', config.style || 'solid', config.color || fallback].join(' ') : 'none';
+export const BaseCellComponent = nativeElement<'td', IBaseCellProps>('td', 'tbl-cell', p => ({
+  borderLeft: border(p.borderLeft, p.borderColor || p.theme.palette.neutral.border || '#ddd'),
+  borderTop: border(p.borderTop, p.borderColor || '#ddd'),
+  borderRight: border(p.borderRight, p.borderColor || '#ddd'),
+  borderBottom: border(p.borderBottom, p.borderColor || '#ddd'),
+  padding: p.padding || '.5rem .75rem',
+  color: p.fontColor || p.theme.palette.primary.dark,
+  backgroundColor: p.isSelected ? p.rowSelectedColor || 'rgba(0,73,135,.1)' : p.isSorted ? p.backgroundColorSort : p.backgroundColor ?? p.rowBackgroundColor ?? (p.fixed ? '#fff' : 'transparent'),
+  fontWeight: p.bold ? 'bold' : 'normal',
+  textAlign: p.textPosition || 'left',
+  textTransform: p.textTransform,
+  fontSize: p.fontSize || '1rem',
+  fontFamily: p.theme.typography.body1.fontFamily,
+  whiteSpace: p.ellipsis ? 'nowrap' : p.wrapText ? 'normal' : 'nowrap',
+  maxWidth: p.maxWidth,
+  overflow: p.ellipsis ? 'hidden' : p.overFlow,
+  textOverflow: p.ellipsis ? 'ellipsis' : p.textOverflow,
+  position: p.isSticky || p.fixed ? 'sticky' : 'relative',
+  top: p.isSticky ? 0 : undefined,
+  left: p.fixed ? p.stickyLeft || 0 : undefined,
+  zIndex: p.fixed && p.isSticky ? 40 : p.fixed ? 30 : p.isSticky ? 10 : undefined,
+  opacity: p.isDragging ? .5 : 1
+}));

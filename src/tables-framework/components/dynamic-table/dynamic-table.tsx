@@ -8,14 +8,8 @@ import { NumCell } from "@/tables-framework/components/cells/num-cell/num-cell";
 import { StatusCell } from "@/tables-framework/components/cells/status-cell/status-cell";
 import { DateCell } from "@/tables-framework/components/cells/date-cell/date-cell";
 import { CustomCell } from "@/tables-framework/components/cells/custom-cell/custom-cell";
-import {
-  InputCell,
-  type TInputType,
-} from "@/tables-framework/components/cells/input-cell/input-cell";
-import {
-  CurrencyCell,
-  type TCurrencySymbolPosition,
-} from "@/tables-framework/components/cells/currency-cell/currency-cell";
+import { InputCell } from "@/tables-framework/components/cells/input-cell/input-cell";
+import { CurrencyCell } from "@/tables-framework/components/cells/currency-cell/currency-cell";
 import { Column } from "@/tables-framework/components/table-parser/components/column/column";
 import { HeaderCell } from "@/tables-framework/components/table-parser/components/header-cell/header-cell";
 import { BodyCell } from "@/tables-framework/components/table-parser/components/body-cell/body-cell";
@@ -31,7 +25,6 @@ import type {
 import { usePaginationPersistence } from "@/tables-framework/hooks/use-pagination-persistence/use-pagination-persistence";
 
 import type {
-  ICellProps,
   ILinkConfig,
   ILinkObject,
   IRowNavigationConfig,
@@ -40,66 +33,21 @@ import type {
   ICell,
   ITableLayout,
   IColumnLayout,
-  IFilterConfig,
 } from "@/tables-framework/defines/common.types";
-import {
-  AutocompleteCell,
-  type TAutocompleteOption,
-} from "@/tables-framework/components/cells/autocomplete-cell.tsx/autocomplete-cell";
-import type { TStatusConfig } from "@/tables-framework/components/cells/status-cell/status-constants";
+import { AutocompleteCell } from "@/tables-framework/components/cells/autocomplete-cell.tsx/autocomplete-cell";
+import type { IColumnConfig } from "@/tables-framework/defines/column-config";
+import type { TCellValue } from "@/tables-framework/defines/editing.types";
+import type { ITableQuery, ITableQueryProps } from "@/tables-framework/defines/query.types";
+import { useTableQuery } from "@/tables-framework/hooks/use-table-query/use-table-query";
+import type { TGlobalSearch } from "@/tables-framework/defines/global-search.types";
+import type { ISavedTableView, ISavedViewsConfig } from "@/tables-framework/defines/saved-views.types";
+import { SavedViewsToolbar } from "../table-sub-components/saved-views-toolbar/saved-views-toolbar";
+export type { IColumnConfig } from "@/tables-framework/defines/column-config";
 import { TableToolbar } from "@/tables-framework/components/table-sub-components/table-toolbar/table-toolbar";
 import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns-config-modal/columns-config-modal";
 import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table";
+import { ObjectUtils, StringUtils } from "@/tables-framework/utils";
 import { setValueAtPath } from "@/tables-framework/utils/object-utils/set-value-at-path/set-value-at-path";
-
-type TUserBaseCellProps = Partial<Omit<IBaseCellProps, keyof ICellProps>>;
-
-export interface IColumnConfig<T = Record<string, unknown>> {
-  id: string;
-  label: string;
-  dataKey?: string;
-  type?:
-    | "text"
-    | "action"
-    | "checkbox"
-    | "date"
-    | "number"
-    | "status"
-    | "custom"
-    | "input"
-    | "currency"
-    | "autocomplete";
-  inputType?: TInputType;
-  inputHeight?: string;
-  inputWidth?: string;
-  // Currency Props
-  currencySymbol?: string | ReactNode;
-  symbolPosition?: TCurrencySymbolPosition;
-  decimals?: number;
-  width?: string;
-  minWidth?: string | number;
-  // Status Props
-  statusConfig?: TStatusConfig;
-  renderStatus?: (value: unknown, color?: string) => ReactNode;
-  headerProps?: TUserBaseCellProps;
-  bodyProps?: TUserBaseCellProps;
-  component?: ElementType;
-  queryParam?: string;
-  onHeaderClick?: (dataKey: string) => void;
-  link?: ILinkConfig<T>;
-  fixed?: boolean;
-  autocompleteOptions?: TAutocompleteOption[];
-  getOptionLabel?: (option: TAutocompleteOption) => string;
-  isOptionEqualToValue?: (
-    option: TAutocompleteOption,
-    value: TAutocompleteOption
-  ) => boolean;
-  disableClearable?: boolean;
-  isResizable?: boolean;
-  hideable?: boolean; // Se false, l'icona "nascondi" non apparirà per questa colonna
-  draggable?: boolean; // Se false, questa colonna non può essere spostata
-  filterConfig?: IFilterConfig;
-}
 
 export interface IPaginationConfig extends IPaginationCustomization {
   enabled?: boolean;
@@ -111,7 +59,7 @@ export interface IPaginationConfig extends IPaginationCustomization {
   paginationComponent?: ReactNode;
 }
 
-interface IDynamicTableProps<T>
+export interface IDynamicTableProps<T>
   extends Omit<
     ITableProps<
       IUnknownProps,
@@ -124,8 +72,8 @@ interface IDynamicTableProps<T>
       IUnknownProps,
       T
     >,
-    "children" | "data" | "dataPagination" | "onDataCountChange"
-  > {
+    "children" | "data" | "dataPagination" | "onDataCountChange" | "searchTerm" | "searchColumns"
+  >, Omit<ITableQueryProps, "dataMode"> {
   columns: IColumnConfig<T>[];
   data: T[];
   onRowSelectionChange?: (data: T[]) => void;
@@ -138,13 +86,15 @@ interface IDynamicTableProps<T>
   rowSelectedColor?: string;
   headerBorder?: IBorderConfig;
   bodyBorder?: IBorderConfig;
-  onDataChange?: (newData: T[], updatedRow: T) => void;
+  onDataChange?: (newData: T[], updatedRow: T) => void | Promise<void>;
   isResizable?: boolean;
   enableColumnReorder?: boolean; // Abilita il Drag & Drop
   enableColumnHiding?: boolean; // Abilita l'icona "occhio sbarrato" nell'header
   enableColumnConfig?: boolean; // Abilita il bottone "Settings" per la modale
   dragHandleVisibility?: "always" | "hover";
   enableColumnFilters?: boolean;
+  globalSearch?: TGlobalSearch;
+  savedViews?: ISavedViewsConfig;
 }
 
 const CELL_COMPONENTS: Record<string, ElementType> = {
@@ -163,6 +113,7 @@ const CELL_COMPONENTS: Record<string, ElementType> = {
 const DynamicTable = <T extends object>({
   columns,
   data,
+  idKey = "id",
   onRowSelectionChange,
   onRowDoubleClick,
   pagination: paginationConfig,
@@ -174,6 +125,16 @@ const DynamicTable = <T extends object>({
   headerBorder,
   bodyBorder,
   onDataChange,
+  query,
+  defaultQuery,
+  onQueryChange,
+  dataMode = "client",
+  totalItems: serverTotalItems,
+  isLoading: externalIsLoading,
+  layout: externalLayout,
+  virtualization,
+  globalSearch = false,
+  savedViews,
   isResizable: globalResizable = false,
   // Estrai le nuove props (default false)
   enableColumnReorder = false,
@@ -206,6 +167,18 @@ const DynamicTable = <T extends object>({
     persistence,
   } = paginationConfig || {};
 
+  const unifiedQuery = !!(query || defaultQuery || onQueryChange || dataMode === "server");
+  const searchConfig = typeof globalSearch === "object" ? globalSearch : undefined;
+  const [internalSearch, setInternalSearch] = useState(searchConfig?.defaultValue ?? "");
+  const searchColumns = useMemo(() => searchConfig?.columns ?? columns
+    .filter(column => column.type !== "checkbox" && column.type !== "action")
+    .map(column => column.dataKey || column.id), [searchConfig?.columns, columns]);
+  const isVirtualized = !!virtualization;
+  const resolvedVirtualization = useMemo(() => virtualization ? {
+    ...(typeof virtualization === "object" ? virtualization : {}),
+    height: (typeof virtualization === "object" ? virtualization.height : undefined) ?? maxHeight ?? 400,
+  } : false, [virtualization, maxHeight]);
+
   // Phase 3: Persistence hook
   const {
     initialLimit: persistedLimit,
@@ -220,6 +193,17 @@ const DynamicTable = <T extends object>({
     persistPage: persistence?.persistPage,
     persistLayout: persistence?.persistLayout,
   });
+
+  const handleQueryChange = useCallback((next: ITableQuery) => {
+    if (persistence?.enabled) persistState({ page: next.page, limit: next.pageSize });
+    onQueryChange?.(next);
+  }, [persistence?.enabled, persistState, onQueryChange]);
+  const { query: queryState, updateQuery } = useTableQuery({ query, onQueryChange: handleQueryChange,
+    defaultQuery: { page: persistedPage, pageSize: persistedLimit ?? initialLimit,
+      sorting: externalLayout?.sorting, filters: externalLayout?.filtering,
+      ...(searchConfig?.defaultValue !== undefined ? { search: searchConfig.defaultValue } : {}), ...defaultQuery },
+  });
+  const searchTerm = unifiedQuery ? queryState.search ?? "" : globalSearch ? searchConfig?.value ?? internalSearch : "";
 
   // Internal state (used when not in controlled mode)
   const [internalOffset, setInternalOffset] = useState<number>(
@@ -238,20 +222,20 @@ const DynamicTable = <T extends object>({
 
   // Use controlled values if provided, otherwise use internal state
   const isControlled = !!controlled;
-  const currentPage = isControlled
+  const currentPage = unifiedQuery ? queryState.page : isControlled
     ? controlled.page
     : Math.floor(internalOffset / internalLimit);
-  const limit = isControlled ? controlled.limit : internalLimit;
-  const offset = isControlled
+  const limit = unifiedQuery ? queryState.pageSize : isControlled ? controlled.limit : internalLimit;
+  const offset = unifiedQuery ? queryState.page * queryState.pageSize : isControlled
     ? controlled.page * controlled.limit
     : internalOffset;
 
   const [filteredTotalItems, setFilteredTotalItems] = useState(data.length);
-  const totalItems = serverSide?.enabled
+  const totalItems = dataMode === "server" ? serverTotalItems ?? serverSide?.totalItems ?? data.length : serverSide?.enabled
     ? serverSide.totalItems
     : filteredTotalItems;
   const totalPages = Math.ceil(totalItems / limit);
-  const isLoading = serverSide?.isLoading ?? false;
+  const isLoading = externalIsLoading ?? serverSide?.isLoading ?? false;
 
   // The parser applies client-side pagination after filtering and sorting.
   const dataPagination = useMemo(
@@ -260,50 +244,48 @@ const DynamicTable = <T extends object>({
     [paginationEnabled, serverSide?.enabled, limit, offset]
   );
 
-  const frozenColumnCount = useMemo(() => {
-    return columns.filter((c) => c.fixed).length;
-  }, [columns]);
+  const columnsLayout = externalLayout?.columnsLayout ?? internalColumnsLayout;
 
   const orderedColumns = useMemo(() => {
     // Se non abbiamo ancora un layout (primo render), usiamo l'ordine originale
-    if (internalColumnsLayout.length === 0) return columns;
+    if (columnsLayout.length === 0) return columns;
 
     // Creiamo una mappa per accesso veloce
     const colMap = new Map(columns.map((c) => [c.id, c]));
 
     // Ricostruiamo l'array nell'ordine corretto
-    const ordered = internalColumnsLayout
+    const ordered = columnsLayout
       .map((l) => colMap.get(l.id))
       .filter((c): c is IColumnConfig<T> => !!c); // Filtra eventuali undefined
 
     // Aggiungiamo in coda eventuali colonne nuove che non sono ancora nel layoutIds
-    const orderedIds = new Set(internalColumnsLayout.map((l) => l.id));
+    const orderedIds = new Set(columnsLayout.map((l) => l.id));
     const remaining = columns.filter((c) => !orderedIds.has(c.id));
 
     return [...ordered, ...remaining];
-  }, [columns, internalColumnsLayout]);
+  }, [columns, columnsLayout]);
 
   const stickyOffsets = useMemo(() => {
     const offsets: Record<string, string> = {};
     let accumulator = 0;
 
-    // Iteriamo le colonne NELL'ORDINE VISUALE CORRENTE
-    orderedColumns.forEach((col, index) => {
-      // Una colonna è 'fixed' se si trova nelle prime 'frozenColumnCount' posizioni
-      const isFixed = index < frozenColumnCount;
-
-      if (isFixed) {
+    // Only visible fixed columns contribute to the left offsets.
+    orderedColumns.forEach((col) => {
+      const hidden = columnsLayout.find((layout) => layout.id === col.id)?.props.isHidden;
+      if (col.fixed && !hidden) {
         offsets[col.id] = `${accumulator}px`;
         // Aggiungiamo la larghezza (reale o 0) all'accumulatore
         accumulator += stickyWidths[col.id] || 0;
       }
     });
     return offsets;
-  }, [orderedColumns, frozenColumnCount, stickyWidths]);
+  }, [orderedColumns, columnsLayout, stickyWidths]);
 
   const handlePageChange = useCallback(
     (page: number) => {
-      if (isControlled) {
+      if (unifiedQuery) {
+        updateQuery({ page });
+      } else if (isControlled) {
         controlled.onPageChange(page);
       } else {
         const newOffset = page * limit;
@@ -321,23 +303,45 @@ const DynamicTable = <T extends object>({
       persistence?.enabled,
       persistState,
       onPaginationChange,
+      unifiedQuery,
+      updateQuery,
     ]
   );
 
   useEffect(() => {
-    if (!paginationEnabled || serverSide?.enabled) return;
+    if (!paginationEnabled || serverSide?.enabled || isLoading || tableProps.error) return;
+    if (dataMode === "server" && serverTotalItems === undefined) return;
     const lastPage = Math.max(0, totalPages - 1);
-    if (currentPage > lastPage) handlePageChange(lastPage);
+    if (currentPage <= lastPage) return;
+    // Reconcile changing totals in a separate frame and cancel stale corrections.
+    const frame = requestAnimationFrame(() => handlePageChange(lastPage));
+    return () => cancelAnimationFrame(frame);
   }, [
     paginationEnabled,
     serverSide?.enabled,
     totalPages,
     currentPage,
     handlePageChange,
+    isLoading,
+    tableProps.error,
+    dataMode,
+    serverTotalItems,
   ]);
 
+  const handleSearchChange = (value: string) => {
+    if (value === searchTerm) return;
+    if (unifiedQuery) updateQuery({ search: value });
+    else {
+      if (searchConfig?.value === undefined) setInternalSearch(value);
+      if (currentPage !== 0) handlePageChange(0);
+    }
+    searchConfig?.onChange?.(value);
+  };
+
   const handleLimitChange = (newLimit: number) => {
-    if (isControlled) {
+    if (unifiedQuery) {
+      updateQuery({ pageSize: newLimit, page: 0 });
+    } else if (isControlled) {
       controlled.onLimitChange(newLimit);
       // Also reset page to 0 in controlled mode
       controlled.onPageChange(0);
@@ -353,16 +357,13 @@ const DynamicTable = <T extends object>({
   };
 
   const handleCellChange = useCallback(
-    (rowId: string, colKey: string, newValue: string | number | boolean) => {
+    (rowId: string, colKey: string, newValue: TCellValue) => {
       if (!onDataChange) return;
 
-      // The parser serializes row IDs, so compare numeric IDs as strings too.
-      const matchesRowId = (id: unknown) =>
-        (typeof id === "string" || typeof id === "number") &&
-        String(id) === rowId;
+      // Resolve exactly the same key and serialization as the data parser.
       const rowIndex = data.findIndex((item) => {
-        const row = item as Record<string, unknown>;
-        return matchesRowId(row.id) || matchesRowId(row._id);
+        const id = ObjectUtils.flatten(item, true)[idKey];
+        return id !== undefined && id !== null && StringUtils.serialize(id) === rowId;
       });
 
       if (rowIndex === -1) return;
@@ -371,9 +372,9 @@ const DynamicTable = <T extends object>({
       const newData = [...data];
       newData[rowIndex] = updatedRow;
 
-      onDataChange(newData, updatedRow);
+      return onDataChange(newData, updatedRow);
     },
-    [data, onDataChange]
+    [data, idKey, onDataChange]
   );
 
   const measureColumn = useCallback(
@@ -394,6 +395,9 @@ const DynamicTable = <T extends object>({
 
   const handleLayoutChange = useCallback(
     (newLayout: ITableLayout) => {
+      if (unifiedQuery) {
+        updateQuery({ sorting: newLayout.sorting ?? [], filters: newLayout.filtering ?? [] });
+      }
       if (newLayout.columnsLayout) {
         // Prevent infinite loops by checking if the layout actually changed
         // Simple deep comparison using JSON.stringify for now
@@ -419,6 +423,8 @@ const DynamicTable = <T extends object>({
       persistence?.enabled,
       persistState,
       internalColumnsLayout,
+      unifiedQuery,
+      updateQuery,
     ]
   );
 
@@ -470,6 +476,18 @@ const DynamicTable = <T extends object>({
 
   const tableExtensions = (
     <>
+      {savedViews && <SavedViewsToolbar key={`${savedViews.storage ?? "localStorage"}:${savedViews.key}`}
+        config={savedViews} columns={columns} search={searchTerm} pageSize={limit} onApply={(view: ISavedTableView) => {
+          setInternalColumnsLayout(view.state.columnsLayout);
+          if (persistence?.enabled) persistState({ columnsLayout: view.state.columnsLayout });
+          if (unifiedQuery) updateQuery({ page: 0, pageSize: view.state.pageSize,
+            sorting: view.state.sorting, filters: view.state.filters, search: view.state.search ?? "" });
+          else {
+            handleLimitChange(view.state.pageSize);
+            if (searchConfig?.value === undefined) setInternalSearch(view.state.search ?? "");
+          }
+          if (searchTerm !== (view.state.search ?? "")) searchConfig?.onChange?.(view.state.search ?? "");
+        }} />}
       {/* TOOLBAR */}
       {enableColumnConfig && (
         <TableToolbar
@@ -498,9 +516,9 @@ const DynamicTable = <T extends object>({
     ({ children }: { children: ReactNode }) => (
       <div
         style={{
-          overflowX: "auto",
-          overflowY: maxHeight ? "auto" : undefined,
-          maxHeight,
+          overflowX: isVirtualized ? undefined : "auto",
+          overflowY: !isVirtualized && maxHeight ? "auto" : undefined,
+          maxHeight: isVirtualized ? undefined : maxHeight,
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
@@ -512,17 +530,19 @@ const DynamicTable = <T extends object>({
             : {}),
         }}
       >
-        <BaseTable>{children}</BaseTable>
+        <BaseTable tableLayout={paginationEnabled ? "fixed" : undefined}>
+          {children}
+        </BaseTable>
       </div>
     ),
-    [maxHeight, externalBorderColor]
+    [maxHeight, externalBorderColor, paginationEnabled, isVirtualized]
   );
 
   const tableChildren = useMemo(() => {
-    return orderedColumns.map((col, index) => {
+    return orderedColumns.map((col) => {
       const CellComponent = getComponentByType(col.type);
       const HeaderComponent = col.type === "checkbox" ? CheckboxCell : BaseCell;
-      const fixed = index < frozenColumnCount;
+      const fixed = !!col.fixed;
       const stickyLeftValue = fixed ? stickyOffsets[col.id] : undefined;
       const isCheckbox = col.type === "checkbox";
       const isColumnResizable = isCheckbox
@@ -539,7 +559,7 @@ const DynamicTable = <T extends object>({
           id={col.id}
           width={col.width}
           isHidden={
-            internalColumnsLayout.find((l) => l.id === col.id)?.props?.isHidden
+            columnsLayout.find((l) => l.id === col.id)?.props?.isHidden
           }
           filterConfig={col.filterConfig}
           link={col.link as ILinkConfig<ILinkObject>}
@@ -570,6 +590,7 @@ const DynamicTable = <T extends object>({
                 draggable: isDraggable,
                 enableHiding: isHideable,
                 dragHandleVisibility,
+                backgroundColor: col.headerProps?.backgroundColor,
               } as Partial<IBaseCellProps>,
             ]}
           />
@@ -591,10 +612,12 @@ const DynamicTable = <T extends object>({
 
                 // Condition props based on column type (to avoid React warnings on DOM elements)
                 ...(col.type === "input" && {
-                  inputType: col.inputType,
-                  inputHeight: col.inputHeight,
-                  inputWidth: col.inputWidth,
-                  padding: "0.1rem 0.25rem",
+                  editable: col.editable ?? col.bodyProps?.editable,
+                  validate: col.validate ?? col.bodyProps?.validate,
+                  inputType: col.inputType ?? col.bodyProps?.inputType,
+                  inputHeight: col.inputHeight ?? col.bodyProps?.inputHeight,
+                  inputWidth: col.inputWidth ?? col.bodyProps?.inputWidth,
+                  padding: col.bodyProps?.padding ?? "0.1rem 0.25rem",
                   onCellChange: (
                     val: string | number | boolean,
                     cellData: ICell
@@ -607,23 +630,25 @@ const DynamicTable = <T extends object>({
                 }),
 
                 ...(col.type === "currency" && {
-                  currencySymbol: col.currencySymbol,
-                  symbolPosition: col.symbolPosition,
-                  decimals: col.decimals,
+                  currencySymbol: col.currencySymbol ?? col.bodyProps?.currencySymbol,
+                  symbolPosition: col.symbolPosition ?? col.bodyProps?.symbolPosition,
+                  decimals: col.decimals ?? col.bodyProps?.decimals,
                 }),
 
                 ...(col.type === "status" && {
-                  statusConfig: col.statusConfig,
-                  renderStatus: col.renderStatus,
+                  statusConfig: col.statusConfig ?? col.bodyProps?.statusConfig,
+                  renderStatus: col.renderStatus ?? col.bodyProps?.renderStatus,
                 }),
 
                 ...(col.type === "autocomplete" && {
-                  options: col.autocompleteOptions,
-                  getOptionLabel: col.getOptionLabel,
-                  isOptionEqualToValue: col.isOptionEqualToValue,
-                  disableClearable: col.disableClearable,
+                  editable: col.editable ?? col.bodyProps?.editable,
+                  validate: col.validate ?? col.bodyProps?.validate,
+                  options: col.autocompleteOptions ?? col.bodyProps?.options,
+                  getOptionLabel: col.getOptionLabel ?? col.bodyProps?.getOptionLabel,
+                  isOptionEqualToValue: col.isOptionEqualToValue ?? col.bodyProps?.isOptionEqualToValue,
+                  disableClearable: col.disableClearable ?? col.bodyProps?.disableClearable,
                   onCellChange: (
-                    val: string | number | boolean,
+                    val: TCellValue,
                     cellData: ICell
                   ) =>
                     handleCellChange(
@@ -635,7 +660,7 @@ const DynamicTable = <T extends object>({
 
                 ...(col.type === "custom" && {
                   onCellChange: (
-                    val: string | number | boolean,
+                    val: TCellValue,
                     cellData: ICell
                   ) =>
                     handleCellChange(
@@ -654,7 +679,6 @@ const DynamicTable = <T extends object>({
     });
   }, [
     orderedColumns,
-    frozenColumnCount,
     stickyOffsets,
     headerBorder,
     bodyBorder,
@@ -665,14 +689,25 @@ const DynamicTable = <T extends object>({
     dragHandleVisibility,
     handleCellChange,
     measureColumn,
-    internalColumnsLayout,
+    columnsLayout,
   ]);
 
   return (
     <div>
       {paginationPosition === "top" && paginationComponent}
 
-      {renderNode(before)}
+      {globalSearch && <div className="tbl-global-search" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {searchConfig?.label ?? "Ricerca globale"}
+          <input type="search" value={searchTerm} placeholder={searchConfig?.placeholder ?? "Cerca nelle colonne…"}
+            onChange={event => handleSearchChange(event.target.value)}
+            onKeyDown={event => {
+              if (event.key === "Enter") event.preventDefault();
+              if (event.key === "Escape") { event.preventDefault(); handleSearchChange(""); }
+            }} />
+        </label>
+        {searchTerm && <button type="button" onClick={() => handleSearchChange("")}>Cancella ricerca globale</button>}
+      </div>}
 
       {infiniteScrollConfig?.enabled && (
         <InfiniteScroll
@@ -689,25 +724,32 @@ const DynamicTable = <T extends object>({
         table={ScrollableTable}
         stickyHeader={stickyHeader}
         data={data}
+        idKey={idKey}
         dataPagination={dataPagination}
         onDataCountChange={setFilteredTotalItems}
         onRowSelectionChange={onRowSelectionChange}
         onRowDoubleClick={onRowDoubleClick}
-        before={<>{tableExtensions}</>}
-        layout={useMemo(
-          () => ({ columnsLayout: internalColumnsLayout }),
-          [internalColumnsLayout]
-        )}
+        before={<>{renderNode(before)}{tableExtensions}</>}
+        after={renderNode(after)}
         onLayoutChange={handleLayoutChange}
         enableColumnFilters={enableColumnFilters}
         parserAPI={{
           resetLayout: handleResetLayout,
         }}
         {...passedTableProps}
+        dataMode={dataMode}
+        searchTerm={searchTerm}
+        searchColumns={searchColumns}
+        isLoading={isLoading}
+        virtualization={resolvedVirtualization}
+        layout={useMemo(() => ({
+          ...externalLayout,
+          columnsLayout: externalLayout?.columnsLayout ?? internalColumnsLayout,
+          ...(unifiedQuery ? { sorting: queryState.sorting, filtering: queryState.filters } : {}),
+        }), [externalLayout, internalColumnsLayout, unifiedQuery, queryState.sorting, queryState.filters])}
       >
         {tableChildren}
       </Table>
-      {renderNode(after)}
       {paginationPosition === "bottom" && paginationComponent}
     </div>
   );

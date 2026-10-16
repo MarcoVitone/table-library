@@ -1,7 +1,7 @@
 import type { ElementType, FC, ReactNode, Ref } from "react";
-import { useCallback, useMemo, useRef } from "react";
-import { ArrowUpward } from "@mui/icons-material";
-import { useTheme } from "@mui/material";
+import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
+import { ArrowUpward } from "@/tables-framework/ui/icons";
+import { useTheme } from "@/tables-framework/theme/theme";
 import type {
   IBorderConfig,
   ICellProps,
@@ -26,6 +26,8 @@ type TSortDirection = "ASC" | "DESC";
 
 interface IBaseCellProps extends ICellProps {
   component?: ElementType;
+  className?: string;
+  style?: React.CSSProperties;
   variant?: TVariant;
   noLeftBorder?: boolean;
   noRightBorder?: boolean;
@@ -38,6 +40,8 @@ interface IBaseCellProps extends ICellProps {
   label?: string;
   fontColor?: string;
   backgroundColor?: string;
+  rowBackgroundColor?: string;
+  rowSelectedColor?: string;
   fontSize?: string;
   bold?: string;
   padding?: string;
@@ -76,7 +80,9 @@ interface IBaseCellProps extends ICellProps {
 }
 
 const BaseCell: FC<IBaseCellProps> = ({
+  component,
   variant,
+  style: styleProp,
   noLeftBorder,
   noRightBorder,
   noTopBorder,
@@ -173,22 +179,7 @@ const BaseCell: FC<IBaseCellProps> = ({
     [isCollapsed, handleExpandColumn]
   );
 
-  const combinedRef = useCallback(
-    (node: HTMLTableCellElement | null) => {
-      // Aggiorna il ref interno
-      innerRef.current = node;
-
-      // Aggiorna il ref del genitore (measuredRef)
-      if (measuredRef) {
-        if (typeof measuredRef === "function") {
-          measuredRef(node);
-        } else {
-          measuredRef.current = node;
-        }
-      }
-    },
-    [measuredRef]
-  );
+  useImperativeHandle(measuredRef, () => innerRef.current!);
 
   const {
     draggable: isDomDraggable,
@@ -294,7 +285,7 @@ const BaseCell: FC<IBaseCellProps> = ({
         );
       }
     },
-    [data?.column?.id, data?.column?.props?.isHidden, setColumnLayout, setColumnsLayout]
+    [data, setColumnLayout, setColumnsLayout]
   );
 
   const justifyContent = useMemo(() => {
@@ -319,7 +310,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       );
     }
     return null;
-  }, [type, area, enableColumnFilters, data?.column, isCollapsed]);
+  }, [type, area, enableColumnFilters, data, isCollapsed]);
 
   const cellContent = useMemo(() => {
     if (isCollapsed) {
@@ -372,7 +363,21 @@ const BaseCell: FC<IBaseCellProps> = ({
 
   return (
     <BaseCellComponent
-      ref={combinedRef}
+      component={component ?? (area === "header" || type === "header" ? "th" : "td")}
+      scope={area === "header" || type === "header" ? (colSpan > 1 ? "colgroup" : "col") : undefined}
+      aria-sort={(area === "header" || type === "header") && sortable
+        ? dir === 1 ? "ascending" : dir === -1 ? "descending" : "none"
+        : undefined}
+      tabIndex={isCollapsed && (area === "header" || type === "header") ? 0 : undefined}
+      aria-label={isCollapsed && (area === "header" || type === "header")
+        ? `${data?.column?.label ?? "Colonna"}: premi Invio per espandere` : undefined}
+      onKeyDown={(event: React.KeyboardEvent) => {
+        if (isCollapsed && (area === "header" || type === "header") && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          handleExpandColumn();
+        }
+      }}
+      ref={innerRef}
       colSpan={colSpan}
       noLeft={!!noLeftBorder}
       noRight={!!noRightBorder}
@@ -399,27 +404,27 @@ const BaseCell: FC<IBaseCellProps> = ({
         minWidth: minWidthProp || currentWidth || "max-content",
         maxWidth: typeof currentWidth === "number"
           ? currentWidth
-          : ellipsis ? currentWidth || "auto" : "none",
-        overflow: typeof currentWidth === "number" ? overFlow ?? "hidden" : overFlow,
-        opacity: isDraggingColumn ? 0.5 : 1,
-        backgroundColor: cellBackgroundColor,
-        borderTop: isDraggingColumn
-          ? `2px dashed ${palette.neutral?.light || "#999"}`
-          : undefined,
-        borderRight: isDraggingColumn
-          ? `2px dashed ${palette.neutral?.light || "#999"}`
-          : undefined,
-        borderBottom: isDraggingColumn
-          ? `2px dashed ${palette.neutral?.light || "#999"}`
-          : undefined,
-        borderLeft:
-          isOver && !isDraggingColumn
-            ? `3px solid ${palette.primary.main}`
-            : isDraggingColumn
-            ? `2px dashed ${palette.neutral?.light || "#999"}`
-            : undefined,
-        padding: isCollapsed ? "0" : padding,
+          : maxWidth ?? (ellipsis ? currentWidth || "auto" : "none"),
+        // Only active layout and interaction states override the base styles.
+        ...(typeof currentWidth === "number"
+          ? { overflow: overFlow ?? "hidden" }
+          : {}),
+        ...(isDraggingColumn ? {
+          opacity: 0.5,
+          borderTop: `2px dashed ${palette.neutral?.light || "#999"}`,
+          borderRight: `2px dashed ${palette.neutral?.light || "#999"}`,
+          borderBottom: `2px dashed ${palette.neutral?.light || "#999"}`,
+          borderLeft: `2px dashed ${palette.neutral?.light || "#999"}`,
+        } : {}),
+        ...(cellBackgroundColor !== undefined
+          ? { backgroundColor: cellBackgroundColor }
+          : {}),
+        ...(isOver && !isDraggingColumn
+          ? { borderLeft: `3px solid ${palette.primary.main}` }
+          : {}),
+        ...(isCollapsed ? { padding: "0" } : {}),
         ...(onHeaderClick ? { cursor: "pointer" } : {}),
+        ...styleProp,
       }}
       data-column-id={data?.column?.id}
       data-query-param={queryParam}
@@ -467,7 +472,7 @@ const BaseCell: FC<IBaseCellProps> = ({
       {(type === "header" || area === "header") &&
         isResizable &&
         !isCollapsed && colSpan === 1 && (
-          <ColumnResizer onResizeEnd={handleResizeEnd} minWidth={minWidthProp} />
+          <ColumnResizer onResizeEnd={handleResizeEnd} minWidth={minWidthProp} width={currentWidth} label={data?.column?.label} />
         )}
     </BaseCellComponent>
   );

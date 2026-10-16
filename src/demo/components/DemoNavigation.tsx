@@ -9,7 +9,12 @@ type TDemoPage =
   | "draggable"
   | "resizable"
   | "collapsible"
-  | "column-config";
+  | "column-config"
+  | "editing"
+  | "reliability"
+  | "virtualization"
+  | "global-search"
+  | "views-actions";
 
 interface IDemoNavigationProps {
   activePage: TDemoPage;
@@ -30,6 +35,11 @@ const DemoNavigation: FC<IDemoNavigationProps> = ({
     { id: "resizable", label: "Ridimensionabile" },
     { id: "collapsible", label: "Collassabile" },
     { id: "column-config", label: "Config. Colonne" },
+    { id: "editing", label: "Modifica celle" },
+    { id: "reliability", label: "Stati e server" },
+    { id: "virtualization", label: "Virtualizzazione" },
+    { id: "global-search", label: "Ricerca globale" },
+    { id: "views-actions", label: "Viste e azioni" },
   ];
 
   return (

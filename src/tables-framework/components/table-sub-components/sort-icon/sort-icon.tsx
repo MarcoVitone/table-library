@@ -1,5 +1,5 @@
-import type { Palette } from "@mui/material/styles";
-import { IconButton } from "@mui/material"; // Importa IconButton
+import type { Palette } from "@/tables-framework/theme/theme";
+import { IconButton } from "@/tables-framework/ui/controls"; // Importa IconButton
 import type { ReactNode } from "react";
 
 interface ISortIcon {
@@ -40,6 +40,7 @@ const SortIcon = ({
       {children}
 
       <IconButton
+        aria-label="Ordina colonna"
         className="sort-icon"
         size="small"
         onClick={(e) => {
