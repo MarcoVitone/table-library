@@ -1,4 +1,5 @@
 import React from "react";
+import { AccessibilityElement, AccessibilityScope } from "../../../../accessibility";
 import type {
   ILinkObject,
   IRow,
@@ -61,13 +62,13 @@ function renderRows<T>(
 
       if (typeof Cell === "string") {
         return (
-          <Cell key={cell.id} colSpan={cell.colSpan}>
+          <AccessibilityElement as={Cell as "td"} slot="cell" context={{ cell, row, column: cell.column, area: row.area, index }} key={cell.id} colSpan={cell.colSpan} {...props}>
             {cell.value}
-          </Cell>
+          </AccessibilityElement>
         );
       } else {
         return (
-          <Cell
+          <AccessibilityScope key={cell.id} context={{ cell, row, column: cell.column, area: row.area, index }}><Cell
             {...props}
             {...(rowStyle?.backgroundColor !== undefined && {
               rowBackgroundColor: rowStyle.backgroundColor,
@@ -89,7 +90,7 @@ function renderRows<T>(
             >
               {cell.value}
             </LinkWrapper>
-          </Cell>
+          </Cell></AccessibilityScope>
         );
       }
     });
@@ -131,13 +132,13 @@ function renderRows<T>(
 
     if (typeof Row === "string") {
       return (
-        <Row {...virtualProps} key={row.id} style={rowStyle} onDoubleClick={handleDoubleClick}>
+        <AccessibilityElement as={Row as "tr"} slot="row" context={{ row, area: row.area, index: rowIndex }} {...props} {...virtualProps} key={row.id} style={rowStyle} onDoubleClick={handleDoubleClick}>
           {children}
-        </Row>
+        </AccessibilityElement>
       );
     } else {
       return (
-        <Row
+        <AccessibilityScope key={row.id} context={{ row, area: row.area, index: rowIndex }}><Row
           {...props}
           {...virtualProps}
           style={rowStyle}
@@ -146,7 +147,7 @@ function renderRows<T>(
           onDoubleClick={handleDoubleClick}
         >
           {children}
-        </Row>
+        </Row></AccessibilityScope>
       );
     }
   });

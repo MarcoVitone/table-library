@@ -67,7 +67,7 @@ const InfiniteScroll = ({
   // Render loading state
   if (isLoading) {
     return (
-      <LoadMoreContainer className={className}>
+      <LoadMoreContainer accessibilitySlot="loadMoreStatus" className={className}>
         {loadMoreComponent ?? <Spinner />}
       </LoadMoreContainer>
     );
@@ -76,7 +76,7 @@ const InfiniteScroll = ({
   // Render end message
   if (!hasMore) {
     if (endMessage) {
-      return <EndMessage className={className}>{endMessage}</EndMessage>;
+      return <EndMessage accessibilitySlot="loadMoreEnd" className={className}>{endMessage}</EndMessage>;
     }
     return null;
   }
@@ -85,7 +85,7 @@ const InfiniteScroll = ({
   if (mode === "button") {
     return (
       <LoadMoreContainer className={className}>
-        <LoadMoreButton onClick={handleButtonClick} disabled={isLoading}>
+        <LoadMoreButton accessibilitySlot="loadMoreButton" onClick={handleButtonClick} disabled={isLoading}>
           {buttonText}
         </LoadMoreButton>
       </LoadMoreContainer>

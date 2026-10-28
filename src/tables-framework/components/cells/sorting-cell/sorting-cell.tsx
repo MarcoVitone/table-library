@@ -11,6 +11,7 @@ import { ArrowUpward } from "@/tables-framework/ui/icons";
 import { animated } from "@react-spring/web";
 import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 import { useSpring } from "@/tables-framework/hooks/use-spring/use-spring.ts";
+import { Button } from "../../../ui/controls";
 
 type TSortDirection = "ASC" | "DESC";
 
@@ -99,12 +100,12 @@ const SortingCell: FC<ISortingCellProps> = ({
       padding={padding}
       {...rest}
     >
-      <span onClick={handleClick} tabIndex={1}>
+      <Button accessibilitySlot="sortButton" onClick={handleClick} disabled={disabled}>
         {data.column.label}
         <animated.span style={rotation}>
           <span style={{ color: palette.primary.main }}>{icon}</span>
         </animated.span>
-      </span>
+      </Button>
     </SortingBaseCell>
   );
 };

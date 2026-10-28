@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTableAccessibility } from "../../accessibility";
 import type {
   ILinkConfig,
   ILinkObject,
@@ -11,6 +12,8 @@ interface ILinkWrapperProps {
 }
 
 const LinkWrapper = ({ config, row, children }: ILinkWrapperProps) => {
+  const { getProps } = useTableAccessibility();
+  const accessibilityProps = getProps("cellLink", {});
   if (!config) {
     return <>{children}</>;
   }
@@ -39,6 +42,7 @@ const LinkWrapper = ({ config, row, children }: ILinkWrapperProps) => {
         className={className}
         style={combinedStyle}
         onClick={(e) => e.stopPropagation()}
+        {...accessibilityProps}
       >
         {children}
       </a>
@@ -53,6 +57,7 @@ const LinkWrapper = ({ config, row, children }: ILinkWrapperProps) => {
         className={className}
         style={combinedStyle}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        {...accessibilityProps}
       >
         {children}
       </CustomComponent>
@@ -70,6 +75,7 @@ const LinkWrapper = ({ config, row, children }: ILinkWrapperProps) => {
         className={className}
         style={combinedStyle}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        {...accessibilityProps}
       >
         {children}
       </CustomComponent>

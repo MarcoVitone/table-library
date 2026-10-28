@@ -100,6 +100,7 @@ const ActionsCell: FC<IActionsCellProps> = ({
             if (component === "button") {
               return (
                 <Button
+                  accessibilitySlot="rowAction" accessibilityContext={{ index, cell: data, row: data.row, column: data.column }}
                   key={index + index}
                   disabled={isLoading}
                   onClick={handleAction}
@@ -115,6 +116,7 @@ const ActionsCell: FC<IActionsCellProps> = ({
 
             return (
               <IconButton
+                accessibilitySlot="rowAction" accessibilityContext={{ index, cell: data, row: data.row, column: data.column }}
                 aria-label={actionLabel || label || "Azione riga"}
                 key={index + index}
                 disabled={isLoading}

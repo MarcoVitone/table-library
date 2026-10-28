@@ -1,5 +1,6 @@
 import { createElement, type HTMLAttributes, type SyntheticEvent } from "react";
 import { useTheme } from "@/tables-framework/theme/theme";
+import { useTableAccessibility } from "@/tables-framework/accessibility";
 export interface AccordionProps extends Omit<HTMLAttributes<HTMLDetailsElement>, 'onChange'> {
   expanded?: boolean;
   defaultExpanded?: boolean;
@@ -17,10 +18,11 @@ export function CustomAccordion({
   style,
   ...props
 }: AccordionProps) {
+  const { getProps } = useTableAccessibility();
   const {
     palette
   } = useTheme();
-  return createElement('details', {
+  return createElement('details', getProps("expandedDetails", {
     ...props,
     open: expanded ?? defaultExpanded,
     className: ['tbl-accordion', props.className].filter(Boolean).join(' '),
@@ -34,5 +36,5 @@ export function CustomAccordion({
       props.onToggle?.(event);
       if (expanded === undefined || event.currentTarget.open !== expanded) onChange?.(event, event.currentTarget.open);
     }
-  }, children);
+  }), children);
 }

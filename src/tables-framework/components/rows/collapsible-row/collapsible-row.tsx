@@ -28,6 +28,7 @@ type TChild = JSX.Element & {
 };
 
 const CollapsibleRow: FC<ICollapsibleRowProps> = ({
+  onClick,
   onSelectRow,
   selectedRowId,
   newCreatedRowid,
@@ -56,7 +57,7 @@ const CollapsibleRow: FC<ICollapsibleRowProps> = ({
   }, []);
 
   return (
-    <ColBaseRow {...rest} data={data}>
+    <ColBaseRow {...rest} data={data} onClick={onClick ? event => onClick(event, !isOpen) : undefined}>
       <td colSpan={data.size}>
         <CustomAccordion
           isNewRow={newCreatedRowid === data.source.id}

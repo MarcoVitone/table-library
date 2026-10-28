@@ -1,3 +1,4 @@
+import { AccessibilityElement } from "@/tables-framework/accessibility";
 import { useState } from "react";
 import { useTable } from "../../../hooks/use-table/use-table";
 import { useSavedViews } from "../../../hooks/use-saved-views/use-saved-views";
@@ -53,9 +54,9 @@ export function SavedViewsToolbar({ config, search, pageSize, columns, onApply }
     setName(view.name); setMessage("Vista applicata.");
   };
 
-  return <section className="tbl-saved-views" aria-label="Gestione viste salvate">
+  return <AccessibilityElement as="section" slot="savedViews" className="tbl-saved-views" aria-label="Gestione viste salvate">
     <div className="tbl-feature-toolbar">
-      <label>Viste salvate <select value={selected?.id ?? ""} onChange={event => {
+      <AccessibilityElement as="label" slot="savedViewSelectLabel">Viste salvate <AccessibilityElement as="select" slot="savedViewSelect" value={selected?.id ?? ""} onChange={event => {
         const view = views.find(item => item.id === event.target.value);
         setSelectedId(view?.id ?? ""); setError(""); setMessage("");
         if (!view) return;
@@ -63,19 +64,19 @@ export function SavedViewsToolbar({ config, search, pageSize, columns, onApply }
       }}>
         <option value="">Seleziona una vista</option>
         {views.map(view => <option key={view.id} value={view.id}>{view.name}</option>)}
-      </select></label>
-      <Button size="small" disabled={!selected} onClick={() => { if (selected) apply(selected); }}>Applica vista</Button>
-      <label>Nome vista <input value={name} maxLength={100} onChange={event => { setName(event.target.value); setError(""); }}
-        onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); save(false); } }} /></label>
-      <Button size="small" onClick={() => save(false)}>Salva vista</Button>
-      <Button size="small" disabled={!selected} onClick={() => save(true)}>Aggiorna vista</Button>
-      <Button size="small" disabled={!selected} onClick={() => {
+      </AccessibilityElement></AccessibilityElement>
+      <Button accessibilitySlot="savedViewApplyButton" size="small" disabled={!selected} onClick={() => { if (selected) apply(selected); }}>Applica vista</Button>
+      <AccessibilityElement as="label" slot="savedViewNameLabel">Nome vista <AccessibilityElement as="input" slot="savedViewName" value={name} maxLength={100} onChange={event => { setName(event.target.value); setError(""); }}
+        onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); save(false); } }} /></AccessibilityElement>
+      <Button accessibilitySlot="savedViewSaveButton" size="small" onClick={() => save(false)}>Salva vista</Button>
+      <Button accessibilitySlot="savedViewUpdateButton" size="small" disabled={!selected} onClick={() => save(true)}>Aggiorna vista</Button>
+      <Button accessibilitySlot="savedViewDeleteButton" size="small" disabled={!selected} onClick={() => {
         changeViews(views.filter(view => view.id !== selectedId));
         setSelectedId(""); setName(""); setError(""); setMessage("Vista eliminata.");
       }}>Elimina vista</Button>
       {modified && <span>Vista modificata</span>}
     </div>
-    {(error || storageError) && <div role="alert">{error || storageError}</div>}
-    <div role="status">{message}</div>
-  </section>;
+    {(error || storageError) && <AccessibilityElement as="div" slot="savedViewError" role="alert">{error || storageError}</AccessibilityElement>}
+    <AccessibilityElement as="div" slot="savedViewStatus" role="status">{message}</AccessibilityElement>
+  </AccessibilityElement>;
 }

@@ -16,8 +16,8 @@ const TableToolbar: FC<ITableToolbarProps> = ({
   return <FlexBox justifyContent="flex-end" alignItems="center" padding=".5rem" gap=".5rem" style={{
     marginBottom: '.5rem'
   }}>
- {onResetLayout && <IconButton title="Ripristina vista di default" aria-label="Ripristina vista di default" onClick={onResetLayout} size="small"><RestartAlt /></IconButton>}
- {showConfigButton && <IconButton title="Configura colonne" aria-label="Configura colonne" onClick={onOpenConfig} size="small"><ViewColumn /></IconButton>}
+ {onResetLayout && <IconButton accessibilitySlot="resetLayoutButton" title="Ripristina vista di default" aria-label="Ripristina vista di default" onClick={onResetLayout} size="small"><RestartAlt /></IconButton>}
+ {showConfigButton && <IconButton accessibilitySlot="configureColumnsButton" title="Configura colonne" aria-label="Configura colonne" onClick={onOpenConfig} size="small"><ViewColumn /></IconButton>}
  </FlexBox>;
 };
 export { TableToolbar };

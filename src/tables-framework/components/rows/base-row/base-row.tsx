@@ -1,9 +1,9 @@
-import type { FC } from "react";
+import type { FC, HTMLAttributes } from "react";
 import type { IRowProps } from "@/tables-framework/defines/common.types.ts";
 import { BaseTr } from "./base-row.styles.ts";
 import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
 
-interface IBaseRowProps extends IRowProps {
+interface IBaseRowProps extends IRowProps, Omit<HTMLAttributes<HTMLTableRowElement>, "children"> {
   isStepFour?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -26,6 +26,7 @@ const BaseRow: FC<IBaseRowProps> = ({ data, isStepFour = false, children, ...res
 
   return (
     <BaseTr {...rest}
+      accessibilityContext={{ row: data, area: data.area }}
       isSelected={isSelected}
       isLoading={isLoading}
       isConfigured={isConfigured}

@@ -1,3 +1,4 @@
+import { AccessibilityElement, useTableAccessibility } from "@/tables-framework/accessibility";
 import { type SyntheticEvent, type FC, useId } from "react";
 import { useCellEditor } from "@/tables-framework/hooks/use-cell-editor/use-cell-editor";
 import type { ICellEditing } from "@/tables-framework/defines/editing.types";
@@ -34,6 +35,8 @@ const AutocompleteCell: FC<IAutocompleteCellProps> = ({
   validate,
   ...rest
 }) => {
+  const { message } = useTableAccessibility();
+  const accessibilityContext = { cell: data, row: data?.row, column: data?.column, area: rest.area };
   const sourceValue = (data?.value as TAutocompleteOption) ?? null;
   const editor = useCellEditor<TAutocompleteOption | null>({ data, sourceValue, onCellChange, editable, validate });
   const feedbackId = useId();
@@ -48,7 +51,7 @@ const AutocompleteCell: FC<IAutocompleteCellProps> = ({
 
   return (
     <BaseCell data={data} {...rest} overFlow="visible">
-      <div style={{ width: "100%" }} aria-busy={editor.isSaving || undefined}>
+      <AccessibilityElement as="div" slot="cellEditor" context={accessibilityContext} style={{ width: "100%" }} aria-busy={editor.isSaving || undefined}>
       <InputContainer>
         <Autocomplete
           value={editor.value}
@@ -69,9 +72,9 @@ const AutocompleteCell: FC<IAutocompleteCellProps> = ({
           label={data?.column?.label}
         />
       </InputContainer>
-      {editor.error && <div id={feedbackId} className="tbl-cell-error" role="alert">{editor.error}</div>}
-      {editor.isSaving && <div id={feedbackId} className="tbl-cell-saving" role="status">Salvataggio…</div>}
-      </div>
+      {editor.error && <AccessibilityElement as="div" slot="cellError" context={accessibilityContext} id={feedbackId} className="tbl-cell-error" role="alert">{editor.error}</AccessibilityElement>}
+      {editor.isSaving && <AccessibilityElement as="div" slot="cellSaving" context={accessibilityContext} id={feedbackId} className="tbl-cell-saving" role="status">{message("saving", "Salvataggio…", accessibilityContext)}</AccessibilityElement>}
+      </AccessibilityElement>
     </BaseCell>
   );
 };

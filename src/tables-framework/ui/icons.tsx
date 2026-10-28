@@ -1,6 +1,7 @@
 import type { CSSProperties, SVGProps } from "react";
 import { useTheme } from "../theme/theme";
 import { sxStyle, type SxProps } from "./native-element";
+import { useTableAccessibility } from "../accessibility";
 type IconProps = Omit<SVGProps<SVGSVGElement>, "color"> & {
   fontSize?: "small" | "medium" | "large" | "inherit";
   color?: string;
@@ -14,6 +15,7 @@ function icon(path: string) {
     style,
     ...props
   }: IconProps) {
+    const { getProps } = useTableAccessibility();
     const {
       palette
     } = useTheme();
@@ -25,7 +27,7 @@ function icon(path: string) {
       large: "2.1875rem",
       inherit: "1em"
     }[fontSize];
-    return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props} style={{
+    return <svg viewBox="0 0 24 24" {...getProps("icon", { "aria-hidden": true, focusable: "false", ...props })} style={{
       width: size,
       height: size,
       fill: "currentColor",

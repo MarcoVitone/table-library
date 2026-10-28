@@ -1,5 +1,6 @@
 import { createElement, type HTMLAttributes, type ReactNode } from "react";
 import { nativeElement } from "@/tables-framework/ui/native-element";
+import { useTableAccessibility } from "@/tables-framework/accessibility";
 export function CustomAccordionSummary({
   expandIcon,
   children,
@@ -8,7 +9,8 @@ export function CustomAccordionSummary({
 }: HTMLAttributes<HTMLElement> & {
   expandIcon?: ReactNode;
 }) {
-  return createElement('summary', {
+  const { getProps } = useTableAccessibility();
+  return createElement('summary', getProps("expandedSummary", {
     ...props,
     className: ['tbl-accordion-summary', props.className].filter(Boolean).join(' '),
     style: {
@@ -20,7 +22,7 @@ export function CustomAccordionSummary({
       cursor: 'pointer',
       ...style
     }
-  }, children, createElement('span', {
+  }), children, createElement('span', {
     className: 'tbl-accordion-arrow'
   }, expandIcon));
 }

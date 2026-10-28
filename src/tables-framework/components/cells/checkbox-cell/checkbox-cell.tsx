@@ -82,6 +82,7 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
       isStickyCheckbox={area === "header" && showHeaderCheckbox && stickyHeader}
     >
       <TableCheckbox
+        accessibilitySlot={area === "header" ? "selectAllCheckbox" : "rowCheckbox"}
         aria-label={area === "header" ? "Seleziona tutte le righe" : `Seleziona riga ${data.row.source.id}`}
         id={data.row.source.id}
         onChange={onChangeHandler}

@@ -22,6 +22,7 @@ Below is the complete list of properties accepted by the `DynamicTable` componen
 | `stickyHeader`        | `boolean`            | No       | Valid only if `maxHeight` is set. Keeps the header fixed while scrolling. Default: `true`. |
 | `externalBorderColor` | `string`             | No       | Color of the external border of the table container.                                       |
 | `rowSelectedColor`    | `string`             | No       | Background color for selected rows.                                                        |
+| `accessibility` | `ITableAccessibility` | No | Consumer overrides for semantics, labels, announcements and dialog focus. See [accessibility configuration](./09_ACCESSIBILITY.md). |
 
 ### Feature Flags
 

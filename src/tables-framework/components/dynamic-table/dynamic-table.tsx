@@ -48,6 +48,7 @@ import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns
 import { BaseTable } from "@/tables-framework/components/areas/base-table/base-table";
 import { ObjectUtils, StringUtils } from "@/tables-framework/utils";
 import { setValueAtPath } from "@/tables-framework/utils/object-utils/set-value-at-path/set-value-at-path";
+import { AccessibilityProvider, AccessibilityElement } from "../../accessibility";
 
 export interface IPaginationConfig extends IPaginationCustomization {
   enabled?: boolean;
@@ -111,6 +112,7 @@ const CELL_COMPONENTS: Record<string, ElementType> = {
 };
 
 const DynamicTable = <T extends object>({
+  accessibility,
   columns,
   data,
   idKey = "id",
@@ -692,21 +694,21 @@ const DynamicTable = <T extends object>({
     columnsLayout,
   ]);
 
-  return (
+  const content = (
     <div>
       {paginationPosition === "top" && paginationComponent}
 
       {globalSearch && <div className="tbl-global-search" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <AccessibilityElement as="label" slot="globalSearchLabel" style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {searchConfig?.label ?? "Ricerca globale"}
-          <input type="search" value={searchTerm} placeholder={searchConfig?.placeholder ?? "Cerca nelle colonne…"}
+          <AccessibilityElement as="input" slot="globalSearchInput" type="search" value={searchTerm} placeholder={searchConfig?.placeholder ?? "Cerca nelle colonne…"}
             onChange={event => handleSearchChange(event.target.value)}
             onKeyDown={event => {
               if (event.key === "Enter") event.preventDefault();
               if (event.key === "Escape") { event.preventDefault(); handleSearchChange(""); }
             }} />
-        </label>
-        {searchTerm && <button type="button" onClick={() => handleSearchChange("")}>Cancella ricerca globale</button>}
+        </AccessibilityElement>
+        {searchTerm && <AccessibilityElement as="button" slot="globalSearchClearButton" type="button" onClick={() => handleSearchChange("")}>Cancella ricerca globale</AccessibilityElement>}
       </div>}
 
       {infiniteScrollConfig?.enabled && (
@@ -753,6 +755,7 @@ const DynamicTable = <T extends object>({
       {paginationPosition === "bottom" && paginationComponent}
     </div>
   );
+  return accessibility ? <AccessibilityProvider value={accessibility}>{content}</AccessibilityProvider> : content;
 };
 
 export { DynamicTable };

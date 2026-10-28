@@ -1,3 +1,4 @@
+import { AccessibilityElement, useTableAccessibility } from "@/tables-framework/accessibility";
 import { DragIndicator } from "@/tables-framework/ui/icons";
 import { IconButton } from "@/tables-framework/ui/controls";
 import type { DragEvent } from "react";
@@ -16,11 +17,13 @@ const DraggableButton = ({
   handleDragEnd,
   handleStyle,
 }: IDraggableButton) => {
+  const { message } = useTableAccessibility();
   const { columnsLayout, setColumnsLayout } = useTable();
   const [announcement, setAnnouncement] = useState("");
   return (
     <>
     <IconButton
+      accessibilitySlot="dragHandle"
       aria-label="Trascina colonna"
       title="Sposta colonna con Alt e freccia sinistra/destra"
       aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
@@ -50,7 +53,8 @@ const DraggableButton = ({
           const to = next.findIndex(column => column.id === target.id);
           [next[from], next[to]] = [next[to], next[from]];
           setColumnsLayout(next);
-          setAnnouncement(`Colonna spostata alla posizione ${index + (e.key === "ArrowLeft" ? 0 : 2)}`);
+          const position = index + (e.key === "ArrowLeft" ? 0 : 2);
+          setAnnouncement(message("columnMoved", `Colonna spostata alla posizione ${position}`, { position }));
         }
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -60,7 +64,7 @@ const DraggableButton = ({
     >
       <DragIndicator fontSize="small" />
     </IconButton>
-    <span className="tbl-sr-only" role="status">{announcement}</span>
+    <AccessibilityElement as="span" slot="dragStatus" className="tbl-sr-only" role="status">{announcement}</AccessibilityElement>
     </>
   );
 };

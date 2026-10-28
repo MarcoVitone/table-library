@@ -118,6 +118,7 @@ const PageSizeSelector = ({
     <StyledPaginationInfo className={className}>
       {label}
       <PageSizeSelect
+        accessibilitySlot="pageSizeSelect" aria-label={label}
         value={value}
         onChange={handleChange}
         style={{ marginLeft: 8 }}
@@ -145,6 +146,7 @@ const NavButton = ({
   tooltip?: string;
 }) => (
   <PaginationButton
+    accessibilitySlot="pageNavigationButton" accessibilityContext={{ label: ariaLabel }}
     onClick={onClick}
     disabled={disabled}
     aria-label={ariaLabel}
@@ -191,6 +193,7 @@ const GoToPage = ({
     <StyledGoToPageContainer className={className}>
       {label && <span>{label}</span>}
       <StyledGoToPageInput
+        accessibilitySlot="goToPageInput" aria-label={label ?? DEFAULT_LABELS.goToPage}
         type="number"
         min={1}
         max={totalPages}
@@ -200,7 +203,7 @@ const GoToPage = ({
         placeholder={placeholder ?? String(currentPage + 1)}
         className={inputClassName}
       />
-      <StyledGoToPageButton onClick={handleSubmit} className={buttonClassName}>
+      <StyledGoToPageButton accessibilitySlot="goToPageButton" onClick={handleSubmit} className={buttonClassName}>
         {buttonLabel}
       </StyledGoToPageButton>
     </StyledGoToPageContainer>
@@ -223,6 +226,7 @@ const PageNumbersList = ({
     {pages.map((page, index) =>
       typeof page === "number" ? (
         <PageButton
+          accessibilitySlot="pageButton" accessibilityContext={{ index: page }} aria-current={page === currentPage ? "page" : undefined}
           key={page}
           isActive={page === currentPage}
           onClick={() => onPageChange(page)}
@@ -413,6 +417,7 @@ const Pagination = ({
 
   return (
     <PaginationContainer
+      accessibilitySlot="pagination"
       alignment={alignment}
       className={classNames?.container}
     >

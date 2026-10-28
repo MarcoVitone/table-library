@@ -130,6 +130,7 @@ const ColumnResizer: FC<IColumnResizerProps> = ({ onResizeEnd, minWidth = 50, wi
 
   return (
     <ResizerHandle
+      accessibilitySlot="resizeHandle" accessibilityContext={{ label }}
       ref={handleRef}
       role="separator"
       aria-label={label ? `Ridimensiona colonna ${label}` : "Ridimensiona colonna"}

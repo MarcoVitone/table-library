@@ -1,4 +1,5 @@
-import type { ElementType, FC, ReactNode, Ref } from "react";
+import type { ElementType, FC, ReactNode, Ref, AriaAttributes, HTMLAttributes } from "react";
+import { AccessibilityScope } from "../../../accessibility";
 import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
 import { ArrowUpward } from "@/tables-framework/ui/icons";
 import { useTheme } from "@/tables-framework/theme/theme";
@@ -24,7 +25,7 @@ type TVariant = "header" | "body" | "footer";
 
 type TSortDirection = "ASC" | "DESC";
 
-interface IBaseCellProps extends ICellProps {
+interface IBaseCellProps extends ICellProps, AriaAttributes, Pick<HTMLAttributes<HTMLElement>, "id" | "role" | "title" | "tabIndex" | "onKeyDown" | "onFocus" | "onBlur"> {
   component?: ElementType;
   className?: string;
   style?: React.CSSProperties;
@@ -362,7 +363,8 @@ const BaseCell: FC<IBaseCellProps> = ({
   }
 
   return (
-    <BaseCellComponent
+    <AccessibilityScope context={{ cell: data, row: data?.row, column: data?.column, area }}><BaseCellComponent
+      accessibilityContext={{ cell: data, row: data?.row, column: data?.column, area }}
       component={component ?? (area === "header" || type === "header" ? "th" : "td")}
       scope={area === "header" || type === "header" ? (colSpan > 1 ? "colgroup" : "col") : undefined}
       aria-sort={(area === "header" || type === "header") && sortable
@@ -474,7 +476,7 @@ const BaseCell: FC<IBaseCellProps> = ({
         !isCollapsed && colSpan === 1 && (
           <ColumnResizer onResizeEnd={handleResizeEnd} minWidth={minWidthProp} width={currentWidth} label={data?.column?.label} />
         )}
-    </BaseCellComponent>
+    </BaseCellComponent></AccessibilityScope>
   );
 };
 

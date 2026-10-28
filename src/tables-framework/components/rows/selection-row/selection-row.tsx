@@ -49,6 +49,7 @@ const SelectionRow: FC<ISelectionRowProps> = ({
 
   return (
     <BaseTr
+      accessibilityContext={{ row: data, area: data.area }}
       {...rest}
       style={style}
       isSelected={isSelected}

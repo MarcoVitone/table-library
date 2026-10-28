@@ -40,6 +40,7 @@ const SortIcon = ({
       {children}
 
       <IconButton
+        accessibilitySlot="sortButton"
         aria-label="Ordina colonna"
         className="sort-icon"
         size="small"

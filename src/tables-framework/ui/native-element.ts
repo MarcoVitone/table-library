@@ -1,6 +1,7 @@
 import { createElement, forwardRef, type ComponentPropsWithoutRef, type CSSProperties, type ElementType } from "react";
 import { useTheme, themeVariables, type TableTheme } from "../theme/theme";
 import "./native.css";
+import { useTableAccessibility, type IAccessibilityContext, type TAccessibilitySlot } from "../accessibility";
 export type SxProps = CSSProperties & Partial<Record<"m" | "mx" | "my" | "mt" | "mb" | "ml" | "mr" | "p" | "px" | "py" | "pt" | "pb" | "pl" | "pr" | "bgcolor", string | number>>;
 export function sxStyle(sx?: SxProps): CSSProperties {
   if (!sx) return {};
@@ -38,22 +39,27 @@ export function nativeElement<T extends keyof HTMLElementTagNameMap, P extends o
     component?: ElementType;
     as?: ElementType;
     sx?: SxProps;
+    accessibilitySlot?: TAccessibilitySlot;
+    accessibilityContext?: IAccessibilityContext;
   };
   const Element = forwardRef<HTMLElementTagNameMap[T], Props>((props, ref) => {
     const theme = useTheme();
+    const { getProps } = useTableAccessibility();
     const {
       component,
       as,
       sx,
       style,
       className: customClass,
+      accessibilitySlot,
+      accessibilityContext,
       ...rest
     } = props as Props & {
       style?: CSSProperties;
       className?: string;
     };
     // React createElement forwards this ref; it does not read ref.current.
-    return createElement(component ?? as ?? tag, {
+    const nativeProps = {
       ...domProps(rest),
       ref,
       "data-loading": (rest as Record<string, unknown>).isLoading || undefined,
@@ -72,7 +78,10 @@ export function nativeElement<T extends keyof HTMLElementTagNameMap, P extends o
         ...sxStyle(sx),
         ...style
       }
-    });
+    };
+    const defaultSlot = ({ thead: "header", tbody: "body", tfoot: "footer", tr: "row", td: "cell", th: "cell" } as const)[tag as "thead" | "tbody" | "tfoot" | "tr" | "td" | "th"];
+    const slot = accessibilitySlot ?? defaultSlot;
+    return createElement(component ?? as ?? tag, slot ? getProps(slot, nativeProps, accessibilityContext) : nativeProps);
   });
   Element.displayName = 'Native(' + tag + ')';
   return Element;

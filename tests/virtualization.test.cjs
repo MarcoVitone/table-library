@@ -53,9 +53,10 @@ test('row styling and accessibility indices use the complete body index', () => 
     getRowStyle: (_data, index) => { received = index; },
   });
   assert.equal(received, 15);
-  assert.equal(node.props.style.backgroundColor, '#f5f7fa');
-  assert.equal(node.props['aria-rowindex'], 18);
-  assert.equal(node.props['data-virtual-index'], 15);
+  const html = renderToStaticMarkup(React.createElement('table', null, React.createElement('tbody', null, node)));
+  assert.match(html, /background-color:#f5f7fa/);
+  assert.match(html, /aria-rowindex="18"/);
+  assert.match(html, /data-virtual-index="15"/);
 });
 
 test('selection rows forward virtualization metadata and empty tables keep their state message', () => {

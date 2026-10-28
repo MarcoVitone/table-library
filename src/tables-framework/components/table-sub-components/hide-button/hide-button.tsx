@@ -11,7 +11,7 @@ export function HideButton({
   palette,
   title
 }: IHideButton) {
-  return <IconButton className="hide-button" title={title} aria-label={title} size="small" onClick={handleCollapseColumn} style={{
+  return <IconButton accessibilitySlot="collapseButton" className="hide-button" title={title} aria-label={title} size="small" onClick={handleCollapseColumn} style={{
     padding: 2,
     marginLeft: 4,
     color: palette.primary.main

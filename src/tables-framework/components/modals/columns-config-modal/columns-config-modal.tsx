@@ -1,6 +1,7 @@
 import { useMemo, useId, type ReactElement, type Dispatch, type SetStateAction } from "react";
 import { Button, IconButton, Checkbox } from "@/tables-framework/ui/controls";
 import { NativeDialog } from "@/tables-framework/ui/dialog";
+import { AccessibilityElement } from "@/tables-framework/accessibility";
 import { Close, ArrowUpward, ArrowDownward } from "@/tables-framework/ui/icons";
 import type { IColumnLayout } from "@/tables-framework/defines/common.types";
 import type { IColumnConfig } from "@/tables-framework/components/dynamic-table/dynamic-table";
@@ -83,7 +84,7 @@ const ColumnsConfigModal = <T,>({
   };
   const id = useId();
   return <NativeDialog open={open} onClose={onClose} title="Configura Colonne">
-    <IconButton aria-label="Chiudi configurazione" title="Chiudi configurazione" onClick={onClose} size="small" style={{
+    <IconButton accessibilitySlot="closeConfigButton" aria-label="Chiudi configurazione" title="Chiudi configurazione" onClick={onClose} size="small" style={{
       position: 'absolute',
       right: 12,
       top: 12
@@ -92,16 +93,16 @@ const ColumnsConfigModal = <T,>({
       {orderedCols.map((col, index) => {
           const layoutCol = columnsLayout?.find(column => column.id === col.id);
           return <li key={col.id} className="tbl-config-item">
-          <label htmlFor={id + col.id} className="tbl-config-label">{col.label}<small>{col.id}</small></label>
+          <AccessibilityElement as="label" slot="columnLabel" context={{ columnId: col.id, label: col.label, index }} htmlFor={id + col.id} className="tbl-config-label">{col.label}<small>{col.id}</small></AccessibilityElement>
           <div className="tbl-config-controls">
-            <IconButton title="Sposta su" aria-label="Sposta su" size="small" onClick={() => handleMoveColumn(index, 'up')} disabled={index === 0}><ArrowUpward fontSize="small" /></IconButton>
-            <IconButton title="Sposta giù" aria-label="Sposta giù" size="small" onClick={() => handleMoveColumn(index, 'down')} disabled={index === orderedCols.length - 1}><ArrowDownward fontSize="small" /></IconButton>
-            <Checkbox id={id + col.id} role="switch" className="tbl-switch" checked={!layoutCol?.props?.isHidden} onChange={() => handleToggleColumn(col.id)} disabled={col.hideable === false} size="small" />
+            <IconButton accessibilitySlot="moveColumnUpButton" accessibilityContext={{ columnId: col.id, label: col.label, index }} title="Sposta su" aria-label="Sposta su" size="small" onClick={() => handleMoveColumn(index, 'up')} disabled={index === 0}><ArrowUpward fontSize="small" /></IconButton>
+            <IconButton accessibilitySlot="moveColumnDownButton" accessibilityContext={{ columnId: col.id, label: col.label, index }} title="Sposta giù" aria-label="Sposta giù" size="small" onClick={() => handleMoveColumn(index, 'down')} disabled={index === orderedCols.length - 1}><ArrowDownward fontSize="small" /></IconButton>
+            <Checkbox accessibilitySlot="columnVisibility" accessibilityContext={{ columnId: col.id, label: col.label, index }} id={id + col.id} role="switch" className="tbl-switch" checked={!layoutCol?.props?.isHidden} onChange={() => handleToggleColumn(col.id)} disabled={col.hideable === false} size="small" />
           </div>
         </li>;
         })}
     </ul></div>
-    <div className="tbl-dialog-actions"><Button onClick={resetLayout} color="inherit" size="small">Ripristina Default</Button><Button onClick={onClose} variant="contained">Chiudi</Button></div>
+    <div className="tbl-dialog-actions"><Button accessibilitySlot="resetConfigButton" onClick={resetLayout} color="inherit" size="small">Ripristina Default</Button><Button accessibilitySlot="closeConfigButton" onClick={onClose} variant="contained">Chiudi</Button></div>
   </NativeDialog>;
 };
 export { ColumnsConfigModal };

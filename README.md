@@ -14,6 +14,7 @@ A powerful, flexible, and completely data-driven React Table Library. Designed t
 - **Virtualization**: Optional row windowing with measured heights for large loaded datasets.
 - **Saved Views**: Named filters, sorting, column layouts, search and page size with browser or controlled persistence.
 - **Bulk Actions**: Typed actions on selected records, with async pending/error feedback.
+- **Accessibility**: Consumer overrides for semantic attributes, labels, announcements and focus, with optional defaults. See the [accessibility guide](./documentation/09_ACCESSIBILITY.md).
 
 ## 📚 Documentation
 

@@ -2,7 +2,10 @@ import { createElement, forwardRef, useEffect, useRef, useImperativeHandle as Re
 import { useTheme, themeVariables, type Palette } from "../theme/theme";
 import { domProps, sxStyle, type SxProps } from "./native-element";
 import { Close } from "./icons";
+import { useTableAccessibility, type IAccessibilityContext, type TAccessibilitySlot } from "../accessibility";
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color"> & {
+  accessibilitySlot?: TAccessibilitySlot;
+  accessibilityContext?: IAccessibilityContext;
   variant?: "text" | "outlined" | "contained";
   color?: keyof Palette | "inherit" | "default";
   size?: "small" | "medium" | "large";
@@ -35,9 +38,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   disabled,
   status,
   variation,
+  accessibilitySlot = "button",
+  accessibilityContext,
   ...rest
 }, ref) {
   const theme = useTheme();
+  const { getProps } = useTableAccessibility();
   const {
     palette
   } = theme;
@@ -48,17 +54,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const Component = component ?? (href ? "a" : "button");
   const inactive = !!disabled;
   const isLink = Component === "a";
-  return <Component {...domProps(rest)} href={inactive && isLink ? undefined : href} ref={ref} type={rest.type ?? (isLink ? undefined : "button")} disabled={isLink ? undefined : inactive} aria-disabled={inactive || undefined} tabIndex={inactive && isLink ? -1 : rest.tabIndex} onClick={inactive ? (event: React.MouseEvent<HTMLElement>) => {
+  const onClick = inactive ? (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
-  } : rest.onClick} className={["tbl-button", 'tbl-button-' + variant, 'tbl-size-' + size, variation && 'tbl-button-' + variation, className].filter(Boolean).join(' ')} style={{
+  } : rest.onClick;
+  const accessibilityProps = getProps(accessibilitySlot, { ...domProps(rest), "aria-disabled": rest["aria-disabled"] ?? (inactive || undefined), tabIndex: inactive && isLink ? -1 : rest.tabIndex, onClick }, accessibilityContext);
+  return <Component href={inactive && isLink ? undefined : href} ref={ref} type={rest.type ?? (isLink ? undefined : "button")} disabled={isLink ? undefined : inactive} className={["tbl-button", 'tbl-button-' + variant, 'tbl-size-' + size, variation && 'tbl-button-' + variation, className].filter(Boolean).join(' ')} style={{
     ...themeVariables(theme),
     "--table-button-bg": ink,
     color: ink,
     width: fullWidth ? "100%" : undefined,
     ...sxStyle(sx),
     ...style
-  } as CSSProperties} data-disabled={disabled || status === "disabled" ? "true" : undefined}>{startIcon && <span className="tbl-button-icon">{startIcon}</span>}{children}{endIcon && <span className="tbl-button-icon">{endIcon}</span>}</Component>;
+  } as CSSProperties} data-disabled={disabled || status === "disabled" ? "true" : undefined} {...accessibilityProps}>{startIcon && <span className="tbl-button-icon">{startIcon}</span>}{children}{endIcon && <span className="tbl-button-icon">{endIcon}</span>}</Component>;
 });
 export const IconButton = forwardRef<HTMLButtonElement, ButtonProps>(function IconButton({
   className,
@@ -67,6 +75,8 @@ export const IconButton = forwardRef<HTMLButtonElement, ButtonProps>(function Ic
   return <Button ref={ref} {...props} className={['tbl-icon-button', className].filter(Boolean).join(' ')} />;
 });
 export type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'color' | 'onChange'> & {
+  accessibilitySlot?: TAccessibilitySlot;
+  accessibilityContext?: IAccessibilityContext;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void;
   indeterminate?: boolean;
   size?: 'small' | 'medium';
@@ -89,9 +99,12 @@ export function Checkbox({
   onChange,
   style,
   className,
+  accessibilitySlot = "checkbox",
+  accessibilityContext,
   ...props
 }: CheckboxProps) {
   const ref = useRef<HTMLInputElement>(null);
+  const { getProps } = useTableAccessibility();
   ReactUseImperativeHandle(inputRef, () => ref.current!, []);
   const theme = useTheme();
   const {
@@ -104,7 +117,7 @@ export function Checkbox({
     ...inputProps,
     ...slotProps?.input
   };
-  return <input {...props} {...nativeInputProps} ref={ref} type="checkbox" className={['tbl-checkbox', 'tbl-size-' + size, nativeInputProps.className, className].filter(Boolean).join(' ')} aria-checked={indeterminate ? 'mixed' : props.checked} style={{
+  return <input {...getProps(accessibilitySlot, { ...props, "aria-checked": indeterminate ? 'mixed' as const : props.checked, ...nativeInputProps }, accessibilityContext)} ref={ref} type="checkbox" className={['tbl-checkbox', 'tbl-size-' + size, nativeInputProps.className, className].filter(Boolean).join(' ')} style={{
     ...themeVariables(theme),
     accentColor: palette[color as keyof Palette] && "main" in Object(palette[color as keyof Palette]) ? (palette[color as keyof Palette] as {
       main: string;
@@ -152,6 +165,7 @@ export function Chip({
   className,
   ...rest
 }: ChipProps) {
+  const { getProps } = useTableAccessibility();
   const {
     palette
   } = useTheme();
@@ -159,7 +173,7 @@ export function Chip({
   const ink = selected && "main" in Object(selected) ? (selected as {
     main: string;
   }).main : undefined;
-  return createElement(component, {
+  return createElement(component, getProps("chip", {
     ...rest,
     className: ['tbl-chip', 'tbl-chip-' + variant, 'tbl-size-' + size, className].filter(Boolean).join(' '),
     role: clickable ? 'button' : rest.role,
@@ -183,10 +197,10 @@ export function Chip({
       ...sxStyle(sx),
       ...style
     }
-  }, icon && <span className="tbl-chip-icon" style={{
+  }), icon && <span className="tbl-chip-icon" style={{
     color: iconColor
-  }}>{icon}</span>, <span>{label}</span>, onDelete && <button type="button" className="tbl-chip-delete" disabled={disabled} aria-label="Rimuovi" onClick={event => {
+  }}>{icon}</span>, <span>{label}</span>, onDelete && <button type="button" className="tbl-chip-delete" disabled={disabled} {...getProps("chipDeleteButton", { "aria-label": "Rimuovi", onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onDelete(event);
-  }}>{deleteIcon ?? <Close fontSize="small" />}</button>);
+  } })}>{deleteIcon ?? <Close fontSize="small" />}</button>);
 }

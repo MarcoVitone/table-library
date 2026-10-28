@@ -30,8 +30,11 @@ import { VirtualRowRetentionContext } from "@/tables-framework/hooks/use-virtual
 import type { IBulkAction } from "@/tables-framework/defines/bulk-actions.types";
 import { defaultAPI, TableContext } from "./table-context";
 import { BulkActionsToolbar } from "../table-sub-components/bulk-actions-toolbar/bulk-actions-toolbar";
+import { AccessibilityProvider, AccessibilityElement, type ITableAccessibility } from "../../accessibility";
 
 interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
+  /** Consumer-owned accessibility overrides; omitted settings use library defaults. */
+  accessibility?: ITableAccessibility;
   source: ISource;
   table?: ElementType;
   header?: ElementType;
@@ -61,7 +64,7 @@ interface ITableRendererProps<T = unknown> extends IRowStyling<T> {
   virtualization?: TVirtualization;
 }
 
-const TableRenderer = <T,>({
+const TableRendererContent = <T,>({
   source,
   table: TableElement = BaseTable,
   header: HeaderElement = BaseHeader,
@@ -155,9 +158,9 @@ const TableRenderer = <T,>({
     const spacer = (from: number, to: number) => {
       const height = virtual.offsets[to] - virtual.offsets[from];
       if (height <= 0) return;
-      nodes.push(<tr key={`virtual-gap-${from}`} className="tbl-virtual-spacer" aria-hidden="true" role="presentation">
+      nodes.push(<AccessibilityElement as="tr" slot="virtualSpacer" key={`virtual-gap-${from}`} className="tbl-virtual-spacer" aria-hidden="true" role="presentation">
         <td colSpan={Math.max(1, source.columns.length)} style={{ height, padding: 0, border: 0, fontSize: 0, lineHeight: 0 }} />
-      </tr>);
+      </AccessibilityElement>);
     };
     let cursor = 0;
     for (const index of [...indices].sort((a, b) => a - b)) {
@@ -260,10 +263,10 @@ const TableRenderer = <T,>({
   const stateRow = (
     <tr className="tbl-state-row">
       <td colSpan={Math.max(1, source.columns.length)} className="tbl-state-cell">
-        <div role={hasError && !isLoading ? "alert" : "status"}>
+        <AccessibilityElement as="div" slot="tableState" role={hasError && !isLoading ? "alert" : "status"}>
           {stateContent}
-          {hasError && !isLoading && onRetry && <button type="button" className="tbl-button" onClick={onRetry}>Riprova</button>}
-        </div>
+          {hasError && !isLoading && onRetry && <AccessibilityElement as="button" slot="retryButton" type="button" className="tbl-button" onClick={onRetry}>Riprova</AccessibilityElement>}
+        </AccessibilityElement>
       </td>
     </tr>
   );
@@ -285,7 +288,7 @@ const TableRenderer = <T,>({
         <Container>
           {beforeNode}
           {bulkActions && <BulkActionsToolbar actions={bulkActions} disabled={isLoading || hasError} />}
-          {virtual.enabled ? <div ref={viewportRef} className="tbl-virtual-viewport"
+          {virtual.enabled ? <AccessibilityElement as="div" slot="scrollRegion" ref={viewportRef} className="tbl-virtual-viewport"
             role="region" aria-label={`${tableLabel ?? "Tabella"}: area scorribile`} tabIndex={0}
             style={{ height: virtual.height, overflow: "auto", width: "100%", maxWidth: "100%", overflowAnchor: "none" }}
             onFocusCapture={event => setFocusedRow((event.target as HTMLElement).closest<HTMLTableRowElement>("tr[data-virtual-row]")?.dataset.virtualRow ?? null)}
@@ -293,13 +296,17 @@ const TableRenderer = <T,>({
               if (!event.currentTarget.contains(event.relatedTarget)) setFocusedRow(null);
             }}>
             {tableNode}
-          </div> : tableNode}
+          </AccessibilityElement> : tableNode}
           {afterNode}
         </Container>
       </VirtualRowRetentionContext.Provider>
     </TableContext.Provider>
   );
 };
+
+const TableRenderer = <T,>({ accessibility, ...props }: ITableRendererProps<T>) => (
+  <AccessibilityProvider value={accessibility}><TableRendererContent {...props} /></AccessibilityProvider>
+);
 
 export type { ITableRendererProps };
 export { TableContext, TableRenderer };
