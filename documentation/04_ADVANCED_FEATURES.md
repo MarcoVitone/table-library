@@ -463,6 +463,55 @@ matching record, including rows outside the viewport.
 azioni** demo combines views, legacy/unified queries and asynchronous actions;
 **Virtualizzazione** demonstrates actions on 10,000 selected rows.
 
+### Shareable view links
+
+Enable URL sharing alongside saved views:
+
+```tsx
+<DynamicTable
+  data={users}
+  columns={columns}
+  globalSearch
+  savedViews={{ key: "users", share: true }}
+/>
+```
+
+**Condividi vista** copies a snapshot of the current filters, sorting, column
+order/width/visibility, search and page size, including unsaved changes. The
+read-only **Link alla vista** field also supports manual copying when clipboard
+access is unavailable. The current browser URL is not changed by sharing.
+
+Opening the link applies the snapshot when this table mounts, taking precedence
+over its initial/default configuration and resetting pagination to page zero.
+It does not add a saved view: recipients can save it explicitly. Later edits do
+not reapply or rewrite the link. Browser back/forward navigation applies a new
+snapshot when that table's URL parameter changes; removing the parameter leaves
+the current view in place. Host routers that change URLs without `popstate`
+can use the parsing helper below or remount the table.
+
+The default query parameter is `tableView.users` (derived from `savedViews.key`).
+Choose unique keys for multiple tables, or override it with
+`share: { parameter: "contactsView" }`. Unrelated parameters and URL hashes are
+preserved. Sharing is disabled by default and independent of saved-view storage.
+
+Snapshots are versioned and validated. Malformed or unsupported links show an
+inline error without applying them; removed columns are ignored and new columns
+retain their defaults. Controlled query/search owners must accept the usual
+change callbacks, as when applying a saved view. `onViewApply` receives a view
+with ID `shared` and name `Vista condivisa`. Server queries still belong to the host;
+mounting may start its initial request before the shared query is applied.
+
+For custom routing or sharing controls, `createTableViewUrl(absoluteUrl, state,
+parameter)` and `parseTableViewUrl(absoluteUrl, parameter)` are exported. The
+parser returns `null` for a missing parameter and throws for an invalid snapshot.
+Regular-expression filters and Unicode text round-trip through the helpers.
+
+Links contain the configuration and filter/search values in readable URL data,
+not the table records or access credentials. Recipients still need access to the
+application and its data. Avoid sensitive search/filter values in shared URLs;
+large configurations produce longer links and remain subject to browser and
+hosting URL-length limits.
+
 ## Column Management
 
 Resizing, hiding, and reordering columns preserve active filters, sorting, and

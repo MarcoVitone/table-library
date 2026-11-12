@@ -22,6 +22,90 @@ async function filterCity(page, text) {
   await page.getByRole('dialog').getByRole('textbox').press('Escape');
 }
 
+test('shared snapshot restores in a fresh browser without saved views and supports manual copying', async ({ page, browser }) => {
+  await openManagement(page);
+  await sizeSelect(page).selectOption('4');
+  await filterCity(page, 'Roma');
+  await search(page).fill('ar');
+  await nameHeader(page).getByRole('button', { name: 'Ordina colonna' }).click();
+  await nameHeader(page).getByRole('separator').focus();
+  await nameHeader(page).getByRole('separator').press('Shift+ArrowRight');
+  await page.getByRole('button', { name: 'Configura colonne', exact: true }).click();
+  await page.getByRole('dialog').getByRole('listitem').filter({ hasText: 'Stato' }).getByRole('switch').uncheck();
+  await page.getByRole('dialog').getByRole('button', { name: 'Chiudi', exact: true }).click();
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true,
+    value: { writeText: () => Promise.reject(new Error('denied')) } }));
+  await page.getByRole('button', { name: 'Condividi vista', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Copia il link' })).toBeVisible();
+  const url = await page.getByRole('textbox', { name: 'Link alla vista', exact: true }).inputValue();
+  const context = await browser.newContext();
+  try {
+    const recipient = await context.newPage();
+    await recipient.goto(url);
+    await openManagement(recipient);
+    await expect(search(recipient)).toHaveValue('ar');
+    await expect(sizeSelect(recipient)).toHaveValue('4');
+    await expect(nameHeader(recipient)).toHaveAttribute('aria-sort', 'ascending');
+    await expect(recipient.locator('thead th')).toHaveText(['', 'Nome', 'Città']);
+    await expect(rows(recipient)).toHaveCount(2);
+    await expect(rows(recipient).first()).toContainText('Carla');
+    await expect(viewsSelect(recipient).locator('option')).toHaveCount(1);
+    await expect.poll(() => recipient.evaluate(() => localStorage.getItem('table_views_demo-contacts'))).toBeNull();
+    // A later user edit must not reapply the snapshot on every render.
+    await search(recipient).fill('Marco');
+    await expect(search(recipient)).toHaveValue('Marco');
+  } finally { await context.close(); }
+});
+
+test('malformed shared URLs leave the current table usable', async ({ page }) => {
+  await page.goto('/?tableView.demo-contacts=%7Bbroken');
+  await openManagement(page);
+  await expect(page.getByRole('alert')).toContainText('vista non valida');
+  await expect(rows(page)).toHaveCount(2);
+  await search(page).fill('Anna');
+  await expect(rows(page)).toHaveCount(1);
+  await expect(rows(page)).toContainText('Anna');
+});
+
+test('copy uses the clipboard without changing the URL and history restores shared snapshots', async ({ page }) => {
+  await openManagement(page);
+  const originalUrl = page.url();
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true,
+    value: { writeText: async value => { window.copiedView = value; } } }));
+  await search(page).fill('Marco');
+  await page.getByRole('button', { name: 'Condividi vista', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Link copiato.' })).toBeVisible();
+  const marcoUrl = await page.evaluate(() => window.copiedView);
+  expect(page.url()).toBe(originalUrl);
+  await search(page).fill('Anna');
+  await page.getByRole('button', { name: 'Condividi vista', exact: true }).click();
+  const annaUrl = await page.evaluate(() => window.copiedView);
+  await page.evaluate(url => { history.pushState(null, '', url); window.dispatchEvent(new PopStateEvent('popstate')); }, marcoUrl);
+  await expect(search(page)).toHaveValue('Marco');
+  await page.evaluate(url => { history.pushState(null, '', url); window.dispatchEvent(new PopStateEvent('popstate')); }, annaUrl);
+  await expect(search(page)).toHaveValue('Anna');
+  await page.goBack();
+  await expect(search(page)).toHaveValue('Marco');
+  // Legacy query mode also imports the link on mount.
+  await page.getByRole('checkbox', { name: 'Query unificata', exact: true }).uncheck();
+  await expect(search(page)).toHaveValue('Marco');
+  await expect(rows(page)).toHaveCount(1);
+  await expect(rows(page)).toContainText('Marco');
+});
+
+test('shared server views emit one complete query when mounted', async ({ page }) => {
+  await page.getByRole('button', { name: 'Stati e server', exact: true }).click();
+  await search(page).fill('Elena');
+  await expect(rows(page).first()).toContainText('Elena');
+  await page.getByRole('button', { name: 'Condividi vista', exact: true }).click();
+  const url = await page.getByRole('textbox', { name: 'Link alla vista', exact: true }).inputValue();
+  await page.goto(url);
+  await page.getByRole('button', { name: 'Stati e server', exact: true }).click();
+  await expect(rows(page).first()).toContainText('Elena');
+  await expect(search(page)).toHaveValue('Elena');
+  await expect(page.getByRole('status', { name: 'Cambi query' })).toHaveText('1');
+});
+
 test.beforeEach(async ({ page }) => {
   const errors = [];
   errorsByPage.set(page, errors);

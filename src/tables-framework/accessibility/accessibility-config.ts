@@ -17,6 +17,7 @@ export type TAccessibilitySlot =
   | "bulkPending" | "bulkError" | "bulkErrorCloseButton"
   | "savedViews" | "savedViewSelect" | "savedViewName" | "savedViewStatus" | "savedViewError"
   | "savedViewApplyButton" | "savedViewSaveButton" | "savedViewUpdateButton" | "savedViewDeleteButton"
+  | "savedViewShareButton" | "savedViewLinkLabel" | "savedViewLink"
   | "resetConfigButton" | "goToPageButton"
   | "pagination" | "pageSizeSelect" | "pageButton" | "pageNavigationButton" | "goToPageInput"
   | "button" | "checkbox" | "chip" | "chipDeleteButton" | "cellLink" | "icon"

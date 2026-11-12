@@ -50,6 +50,26 @@ export function cloneTableViewState(state: ITableViewState): ITableViewState {
   return decode(encode(state)) as ITableViewState;
 }
 
+/** Creates a portable snapshot, preserving unrelated query parameters and the hash. */
+export function createTableViewUrl(url: string, state: ITableViewState, parameter: string): string {
+  if (!parameter || !isTableViewState(state)) throw new Error("Invalid shared view");
+  const result = new URL(url);
+  result.searchParams.set(parameter, encode({ version: 1, state }));
+  return result.href;
+}
+
+/** Missing parameters return null; malformed or unsupported snapshots throw. */
+export function parseTableViewUrl(url: string, parameter: string): ITableViewState | null {
+  if (!parameter) throw new Error("Invalid shared view parameter");
+  const text = new URL(url).searchParams.get(parameter);
+  if (text === null) return null;
+  const value = decode(text);
+  if (!record(value) || value.version !== 1 || !isTableViewState(value.state)) {
+    throw new Error("Invalid shared view");
+  }
+  return value.state;
+}
+
 export function tableViewSignature(state: ITableViewState): string {
   // Canonical property order also handles views supplied by external storage.
   return encode({ columnsLayout: state.columnsLayout.map(({ id, props }) => ({ id, props: {

@@ -44,4 +44,4 @@ export type { IVirtualizationConfig, TVirtualization } from "../defines/virtuali
 export type { IGlobalSearchConfig, TGlobalSearch } from "../defines/global-search.types";
 export type { ITableViewState, ISavedTableView, ISavedViewsConfig } from "../defines/saved-views.types";
 export type { IBulkAction, IBulkActionContext } from "../defines/bulk-actions.types";
-export { parseSavedViews, serializeSavedViews } from "../utils/saved-views/saved-views";
+export { parseSavedViews, serializeSavedViews, createTableViewUrl, parseTableViewUrl } from "../utils/saved-views/saved-views";

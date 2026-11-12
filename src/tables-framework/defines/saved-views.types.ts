@@ -15,6 +15,8 @@ export interface ISavedTableView {
 export interface ISavedViewsConfig {
   /** Unique table/account namespace. */
   key: string;
+  /** Enable copying and restoring a view URL. Default parameter: `tableView.${key}`. */
+  share?: boolean | { parameter?: string };
   storage?: TPersistenceStorage | false;
   /** Controlled list: storage is delegated to the owner. */
   views?: ISavedTableView[];

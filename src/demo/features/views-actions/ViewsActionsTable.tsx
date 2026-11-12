@@ -49,7 +49,7 @@ export function ViewsActionsTable() {
     <button type="button" onClick={() => setData(initialData)}>Ripristina contatti</button>
     <DynamicTable key={String(unified)} data={data} columns={columns} tableLabel="Contatti gestibili"
       query={unified ? query : undefined} onQueryChange={unified ? setQuery : undefined}
-      globalSearch savedViews={{ key: "demo-contacts" }} bulkActions={actions}
+      globalSearch savedViews={{ key: "demo-contacts", share: true }} bulkActions={actions}
       pagination={{ enabled: true, limit: 2, limitOptions: [2, 4, 6] }}
       enableColumnFilters enableColumnConfig enableColumnReorder isResizable stripedRows />
     <output aria-label="Ultime righe elaborate">{JSON.stringify(lastRows)}</output>

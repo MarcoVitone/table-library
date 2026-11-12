@@ -17,6 +17,33 @@ const state = () => ({ columnsLayout: [
   search: 'Roma', pageSize: 25 });
 const view = () => ({ id: 'v1', name: 'Roma', state: state() });
 
+const { createTableViewUrl, parseTableViewUrl } = require('../src/tables-framework/utils/saved-views/saved-views.ts');
+test('shared URLs preserve Unicode, regex filters, unrelated parameters, hash and other tables', () => {
+  const snapshot = { ...state(), search: 'Città & 東京 + #?' };
+  const url = createTableViewUrl('https://example.com/contacts?tenant=42#details', snapshot, 'tableView.contacts');
+  assert.deepEqual(parseTableViewUrl(url, 'tableView.contacts'), snapshot);
+  assert.equal(new URL(url).searchParams.get('tenant'), '42');
+  assert.equal(new URL(url).hash, '#details');
+  assert.equal(parseTableViewUrl(url, 'tableView.other'), null);
+  const second = createTableViewUrl(url, state(), 'tableView.other');
+  assert.deepEqual(parseTableViewUrl(second, 'tableView.contacts'), snapshot);
+  assert.deepEqual(parseTableViewUrl(second, 'tableView.other'), state());
+  assert.equal(new URL(createTableViewUrl(url, state(), 'tableView.contacts')).searchParams.getAll('tableView.contacts').length, 1);
+});
+
+test('shared URLs reject invalid payloads, unsupported versions and invalid state', () => {
+  for (const payload of ['', '{', 'null', JSON.stringify({ version: 2, state: state() }),
+    JSON.stringify({ version: 1, state: { ...state(), pageSize: 0 } }),
+    JSON.stringify({ version: 1, state: { ...state(), columnsLayout: null } }),
+    '{"version":1,"state":{"$tableRegExp":{"source":"[","flags":"i"}}}']) {
+    const url = new URL('https://example.com');
+    url.searchParams.set('view', payload);
+    assert.throws(() => parseTableViewUrl(url.href, 'view'));
+  }
+  assert.throws(() => createTableViewUrl('https://example.com', { ...state(), pageSize: -1 }, 'view'));
+  assert.throws(() => createTableViewUrl('https://example.com', state(), ''));
+});
+
 test('saved views round-trip full layout, typed filters and regular expressions', () => {
   const restored = parseSavedViews(serializeSavedViews([view()]));
   assert.deepEqual(restored, [view()]);
