@@ -1,5 +1,5 @@
 import { nativeElement } from "@/tables-framework/ui/native-element";
-export const PaginationContainer = nativeElement<'div', {
+export const PaginationContainer = /* @__PURE__ */ nativeElement<'div', {
   alignment: 'left' | 'center' | 'right';
 }>('div', 'tbl-pagination', ({
   alignment
@@ -14,10 +14,10 @@ export const PaginationContainer = nativeElement<'div', {
   color: '#333',
   flexWrap: 'wrap'
 }));
-export const PaginationInfo = nativeElement('span', 'tbl-pagination-info', () => ({
+export const PaginationInfo = /* @__PURE__ */ nativeElement('span', 'tbl-pagination-info', () => ({
   color: '#666'
 }));
-export const PaginationControls = nativeElement('div', 'tbl-pagination-controls', () => ({
+export const PaginationControls = /* @__PURE__ */ nativeElement('div', 'tbl-pagination-controls', () => ({
   display: 'flex',
   alignItems: 'center',
   gap: 8,
@@ -25,7 +25,7 @@ export const PaginationControls = nativeElement('div', 'tbl-pagination-controls'
   maxWidth: '100%',
   justifyContent: 'inherit'
 }));
-export const PaginationButton = nativeElement<'button', {
+export const PaginationButton = /* @__PURE__ */ nativeElement<'button', {
   disabled?: boolean;
 }>('button', 'tbl-pagination-button', ({
   disabled
@@ -41,20 +41,20 @@ export const PaginationButton = nativeElement<'button', {
   cursor: disabled ? 'not-allowed' : 'pointer',
   fontSize: 14
 }));
-export const PageSizeSelect = nativeElement('select', 'tbl-select', () => ({
+export const PageSizeSelect = /* @__PURE__ */ nativeElement('select', 'tbl-select', () => ({
   padding: '6px 8px',
   background: '#fff',
   fontSize: 14,
   cursor: 'pointer'
 }));
-export const PageNumbers = nativeElement('div', 'tbl-page-numbers', () => ({
+export const PageNumbers = /* @__PURE__ */ nativeElement('div', 'tbl-page-numbers', () => ({
   display: 'flex',
   alignItems: 'center',
   gap: 4,
   flexWrap: 'wrap',
   maxWidth: '100%'
 }));
-export const PageButton = nativeElement<'button', {
+export const PageButton = /* @__PURE__ */ nativeElement<'button', {
   isActive?: boolean;
 }>('button', 'tbl-page-button', ({
   isActive
@@ -72,12 +72,12 @@ export const PageButton = nativeElement<'button', {
   cursor: 'pointer',
   fontSize: 14
 }));
-export const GoToPageContainer = nativeElement('div', 'tbl-goto', () => ({
+export const GoToPageContainer = /* @__PURE__ */ nativeElement('div', 'tbl-goto', () => ({
   display: 'flex',
   alignItems: 'center',
   gap: 8
 }));
-export const GoToPageInput = nativeElement('input', 'tbl-input', () => ({
+export const GoToPageInput = /* @__PURE__ */ nativeElement('input', 'tbl-input', () => ({
   width: 60,
   padding: '6px 8px',
   background: '#fff',
@@ -85,7 +85,7 @@ export const GoToPageInput = nativeElement('input', 'tbl-input', () => ({
   fontSize: 14,
   textAlign: 'center'
 }));
-export const GoToPageButton = nativeElement('button', 'tbl-button tbl-button-contained', () => ({
+export const GoToPageButton = /* @__PURE__ */ nativeElement('button', 'tbl-button tbl-button-contained', () => ({
   padding: '6px 12px',
   fontSize: 14
 }));

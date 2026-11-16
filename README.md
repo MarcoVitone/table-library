@@ -14,6 +14,9 @@ A powerful, flexible, and completely data-driven React Table Library. Designed t
 - **Virtualization**: Optional row windowing with measured heights for large loaded datasets.
 - **Saved Views**: Named filters, sorting, column layouts, search and page size with browser or controlled persistence.
 - **Shareable Views**: Opt-in view links that restore the current configuration in another browser.
+- **Excel Paste**: Paste rectangular blocks with typed conversion, validation preview and a single batch save.
+- **Localization**: document/browser language detection, built-in English and Italian, and typed message overrides for labels, accessibility and clipboard validation.
+- **Bundle size**: no additional runtime dependencies beyond React/ReactDOM peers. Approximately 42 kB gzip for `DynamicTable` or 2.9 kB for `TableButton`, plus 2.2 kB shared CSS. See [bundle measurements](documentation/10_BUNDLE_SIZE.md).
 - **Bulk Actions**: Typed actions on selected records, with async pending/error feedback.
 - **Accessibility**: Consumer overrides for semantic attributes, labels, announcements and focus, with optional defaults. See the [accessibility guide](./documentation/09_ACCESSIBILITY.md).
 

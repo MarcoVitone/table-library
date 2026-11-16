@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import { AccessibilityElement, useTableAccessibility } from "@/tables-framework/accessibility";
 import { useState, useRef, useId, useLayoutEffect, useEffect, type SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
@@ -33,6 +34,7 @@ export function Autocomplete({
   describedBy,
   onCancel,
 }: Props) {
+  const t = useTableLocalization();
   const { message } = useTableAccessibility();
   const labelOf = (option: AutocompleteOption | null) => option === null ? '' : getOptionLabel(option);
   const [previousValue, setPreviousValue] = useState(value);
@@ -94,7 +96,7 @@ export function Autocomplete({
     input.current?.focus();
   };
   return <div className="tbl-combobox" ref={root}>
-  <AccessibilityElement as="input" slot="autocompleteInput" ref={input} disabled={disabled} aria-invalid={invalid || undefined} aria-describedby={describedBy} className="tbl-input" role="combobox" aria-label={label || placeholder || 'Seleziona opzione'} aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} aria-activedescendant={open && activeIndex >= 0 ? id + '-' + activeIndex : undefined} autoComplete="off" placeholder={placeholder} value={query} onChange={event => {
+  <AccessibilityElement as="input" slot="autocompleteInput" ref={input} disabled={disabled} aria-invalid={invalid || undefined} aria-describedby={describedBy} className="tbl-input" role="combobox" aria-label={label || placeholder || t("a11y.option")} aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} aria-activedescendant={open && activeIndex >= 0 ? id + '-' + activeIndex : undefined} autoComplete="off" placeholder={placeholder} value={query} onChange={event => {
       setQuery(event.target.value);
       setActive(0);
       setOpen(true);
@@ -129,18 +131,18 @@ export function Autocomplete({
       }
     }} />
   <div className="tbl-combobox-controls">
-   {!disableClearable && value !== null && <IconButton accessibilitySlot="autocompleteClearButton" disabled={disabled} size="small" aria-label="Cancella selezione" onMouseDown={event => event.preventDefault()} onClick={event => choose(event, null)}><Close fontSize="inherit" /></IconButton>}
-   <IconButton accessibilitySlot="autocompleteToggleButton" disabled={disabled} size="small" aria-label={open ? 'Chiudi opzioni' : 'Apri opzioni'} tabIndex={-1} onMouseDown={event => event.preventDefault()} onClick={() => {
+   {!disableClearable && value !== null && <IconButton accessibilitySlot="autocompleteClearButton" disabled={disabled} size="small" aria-label={t("a11y.clear")} onMouseDown={event => event.preventDefault()} onClick={event => choose(event, null)}><Close fontSize="inherit" /></IconButton>}
+   <IconButton accessibilitySlot="autocompleteToggleButton" disabled={disabled} size="small" aria-label={open ? t("a11y.closeOptions") : t("a11y.openOptions")} tabIndex={-1} onMouseDown={event => event.preventDefault()} onClick={() => {
         input.current?.focus();
         setOpen(!open);
         setQuery('');
         setActive(0);
       }}><KeyboardArrowDown fontSize="inherit" /></IconButton>
   </div>
-  {open && !disabled && typeof document !== 'undefined' && createPortal(<AccessibilityElement as="ul" slot="autocompleteList" id={id} ref={list} style={themeVariables(theme)} className="tbl-combobox-list" role="listbox" aria-label={label || 'Opzioni'} onMouseDown={event => event.preventDefault()}>
+  {open && !disabled && typeof document !== 'undefined' && createPortal(<AccessibilityElement as="ul" slot="autocompleteList" id={id} ref={list} style={themeVariables(theme)} className="tbl-combobox-list" role="listbox" aria-label={label || t("a11y.options")} onMouseDown={event => event.preventDefault()}>
    {filtered.length ? filtered.map((option, index) => <AccessibilityElement as="li" slot="autocompleteOption" context={{ index, label: getOptionLabel(option) }} id={id + '-' + index} key={index} role="option" aria-selected={value !== null && isOptionEqualToValue(option, value)} data-active={index === activeIndex} onMouseMove={() => setActive(index)} onClick={event => choose(event, option)}>{getOptionLabel(option)}</AccessibilityElement>) : <AccessibilityElement as="li" slot="autocompleteEmpty" role="status" style={{
         padding: '.4rem .75rem'
-      }}>{message("autocompleteEmpty", "Nessun risultato")}</AccessibilityElement>}
+      }}>{message("autocompleteEmpty", t("a11y.empty"))}</AccessibilityElement>}
   </AccessibilityElement>, document.body)}
  </div>;
 }

@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import { Button, IconButton } from "@/tables-framework/ui/controls";
 import type { ButtonProps } from "@/tables-framework/ui/controls";
 import type { FC, ReactNode } from "react";
@@ -39,6 +40,7 @@ const ActionsCell: FC<IActionsCellProps> = ({
   labelAfter = false,
   ...rest
 }) => {
+  const t = useTableLocalization();
   const { rowStatus, setRowStatus } = useTable(data);
 
   const isLoading = !!rowStatus && rowStatus.state === "pending";
@@ -117,7 +119,7 @@ const ActionsCell: FC<IActionsCellProps> = ({
             return (
               <IconButton
                 accessibilitySlot="rowAction" accessibilityContext={{ index, cell: data, row: data.row, column: data.column }}
-                aria-label={actionLabel || label || "Azione riga"}
+                aria-label={actionLabel || label || t("a11y.rowAction")}
                 key={index + index}
                 disabled={isLoading}
                 onClick={handleAction}

@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import type { FC, MouseEvent } from "react";
 import { useState, useEffect, useRef } from "react";
 import { ResizerHandle } from "./column-resizer.styles.ts";
@@ -10,6 +11,7 @@ interface IColumnResizerProps {
 }
 
 const ColumnResizer: FC<IColumnResizerProps> = ({ onResizeEnd, minWidth = 50, width, label }) => {
+  const t = useTableLocalization();
   const [isResizing, setIsResizing] = useState(false);
   const handleRef = useRef<HTMLDivElement>(null);
   const [measuredWidth, setMeasuredWidth] = useState<number>();
@@ -133,12 +135,12 @@ const ColumnResizer: FC<IColumnResizerProps> = ({ onResizeEnd, minWidth = 50, wi
       accessibilitySlot="resizeHandle" accessibilityContext={{ label }}
       ref={handleRef}
       role="separator"
-      aria-label={label ? `Ridimensiona colonna ${label}` : "Ridimensiona colonna"}
+      aria-label={label ? t("a11y.resizeLabel", { label }) : t("a11y.resize")}
       aria-orientation="vertical"
       aria-valuemin={typeof minWidth === "number" ? minWidth : undefined}
       aria-valuenow={measuredWidth ?? (typeof width === "number" ? Math.round(width) : undefined)}
-      aria-valuetext={measuredWidth !== undefined ? `${measuredWidth} pixel`
-        : typeof width === "number" ? `${Math.round(width)} pixel` : "Larghezza automatica"}
+      aria-valuetext={measuredWidth !== undefined ? t("a11y.width", { width: measuredWidth })
+        : typeof width === "number" ? t("a11y.width", { width: Math.round(width) }) : t("a11y.autoWidth")}
       tabIndex={0}
       onKeyDown={(event) => {
         if (!["ArrowLeft", "ArrowRight", "Home"].includes(event.key)) return;

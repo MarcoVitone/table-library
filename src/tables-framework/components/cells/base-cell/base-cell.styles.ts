@@ -36,7 +36,7 @@ interface IBaseCellProps {
   draggable?: boolean;
 }
 const border = (config: IBorderConfig | undefined, fallback: string) => config?.show ? [config.width || '1px', config.style || 'solid', config.color || fallback].join(' ') : 'none';
-export const BaseCellComponent = nativeElement<'td', IBaseCellProps>('td', 'tbl-cell', p => ({
+export const BaseCellComponent = /* @__PURE__ */ nativeElement<'td', IBaseCellProps>('td', 'tbl-cell', p => ({
   borderLeft: border(p.borderLeft, p.borderColor || p.theme.palette.neutral.border || '#ddd'),
   borderTop: border(p.borderTop, p.borderColor || '#ddd'),
   borderRight: border(p.borderRight, p.borderColor || '#ddd'),

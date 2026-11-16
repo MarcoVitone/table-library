@@ -23,8 +23,8 @@ test('global search supports accents, whitespace and words across multiple neste
 });
 
 test('searches only configured data columns and supports explicit restrictions', () => {
-  assert.match(render({ globalSearch: { defaultValue: 'private' } }), /Nessun risultato/);
-  assert.match(render({ globalSearch: { columns: ['name'], defaultValue: 'Roma' } }), /Nessun risultato/);
+  assert.match(render({ globalSearch: { defaultValue: 'private' } }), /No results/);
+  assert.match(render({ globalSearch: { columns: ['name'], defaultValue: 'Roma' } }), /No results/);
   assert.match(body(render({ globalSearch: { columns: ['secret'], defaultValue: 'private' } })), /José/);
 });
 
@@ -57,7 +57,7 @@ test('controlled standalone search and query search take precedence over default
 test('blank search restores rows, while active search uses the customizable no-results state', () => {
   assert.match(body(render({ globalSearch: { defaultValue: '  ' } })), /Anna/);
   assert.match(render({ globalSearch: { defaultValue: 'absent' }, noResultsContent: 'No matches' }), /No matches/);
-  assert.match(render({ data: [], globalSearch: true }), /Nessun dato disponibile/);
+  assert.match(render({ data: [], globalSearch: true }), /No data available/);
 });
 
 test('server query search never filters the supplied page locally', () => {

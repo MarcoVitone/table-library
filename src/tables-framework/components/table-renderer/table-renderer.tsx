@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import type { ElementType, ReactNode } from "react";
 import {
   Fragment,
@@ -87,13 +88,14 @@ const TableRendererContent = <T,>({
   isLoading = false,
   error,
   onRetry,
-  loadingContent = "Caricamento…",
-  emptyContent = "Nessun dato disponibile",
-  noResultsContent = "Nessun risultato per i filtri applicati",
+  loadingContent,
+  emptyContent,
+  noResultsContent,
   virtualization,
   searchTerm = "",
   bulkActions,
-}: ITableRendererProps<T>) => {
+}: Omit<ITableRendererProps<T>, "accessibility">) => {
+  const t = useTableLocalization();
   const { rowsStatus, setRowsStatus } = useStatus({
     rows: source.body.rows,
     rowStatusMapper,
@@ -258,14 +260,14 @@ const TableRendererContent = <T,>({
   ]);
 
   const hasError = error !== undefined && error !== null && error !== false;
-  const stateContent = isLoading ? loadingContent : hasError ? error
-    : parserAPI.filtering?.length || searchTerm.trim() ? noResultsContent : emptyContent;
+  const stateContent = isLoading ? (loadingContent === undefined ? t("state.loading") : loadingContent) : hasError ? error
+    : parserAPI.filtering?.length || searchTerm.trim() ? (noResultsContent === undefined ? t("state.noResults") : noResultsContent) : (emptyContent === undefined ? t("state.empty") : emptyContent);
   const stateRow = (
     <tr className="tbl-state-row">
       <td colSpan={Math.max(1, source.columns.length)} className="tbl-state-cell">
         <AccessibilityElement as="div" slot="tableState" role={hasError && !isLoading ? "alert" : "status"}>
           {stateContent}
-          {hasError && !isLoading && onRetry && <AccessibilityElement as="button" slot="retryButton" type="button" className="tbl-button" onClick={onRetry}>Riprova</AccessibilityElement>}
+          {hasError && !isLoading && onRetry && <AccessibilityElement as="button" slot="retryButton" type="button" className="tbl-button" onClick={onRetry}>{t("state.retry")}</AccessibilityElement>}
         </AccessibilityElement>
       </td>
     </tr>
@@ -289,7 +291,7 @@ const TableRendererContent = <T,>({
           {beforeNode}
           {bulkActions && <BulkActionsToolbar actions={bulkActions} disabled={isLoading || hasError} />}
           {virtual.enabled ? <AccessibilityElement as="div" slot="scrollRegion" ref={viewportRef} className="tbl-virtual-viewport"
-            role="region" aria-label={`${tableLabel ?? "Tabella"}: area scorribile`} tabIndex={0}
+            role="region" aria-label={t("a11y.scroll", { label: tableLabel ?? t("a11y.table") })} tabIndex={0}
             style={{ height: virtual.height, overflow: "auto", width: "100%", maxWidth: "100%", overflowAnchor: "none" }}
             onFocusCapture={event => setFocusedRow((event.target as HTMLElement).closest<HTMLTableRowElement>("tr[data-virtual-row]")?.dataset.virtualRow ?? null)}
             onBlurCapture={event => {

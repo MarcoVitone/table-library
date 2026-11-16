@@ -512,6 +512,79 @@ application and its data. Avoid sensitive search/filter values in shared URLs;
 large configurations produce longer links and remain subject to browser and
 hosting URL-length limits.
 
+## Pasting blocks from Excel
+
+Enable the import control with a typed batch callback:
+
+```tsx
+<DynamicTable
+  data={users}
+  columns={columns}
+  excelPaste={{
+    onApply: async (nextData, updatedRows) => {
+      await saveRows(updatedRows);
+      setUsers(nextData);
+    },
+  }}
+/>
+```
+
+**Incolla da Excel** opens a dialog. Choose the starting row and column, paste
+the cells into **Celle da Excel**, then select **Anteprima**. The preview shows
+each destination, old value, converted value and error. **Applica blocco** remains
+disabled until the entire block is valid and contains at least one change.
+Canceling leaves the data untouched. No clipboard permission is needed: use the
+usual keyboard or browser paste command in the text area.
+
+Destinations follow the current filtered/sorted page and visible column order.
+Selection-checkbox and action columns are excluded. Other read-only columns
+occupy their position and report errors; they are never silently skipped.
+Without pagination, loaded rows outside a virtual viewport are included.
+Server tables can update only records supplied by the owner. Blocks cannot
+create rows, overflow the current page, or change row identities. Every target
+record needs a unique, non-null `idKey` value.
+
+Only `input` and `autocomplete` columns accept pasted values. Column-level
+`editable` and `validate` take precedence over `bodyProps`, as in cell editing.
+Predicates and validators receive the original record; autocomplete validators
+receive the resolved option object or string. Validators should be pure: they
+run during preview and again before committing. Cross-field validation against
+the complete changed batch can be performed in `onApply`.
+
+- Text is preserved, including empty values. Formula strings remain plain text.
+- Numbers accept decimal dots or commas and scientific notation; grouping
+  separators and currency symbols are rejected. Empty numeric cells stay `""`.
+- Boolean inputs accept `true`/`false` or `1`/`0`, ignoring case and outer spaces.
+- Date inputs require real calendar dates in `YYYY-MM-DD` format; email inputs
+  check basic address syntax. Existing custom validators still run.
+- Autocomplete text must exactly match one option label. Unknown or ambiguous
+  labels are errors. Empty text clears only when `disableClearable` allows it.
+
+Excel's quoted tab-separated clipboard format supports tabs, multiline cells,
+escaped quotes, CRLF line endings and empty cells. Copy values without column
+headers. Unequal row widths, unterminated quotes, more than 10,000 cells or more
+than 1,000,000 characters are rejected. This imports clipboard text, not `.xlsx`
+files, formulas, styling or merged cells.
+
+`onApply(nextData, updatedRows)` runs once for the complete block; `onDataChange`
+is reserved for individual cell edits. The library never mutates `data`. The
+owner saves the batch and updates its data, ideally after an atomic server
+operation succeeds. While the promise is pending, submission and closing are
+disabled. A thrown error or rejection stays in the dialog so users can retry.
+External data updates and changes to displayed destinations invalidate the
+preview; users must generate it again before applying.
+
+For custom interfaces, `parseExcelClipboard(text)` returns a rectangular string
+matrix. `previewExcelPaste(data, rowIndices, columns, text, startRow, startColumn,
+idKey?)` returns `{ cells, newData, updatedRows }`; destination indices are
+zero-based and `rowIndices` maps displayed rows into `data`. Structural parsing
+errors throw; cell errors appear on `cells`. If any cell fails, the returned
+data remains unchanged and `updatedRows` is empty. Both helpers and their
+`IExcelPasteConfig<T>`, `IPasteCell` and `IPastePreview<T>` types are exported.
+
+The **Modifica celle** demo includes the dialog, row restrictions, autocomplete
+validation, asynchronous saving and simulated failures.
+
 ## Column Management
 
 Resizing, hiding, and reordering columns preserve active filters, sorting, and

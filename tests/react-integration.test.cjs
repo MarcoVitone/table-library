@@ -63,7 +63,7 @@ test('server-side mode does not slice the supplied page a second time', () => {
 test('empty table renders without failing', () => {
   const html = render(DynamicTable, { data: [], columns });
   assert.match(html, /class="tbl-state-row"/);
-  assert.match(html, /Nessun dato disponibile/);
+  assert.match(html, /No data available/);
   assert.doesNotMatch(html.match(/<tbody[\s\S]*?<\/tbody>/)[0], /class="tbl-row"/);
 });
 test('nested input cells render their current value with ID zero', () => {

@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import { AccessibilityElement, useTableAccessibility } from "@/tables-framework/accessibility";
 import { DragIndicator } from "@/tables-framework/ui/icons";
 import { IconButton } from "@/tables-framework/ui/controls";
@@ -17,6 +18,7 @@ const DraggableButton = ({
   handleDragEnd,
   handleStyle,
 }: IDraggableButton) => {
+  const t = useTableLocalization();
   const { message } = useTableAccessibility();
   const { columnsLayout, setColumnsLayout } = useTable();
   const [announcement, setAnnouncement] = useState("");
@@ -24,8 +26,8 @@ const DraggableButton = ({
     <>
     <IconButton
       accessibilitySlot="dragHandle"
-      aria-label="Trascina colonna"
-      title="Sposta colonna con Alt e freccia sinistra/destra"
+      aria-label={t("a11y.drag")}
+      title={t("a11y.dragHelp")}
       aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
       className="drag-handle"
       draggable={isDomDraggable}
@@ -54,7 +56,7 @@ const DraggableButton = ({
           [next[from], next[to]] = [next[to], next[from]];
           setColumnsLayout(next);
           const position = index + (e.key === "ArrowLeft" ? 0 : 2);
-          setAnnouncement(message("columnMoved", `Colonna spostata alla posizione ${position}`, { position }));
+          setAnnouncement(message("columnMoved", t("a11y.moved", { position }), { position }));
         }
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

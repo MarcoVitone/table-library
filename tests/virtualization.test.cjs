@@ -68,6 +68,6 @@ test('selection rows forward virtualization metadata and empty tables keep their
   assert.match(html, /data-virtual-row="table-body-0"/);
   assert.match(html, /aria-rowindex="2"/);
   const empty = renderToStaticMarkup(React.createElement(DynamicTable, { data: [], columns, virtualization: true }));
-  assert.match(empty, /Nessun dato disponibile/);
+  assert.match(empty, /No data available/);
   assert.doesNotMatch(empty, /tbl-virtual-spacer/);
 });

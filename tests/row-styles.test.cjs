@@ -129,6 +129,6 @@ test('row styles compose with existing custom row styles and native row elements
 test('empty tables do not invoke getRowStyle', () => {
   let calls = 0;
   const { html } = render({ data: [], stripedRows: true, getRowStyle: () => { calls++; } });
-  assert.match(html, /Nessun dato disponibile/);
+  assert.match(html, /No data available/);
   assert.equal(calls, 0);
 });

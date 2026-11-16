@@ -1,8 +1,10 @@
+import { useTableLocalization } from "../../localization/use-table-localization";
 import { useState } from "react";
 import type { ISavedTableView, ISavedViewsConfig } from "../../defines/saved-views.types";
 import { parseSavedViews, serializeSavedViews } from "../../utils/saved-views/saved-views";
 
 export function useSavedViews(config: ISavedViewsConfig) {
+  const t = useTableLocalization();
   const storageKey = `table_views_${config.key}`;
   const storage = config.storage ?? "localStorage";
   const [initial] = useState(() => {
@@ -11,7 +13,7 @@ export function useSavedViews(config: ISavedViewsConfig) {
       const text = window[storage].getItem(storageKey);
       return { views: text ? parseSavedViews(text) : config.defaultViews ?? [], error: "" };
     } catch {
-      return { views: config.defaultViews ?? [], error: "Impossibile leggere le viste salvate." };
+      return { views: config.defaultViews ?? [], error: t("views.readFailed") };
     }
   });
   const [internalViews, setInternalViews] = useState(initial.views);
@@ -23,7 +25,7 @@ export function useSavedViews(config: ISavedViewsConfig) {
       setInternalViews(next);
       if (storage !== false && typeof window !== "undefined") {
         try { window[storage].setItem(storageKey, serializeSavedViews(next)); }
-        catch { setError("Viste aggiornate in memoria. Impossibile salvarle nel browser."); }
+        catch { setError(t("views.writeFailed")); }
       }
     }
     config.onViewsChange?.(next);

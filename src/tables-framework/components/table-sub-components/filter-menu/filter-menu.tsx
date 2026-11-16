@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import { AccessibilityElement } from "@/tables-framework/accessibility";
 import type { FC } from "react";
 import { useState, useMemo, useId } from "react";
@@ -14,6 +15,7 @@ const FilterMenu: FC<IFilterMenuProps> = ({
   dataKey,
   config
 }) => {
+  const t = useTableLocalization();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const {
     filtering,
@@ -55,23 +57,23 @@ const FilterMenu: FC<IFilterMenuProps> = ({
   const selected = Array.isArray(currentFilter?.val) ? currentFilter.val : [currentFilter?.val];
   const selectValue = config.type === 'multi-select' ? options.flatMap((option, index) => selected.includes(option.value) ? [String(index)] : []) : String(options.findIndex(option => Object.is(option.value, currentFilter?.val))).replace('-1', '');
   return <>
-    <IconButton accessibilitySlot="filterButton" accessibilityContext={{ label: dataKey }} aria-label={config.filterLabel || 'Filtra colonna'} aria-haspopup="dialog" aria-expanded={open} size="small" onClick={handleOpen} color={currentFilter ? 'primary' : 'default'} className={['filter-icon', currentFilter ? 'active' : '', open ? 'open' : ''].join(' ')}><FilterAlt fontSize="inherit" /></IconButton>
-    <NativeDialog open={open} anchor={anchorEl} onClose={handleClose} title={config.filterLabel || 'Filtro colonna'}>
+    <IconButton accessibilitySlot="filterButton" accessibilityContext={{ label: dataKey }} aria-label={config.filterLabel || t("a11y.filter")} aria-haspopup="dialog" aria-expanded={open} size="small" onClick={handleOpen} color={currentFilter ? 'primary' : 'default'} className={['filter-icon', currentFilter ? 'active' : '', open ? 'open' : ''].join(' ')}><FilterAlt fontSize="inherit" /></IconButton>
+    <NativeDialog open={open} anchor={anchorEl} onClose={handleClose} title={config.filterLabel || t("a11y.filterTitle")}>
       <div className="tbl-filter-fields">
       <AccessibilityElement as="label" slot="filterLabel" className="tbl-field" htmlFor={inputId}>
-        {config.filterLabel || (config.type === 'text' ? 'Cerca...' : config.type === 'number' ? 'Valore' : config.type === 'date' ? 'Data' : 'Filtra')}
+        {config.filterLabel || (config.type === 'text' ? t("filter.search") : config.type === 'number' ? t("filter.value") : config.type === 'date' ? t("filter.date") : t("filter.filter"))}
         {config.type === 'select' || config.type === 'multi-select' ? <AccessibilityElement as="select" slot="filterInput" context={{ label: dataKey }} id={inputId} className="tbl-select" autoFocus multiple={config.type === 'multi-select'} value={selectValue} onChange={event => {
             const values = Array.from(event.currentTarget.selectedOptions).filter(option => option.value !== '').map(option => options[Number(option.value)].value);
             handleFilterChange(config.type === 'multi-select' ? values : values[0] ?? null);
           }}>
-          {config.type === 'select' && <option value="">Tutti</option>}
+          {config.type === 'select' && <option value="">{t("filter.all")}</option>}
           {options.map((option, index) => <option key={index} value={String(index)}>{option.label}</option>)}
         </AccessibilityElement> : <AccessibilityElement as="input" slot="filterInput" context={{ label: dataKey }} id={inputId} className="tbl-input" type={config.type === 'number' ? 'number' : config.type === 'date' ? 'date' : 'text'} autoFocus placeholder={config.placeholder} value={String(currentFilter?.val ?? '')} onChange={event => handleFilterChange(event.target.value)} />}
       </AccessibilityElement>
       <Button accessibilitySlot="filterResetButton" size="small" disabled={!currentFilter} onClick={() => {
           handleFilterChange(null);
           handleClose();
-        }}>Reset</Button>
+        }}>{t("filter.reset")}</Button>
       </div>
     </NativeDialog>
   </>;

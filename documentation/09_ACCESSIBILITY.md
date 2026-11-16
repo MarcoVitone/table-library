@@ -159,6 +159,8 @@ custom title ID. Likewise keep `aria-controls`, `aria-activedescendant`, label
 | Table feedback and search | `tableState`, `retryButton`, `globalSearchLabel`, `globalSearchInput`, `globalSearchClearButton` |
 | Bulk actions | `bulkActions`, `bulkToolbar`, `bulkSelectionStatus`, `bulkAction`, `bulkClearButton`, `bulkPending`, `bulkError`, `bulkErrorCloseButton` |
 | Saved views | `savedViews`, `savedViewSelectLabel`, `savedViewSelect`, `savedViewNameLabel`, `savedViewName`, `savedViewApplyButton`, `savedViewSaveButton`, `savedViewUpdateButton`, `savedViewDeleteButton`, `savedViewStatus`, `savedViewError` |
+| Shared view link | `savedViewShareButton`, `savedViewLinkLabel`, `savedViewLink` |
+| Excel paste | `pasteOpenButton`, `pasteContent`, `pasteHelp`, `pasteRowLabel`, `pasteRowSelect`, `pasteColumnLabel`, `pasteColumnSelect`, `pasteTextLabel`, `pasteText`, `pastePreviewButton`, `pasteApplyButton`, `pasteCancelButton`, `pasteStatus`, `pasteError`, `pastePreviewTable`, `pastePreviewHeader`, `pastePreviewBody`, `pastePreviewRow`, `pastePreviewCell` |
 | Pagination | `pagination`, `pageSizeSelect`, `pageButton`, `pageNavigationButton`, `goToPageInput`, `goToPageButton` |
 | Other controls | `button`, `checkbox`, `chip`, `chipDeleteButton`, `cellLink`, `icon`, `expandedDetails`, `expandedSummary`, `loadMoreButton`, `loadMoreStatus`, `loadMoreEnd` |
 
@@ -171,3 +173,58 @@ multiple slot names. Slot names and ARIA values are checked by TypeScript.
 suppresses the announcement. Other feedback content can be replaced through
 its slot's `children` or the existing content props such as `loadingContent`,
 `emptyContent`, `noResultsContent`, `error` and `infiniteScroll.endMessage`.
+## Languages and accessible labels
+
+Generated labels and messages detect the document's `<html lang>` first, then
+the browser language, and fall back to English. Changes to the document language
+and browser `languagechange` events update mounted controls, including portals.
+An explicit `localization.locale` on the table or provider takes precedence.
+Server rendering and the initial hydration render use English unless a locale
+is supplied explicitly; supply the same explicit locale on server and client to
+render translated HTML without a language change after hydration.
+Provide a typed message dictionary for any other language:
+
+```tsx
+<DynamicTable
+  data={users}
+  columns={columns}
+  localization={{
+    locale: "fr",
+    messages: {
+      "a11y.sort": "Trier la colonne",
+      "paste.open": "Coller depuis Excel",
+      "paste.summary": "{count} cellules, {errors} erreurs.",
+      "paste.number": "Saisissez un nombre valide.",
+    },
+  }}
+/>
+```
+
+English and Italian (`locale: "it"` or `"it-IT"`) are built in. Unsupported
+locales fall back to English for keys missing from `messages`; empty strings
+are preserved. `TTableMessage` lists all supported keys. The exported
+`englishTableMessages` and `italianTableMessages` can seed another dictionary.
+Messages can also be functions receiving interpolation values, for example
+`"paste.summary": ({ count, errors }) => i18n.t("pasteSummary", { count, errors })`.
+This allows the host's translation system to handle its own plural rules.
+
+Wrap multiple tables or low-level components in
+`<TableLocalizationProvider value={{ locale: "it" }}>`. Nested providers and
+per-table dictionaries merge with inherited settings. Translations also cover
+dialogs rendered in portals, paste validation errors, saved views, bulk actions,
+pagination, search and table states. The demo selects Italian explicitly.
+
+Column labels, action labels, search labels, pagination labels and custom
+validation/server error messages remain owned by the application. They are not
+replaced by catalog translations. Existing `accessibility.slotProps` and
+`getProps` overrides run after generated translated properties and retain final
+control over ARIA labels, titles and relationships. Native controls use their
+visible label when available; icon-only controls use translated action labels.
+Set the appropriate document or container `lang` in the host application.
+
+Headless translators default to English and do not inspect browser globals.
+For headless clipboard helpers, create a translator with
+`createTableTranslator({ locale, messages })`, pass it as the second argument to
+`parseExcelClipboard(text, translator)` or the final argument to
+`previewExcelPaste(data, rowIndices, columns, text, row, column, idKey, translator)`.
+Custom validators continue to return the application's own messages.

@@ -1,11 +1,12 @@
+import { useTableLocalization } from "../../localization/use-table-localization";
 import { useEffect, useRef, useCallback } from "react";
 import { nativeElement } from "@/tables-framework/ui/native-element";
 import type { IInfiniteScrollConfig } from "@/tables-framework/components/pagination/pagination.types";
 
-const LoadMoreContainer=nativeElement('div','tbl-load-more',()=>({display:'flex',justifyContent:'center',alignItems:'center',padding:16}));
-const LoadMoreButton=nativeElement('button','tbl-button tbl-button-contained',()=>({padding:'10px 24px',fontSize:14}));
-const EndMessage=nativeElement('div','tbl-end-message',()=>({textAlign:'center',padding:16,color:'#666',fontSize:14}));
-const Spinner=nativeElement('div','tbl-spinner',()=>({width:24,height:24,border:'3px solid #f3f3f3',borderTopColor:'#1976d2',borderRadius:'50%',animation:'tbl-spin 1s linear infinite'}));
+const LoadMoreContainer=/* @__PURE__ */ nativeElement('div','tbl-load-more',()=>({display:'flex',justifyContent:'center',alignItems:'center',padding:16}));
+const LoadMoreButton=/* @__PURE__ */ nativeElement('button','tbl-button tbl-button-contained',()=>({padding:'10px 24px',fontSize:14}));
+const EndMessage=/* @__PURE__ */ nativeElement('div','tbl-end-message',()=>({textAlign:'center',padding:16,color:'#666',fontSize:14}));
+const Spinner=/* @__PURE__ */ nativeElement('div','tbl-spinner',()=>({width:24,height:24,border:'3px solid #f3f3f3',borderTopColor:'#1976d2',borderRadius:'50%',animation:'tbl-spin 1s linear infinite'}));
 
 interface IInfiniteScrollProps extends Omit<IInfiniteScrollConfig, "enabled"> {
   className?: string;
@@ -22,8 +23,9 @@ const InfiniteScroll = ({
   endMessage,
   className,
   mode = "auto",
-  buttonText = "Carica altri",
+  buttonText,
 }: IInfiniteScrollProps) => {
+  const t = useTableLocalization();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -67,7 +69,7 @@ const InfiniteScroll = ({
   // Render loading state
   if (isLoading) {
     return (
-      <LoadMoreContainer accessibilitySlot="loadMoreStatus" className={className}>
+      <LoadMoreContainer accessibilitySlot="loadMoreStatus" role="status" aria-label={t("state.loading")} className={className}>
         {loadMoreComponent ?? <Spinner />}
       </LoadMoreContainer>
     );
@@ -86,7 +88,7 @@ const InfiniteScroll = ({
     return (
       <LoadMoreContainer className={className}>
         <LoadMoreButton accessibilitySlot="loadMoreButton" onClick={handleButtonClick} disabled={isLoading}>
-          {buttonText}
+          {buttonText ?? t("scroll.loadMore")}
         </LoadMoreButton>
       </LoadMoreContainer>
     );

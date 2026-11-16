@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import { AccessibilityElement } from "@/tables-framework/accessibility";
 import { useState, useEffect, useEffectEvent, useRef } from "react";
 import { useTable } from "../../../hooks/use-table/use-table";
@@ -15,6 +16,7 @@ interface IProps {
 }
 
 export function SavedViewsToolbar({ config, search, pageSize, columns, onApply }: IProps) {
+  const t = useTableLocalization();
   const { columnsLayout, sorting, filtering, setColumnsLayout, setSorting, setFiltering } = useTable();
   const { views, changeViews, error: storageError } = useSavedViews(config);
   const [selectedId, setSelectedId] = useState("");
@@ -33,9 +35,9 @@ export function SavedViewsToolbar({ config, search, pageSize, columns, onApply }
   const save = (replace: boolean) => {
     const trimmed = name.trim();
     setError(""); setMessage("");
-    if (!trimmed) { setError("Inserisci un nome per la vista."); return; }
+    if (!trimmed) { setError(t("views.nameRequired")); return; }
     if (views.some(view => view.name.toLocaleLowerCase() === trimmed.toLocaleLowerCase() && (!replace || view.id !== selected?.id))) {
-      setError("Esiste già una vista con questo nome."); return;
+      setError(t("views.duplicate")); return;
     }
     if (replace && !selected) return;
     const view: ISavedTableView = { id: replace && selected ? selected.id
@@ -43,19 +45,19 @@ export function SavedViewsToolbar({ config, search, pageSize, columns, onApply }
       name: trimmed, state: cloneTableViewState(snapshot) };
     changeViews(replace ? views.map(item => item.id === view.id ? view : item) : [...views, view]);
     setSelectedId(view.id); setName(view.name);
-    setMessage(replace ? "Vista aggiornata." : "Vista salvata.");
+    setMessage(replace ? t("views.updated") : t("views.saved"));
   };
 
   const apply = (view: ISavedTableView) => {
     setError(""); setMessage("");
-    if (!isTableViewState(view.state)) { setError("La vista contiene una configurazione non valida."); return; }
+    if (!isTableViewState(view.state)) { setError(t("views.invalid")); return; }
     const applied = { ...view, state: reconcileTableViewState(view.state, columns) };
     setColumnsLayout?.(applied.state.columnsLayout);
     setSorting?.(applied.state.sorting);
     setFiltering?.(applied.state.filters);
     onApply(applied);
     config.onViewApply?.(applied);
-    setName(view.name); setMessage("Vista applicata.");
+    setName(view.name); setMessage(t("views.applied"));
   };
 
   const restoreSharedView = useEffectEvent(() => {
@@ -66,12 +68,12 @@ export function SavedViewsToolbar({ config, search, pageSize, columns, onApply }
     try {
       const state = parseTableViewUrl(window.location.href, shareParameter);
       if (state) {
-        apply({ id: "shared", name: "Vista condivisa", state });
+        apply({ id: "shared", name: t("views.sharedName"), state });
         setSelectedId("");
-        setMessage("Vista condivisa applicata.");
+        setMessage(t("views.sharedApplied"));
       }
     } catch {
-      setError("Il link contiene una vista non valida o non supportata.");
+      setError(t("views.invalidLink"));
     }
   });
   useEffect(() => {
@@ -91,39 +93,39 @@ export function SavedViewsToolbar({ config, search, pageSize, columns, onApply }
       setShareUrl(url);
       try {
         await navigator.clipboard.writeText(url);
-        setMessage("Link copiato.");
+        setMessage(t("views.copied"));
       } catch {
-        setMessage("Copia il link dal campo Link alla vista.");
+        setMessage(t("views.manualCopy"));
       }
     } catch {
-      setError("Impossibile creare il link alla vista.");
+      setError(t("views.shareFailed"));
     }
   };
 
-  return <AccessibilityElement as="section" slot="savedViews" className="tbl-saved-views" aria-label="Gestione viste salvate">
+  return <AccessibilityElement as="section" slot="savedViews" className="tbl-saved-views" aria-label={t("a11y.savedViews")}>
     <div className="tbl-feature-toolbar">
-      <AccessibilityElement as="label" slot="savedViewSelectLabel">Viste salvate <AccessibilityElement as="select" slot="savedViewSelect" value={selected?.id ?? ""} onChange={event => {
+      <AccessibilityElement as="label" slot="savedViewSelectLabel">{t("views.select")} <AccessibilityElement as="select" slot="savedViewSelect" value={selected?.id ?? ""} onChange={event => {
         const view = views.find(item => item.id === event.target.value);
         setSelectedId(view?.id ?? ""); setError(""); setMessage("");
         if (!view) return;
         apply(view);
       }}>
-        <option value="">Seleziona una vista</option>
+        <option value="">{t("views.selectPlaceholder")}</option>
         {views.map(view => <option key={view.id} value={view.id}>{view.name}</option>)}
       </AccessibilityElement></AccessibilityElement>
-      <Button accessibilitySlot="savedViewApplyButton" size="small" disabled={!selected} onClick={() => { if (selected) apply(selected); }}>Applica vista</Button>
-      <AccessibilityElement as="label" slot="savedViewNameLabel">Nome vista <AccessibilityElement as="input" slot="savedViewName" value={name} maxLength={100} onChange={event => { setName(event.target.value); setError(""); }}
+      <Button accessibilitySlot="savedViewApplyButton" size="small" disabled={!selected} onClick={() => { if (selected) apply(selected); }}>{t("views.apply")}</Button>
+      <AccessibilityElement as="label" slot="savedViewNameLabel">{t("views.name")} <AccessibilityElement as="input" slot="savedViewName" value={name} maxLength={100} onChange={event => { setName(event.target.value); setError(""); }}
         onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); save(false); } }} /></AccessibilityElement>
-      <Button accessibilitySlot="savedViewSaveButton" size="small" onClick={() => save(false)}>Salva vista</Button>
-      <Button accessibilitySlot="savedViewUpdateButton" size="small" disabled={!selected} onClick={() => save(true)}>Aggiorna vista</Button>
+      <Button accessibilitySlot="savedViewSaveButton" size="small" onClick={() => save(false)}>{t("views.save")}</Button>
+      <Button accessibilitySlot="savedViewUpdateButton" size="small" disabled={!selected} onClick={() => save(true)}>{t("views.update")}</Button>
       <Button accessibilitySlot="savedViewDeleteButton" size="small" disabled={!selected} onClick={() => {
         changeViews(views.filter(view => view.id !== selectedId));
-        setSelectedId(""); setName(""); setError(""); setMessage("Vista eliminata.");
-      }}>Elimina vista</Button>
-      {config.share && <Button accessibilitySlot="savedViewShareButton" size="small" onClick={share}>Condividi vista</Button>}
-      {modified && <span>Vista modificata</span>}
+        setSelectedId(""); setName(""); setError(""); setMessage(t("views.deleted"));
+      }}>{t("views.delete")}</Button>
+      {config.share && <Button accessibilitySlot="savedViewShareButton" size="small" onClick={share}>{t("views.share")}</Button>}
+      {modified && <span>{t("views.modified")}</span>}
     </div>
-    {config.share && shareUrl && <AccessibilityElement as="label" slot="savedViewLinkLabel">Link alla vista
+    {config.share && shareUrl && <AccessibilityElement as="label" slot="savedViewLinkLabel">{t("views.link")}
       <AccessibilityElement as="input" slot="savedViewLink" readOnly value={shareUrl} onFocus={event => event.currentTarget.select()} />
     </AccessibilityElement>}
     {(error || storageError) && <AccessibilityElement as="div" slot="savedViewError" role="alert">{error || storageError}</AccessibilityElement>}

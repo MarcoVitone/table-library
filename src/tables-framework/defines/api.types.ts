@@ -1,4 +1,3 @@
-import type { TFunction } from "i18next";
 import type {
   TColumnsLayout,
   TSorting,
@@ -40,7 +39,8 @@ interface ILayoutAPI {
 
 // *** EXPORT API ***
 
-type TExportTranslation = TFunction<"export", undefined>;
+/** Compatible with application translators without requiring an i18n runtime. */
+type TExportTranslation = (key: "true" | "false" | "yes" | "no") => string;
 
 type TExportCSV = (
   isSimpleExport?: boolean,

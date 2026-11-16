@@ -22,6 +22,8 @@ test('ten thousand rows use a bounded DOM and the first/last records remain reac
   await expect(page.getByRole('table', { name: 'Righe virtualizzate' })).toHaveAttribute('aria-rowcount', '10001');
   await expect.poll(() => rows(page).count()).toBeLessThan(35);
   await expect(rowAt(page, 0)).toContainText('Riga 00000');
+  // The language toolbar can place the bottom of the table below the browser viewport.
+  await viewport(page).scrollIntoViewIfNeeded();
   await scrollTo(page, 'end');
   await expect(rowAt(page, 9999)).toBeInViewport();
   await expect.poll(() => rows(page).count()).toBeLessThan(35);

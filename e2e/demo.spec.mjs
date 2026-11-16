@@ -50,7 +50,7 @@ test('pagination changes page and page size', async ({ page }) => {
   await expect(bodyRows(page).first()).toContainText(MOCK_USERS[0].firstName);
   await page.getByRole('button', { name: 'Pagina successiva', exact: true }).click();
   await expect(bodyRows(page).first()).toContainText(MOCK_USERS[5].firstName);
-  await page.getByRole('combobox').selectOption('10');
+  await page.getByRole('combobox', { name: 'Righe per pagina:' }).selectOption('10');
   await expect(bodyRows(page)).toHaveCount(Math.min(10, MOCK_USERS.length));
   await expect(bodyRows(page).first()).toContainText(MOCK_USERS[0].firstName);
 });
@@ -77,7 +77,7 @@ test('pagination keeps column widths stable across pages and page sizes', async 
   await page.getByRole('button', { name: 'Prima pagina', exact: true }).click();
   await expect(bodyRows(page).first()).toContainText(MOCK_USERS[0].firstName);
   await expectStableWidths();
-  await page.getByRole('combobox').selectOption('10');
+  await page.getByRole('combobox', { name: 'Righe per pagina:' }).selectOption('10');
   await expect(bodyRows(page)).toHaveCount(Math.min(10, MOCK_USERS.length));
   await expectStableWidths();
 });

@@ -177,7 +177,12 @@ export function EditingTable() {
       } : row));
       setLastChange(null);
     }}>Aggiorna dati esterni</button>
-  <DynamicTable columns={columns} data={rows} enableColumnFilters enableColumnConfig isResizable maxHeight={420} onDataChange={(_next, updated) => {
+  <DynamicTable columns={columns} data={rows} excelPaste={{ onApply: async (next, updated) => {
+      if (asyncSave) await new Promise(resolve => setTimeout(resolve, 600));
+      if (rejectSave) throw new Error('Salvataggio rifiutato');
+      setRows(next);
+      setLastChange(updated[updated.length - 1]);
+    } }} enableColumnFilters enableColumnConfig isResizable maxHeight={420} onDataChange={(_next, updated) => {
       const apply = () => {
         if (rejectSave) throw new Error('Salvataggio rifiutato');
         setRows(previous => previous.map(row => row.id === updated.id ? updated : row));

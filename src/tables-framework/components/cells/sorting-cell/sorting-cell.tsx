@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from "react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useTheme } from "@/tables-framework/theme/theme";
 import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
 import { SortingBaseCell } from "./sorting-cell.styles.ts";
@@ -8,9 +8,7 @@ import type {
   TDirection,
 } from "@/tables-framework/defines/common.types.ts";
 import { ArrowUpward } from "@/tables-framework/ui/icons";
-import { animated } from "@react-spring/web";
 import { useTable } from "@/tables-framework/hooks/use-table/use-table.ts";
-import { useSpring } from "@/tables-framework/hooks/use-spring/use-spring.ts";
 import { Button } from "../../../ui/controls";
 
 type TSortDirection = "ASC" | "DESC";
@@ -69,10 +67,6 @@ const SortingCell: FC<ISortingCellProps> = ({
     }
   }, [dir]);
 
-  const [rotation, api] = useSpring({
-    rotate: angle,
-  });
-
   const handleClick = useCallback(() => {
     if (!setSorting || disabled) {
       return;
@@ -87,10 +81,6 @@ const SortingCell: FC<ISortingCellProps> = ({
     }
   }, [dataKey, dir, disabled, isServerSide, onClick, setSorting]);
 
-  useEffect(() => {
-    api.start({ rotate: angle });
-  }, [angle, api]);
-
   return (
     <SortingBaseCell
       data={data}
@@ -102,9 +92,9 @@ const SortingCell: FC<ISortingCellProps> = ({
     >
       <Button accessibilitySlot="sortButton" onClick={handleClick} disabled={disabled}>
         {data.column.label}
-        <animated.span style={rotation}>
+        <span className="tbl-sort-indicator" style={{ transform: `rotate(${angle}deg)` }}>
           <span style={{ color: palette.primary.main }}>{icon}</span>
-        </animated.span>
+        </span>
       </Button>
     </SortingBaseCell>
   );

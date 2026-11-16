@@ -2,6 +2,7 @@ import type { CSSProperties, ElementType, FC, ReactNode } from "react";
 import { useContext } from "react";
 import { TableContext } from "@/tables-framework/components/table-renderer/table-renderer";
 import { useTableAccessibility } from "../../../accessibility";
+import { useTableLocalization } from "../../../localization/use-table-localization";
 
 interface IBaseTableProps {
   component?: ElementType;
@@ -18,6 +19,7 @@ const BaseTable: FC<IBaseTableProps> = ({
 }) => {
   const { source, isLoading, tableLabel, virtualRowCount } = useContext(TableContext);
   const { getProps } = useTableAccessibility();
+  const t = useTableLocalization();
   const widths = source?.columns.map((column) => column.props.width) ?? [];
   const numericWidths = widths.filter((width): width is number =>
     typeof width === "number" && Number.isFinite(width)
@@ -26,7 +28,7 @@ const BaseTable: FC<IBaseTableProps> = ({
 
   return (
     <Component
-      {...getProps("table", { "aria-label": tableLabel, "aria-busy": isLoading || undefined, "aria-rowcount": virtualRowCount })}
+      {...getProps("table", { "aria-label": tableLabel ?? t("a11y.table"), "aria-busy": isLoading || undefined, "aria-rowcount": virtualRowCount })}
       style={{
         borderCollapse: "separate",
         borderSpacing: "0",

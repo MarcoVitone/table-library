@@ -17,12 +17,9 @@
     "build:demo": "tsc -b && vite build --configLoader runner",
     "prepack": "npm run build",
     "prepublishOnly": "npm run lint && npm run test:types && npm test",
-    "test:package": "npm run build && node scripts/verify-package.mjs"
-  },
-  "dependencies": {
-    "@react-spring/web": "^10.0.3",
-    "i18next": "^25.7.1",
-    "react-i18next": "^16.3.5"
+    "test:package": "npm run build && node scripts/verify-package.mjs",
+    "size": "node scripts/measure-bundle.mjs",
+    "size:check": "node scripts/measure-bundle.mjs --check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

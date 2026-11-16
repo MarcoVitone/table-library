@@ -18,6 +18,10 @@ export type TAccessibilitySlot =
   | "savedViews" | "savedViewSelect" | "savedViewName" | "savedViewStatus" | "savedViewError"
   | "savedViewApplyButton" | "savedViewSaveButton" | "savedViewUpdateButton" | "savedViewDeleteButton"
   | "savedViewShareButton" | "savedViewLinkLabel" | "savedViewLink"
+  | "pasteOpenButton" | "pasteRowLabel" | "pasteRowSelect" | "pasteColumnLabel" | "pasteColumnSelect"
+  | "pasteTextLabel" | "pasteText" | "pastePreviewButton" | "pasteApplyButton" | "pasteCancelButton" | "pasteStatus" | "pasteError"
+  | "pastePreviewTable"
+  | "pasteContent" | "pasteHelp" | "pastePreviewHeader" | "pastePreviewBody" | "pastePreviewRow" | "pastePreviewCell"
   | "resetConfigButton" | "goToPageButton"
   | "pagination" | "pageSizeSelect" | "pageButton" | "pageNavigationButton" | "goToPageInput"
   | "button" | "checkbox" | "chip" | "chipDeleteButton" | "cellLink" | "icon"
@@ -68,8 +72,8 @@ export interface ITableAccessibility {
   messages?: Partial<Record<TAccessibilityMessage, string | ((context: IAccessibilityContext) => string)>>;
 }
 
-export const AccessibilityContext = createContext<ITableAccessibility | undefined>(undefined);
-export const ElementContext = createContext<IAccessibilityContext>({});
+export const AccessibilityContext = /* @__PURE__ */ createContext<ITableAccessibility | undefined>(undefined);
+export const ElementContext = /* @__PURE__ */ createContext<IAccessibilityContext>({});
 
 export function resolveAccessibilityProps<P extends object>(config: ITableAccessibility | undefined, slot: TAccessibilitySlot, defaults: P, context: IAccessibilityContext = {}): P {
   const base = config?.useDefaults === false ? Object.fromEntries(Object.entries(defaults).map(([key, value]) =>

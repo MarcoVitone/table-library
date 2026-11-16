@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import type { ElementType, FC, ReactNode, Ref, AriaAttributes, HTMLAttributes } from "react";
 import { AccessibilityScope } from "../../../accessibility";
 import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
@@ -127,6 +128,7 @@ const BaseCell: FC<IBaseCellProps> = ({
   dragHandleVisibility = "always",
   ...rest
 }) => {
+  const t = useTableLocalization();
   const type = variant || area;
   const { palette } = useTheme();
   const innerRef = useRef<HTMLTableCellElement>(null);
@@ -372,7 +374,7 @@ const BaseCell: FC<IBaseCellProps> = ({
         : undefined}
       tabIndex={isCollapsed && (area === "header" || type === "header") ? 0 : undefined}
       aria-label={isCollapsed && (area === "header" || type === "header")
-        ? `${data?.column?.label ?? "Colonna"}: premi Invio per espandere` : undefined}
+        ? t("a11y.expand", { label: data?.column?.label ?? t("a11y.column") }) : undefined}
       onKeyDown={(event: React.KeyboardEvent) => {
         if (isCollapsed && (area === "header" || type === "header") && (event.key === "Enter" || event.key === " ")) {
           event.preventDefault();
@@ -466,7 +468,7 @@ const BaseCell: FC<IBaseCellProps> = ({
             <HideButton
               handleCollapseColumn={handleCollapseColumn}
               palette={palette}
-              title="Collassa colonna"
+              title={t("a11y.collapse")}
             />
           </div>
         )}

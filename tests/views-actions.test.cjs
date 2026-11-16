@@ -157,12 +157,12 @@ test('unavailable storage falls back to in-memory views and reports the failed p
     function Probe() {
       const [step, setStep] = React.useState(0);
       api = useSavedViews({ key: 'blocked' });
-      if (!step) { assert.match(api.error, /leggere/); api.changeViews([view()]); setStep(1); }
+      if (!step) { assert.match(api.error, /read/); api.changeViews([view()]); setStep(1); }
       return null;
     }
     renderToString(React.createElement(Probe));
     assert.equal(api.views.length, 1);
-    assert.match(api.error, /memoria/);
+    assert.match(api.error, /memory/);
   });
 });
 
@@ -190,11 +190,11 @@ const render = props => renderToStaticMarkup(React.createElement(DynamicTable, {
 test('bulk toolbar is opt-in, hidden without selection, and receives current typed records including ID zero', () => {
   const checks = [];
   const bulkActions = [{ id: 'archive', label: 'Archive', onAction() {}, disabled: rows => { checks.push(rows); return rows.some(row => row.locked); } }];
-  assert.doesNotMatch(render({ bulkActions }), /Azioni sulle righe selezionate/);
-  assert.doesNotMatch(render({ rowStatusMapper: () => ({ isSelected: true }) }), /Azioni sulle righe selezionate/);
+  assert.doesNotMatch(render({ bulkActions }), /Actions on selected rows/);
+  assert.doesNotMatch(render({ rowStatusMapper: () => ({ isSelected: true }) }), /Actions on selected rows/);
   const html = render({ rowStatusMapper: () => ({ isSelected: true }), bulkActions });
-  assert.match(html, /role="toolbar" aria-label="Azioni sulle righe selezionate"/);
-  assert.match(html, /2 righe selezionate/);
+  assert.match(html, /role="toolbar" aria-label="Actions on selected rows"/);
+  assert.match(html, /2 rows selected/);
   assert.match(html, /<button[^>]*disabled=""[^>]*>Archive<\/button>/);
   assert.deepEqual(checks[0], data);
 });
@@ -209,7 +209,7 @@ test('bulk actions are disabled while loading or showing an error', () => {
 
 test('saved view controls render safely without browser storage or rows', () => {
   const html = render({ data: [], savedViews: { key: 'ssr', defaultViews: [view()] } });
-  assert.match(html, /Gestione viste salvate/);
+  assert.match(html, /Saved views management/);
   assert.match(html, /<option value="v1">Roma/);
-  assert.match(html, /Nessun dato disponibile/);
+  assert.match(html, /No data available/);
 });

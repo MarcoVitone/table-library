@@ -2,6 +2,7 @@ import { createElement, forwardRef, useEffect, useRef, useImperativeHandle as Re
 import { useTheme, themeVariables, type Palette } from "../theme/theme";
 import { domProps, sxStyle, type SxProps } from "./native-element";
 import { Close } from "./icons";
+import { useTableLocalization } from "../localization/use-table-localization";
 import { useTableAccessibility, type IAccessibilityContext, type TAccessibilitySlot } from "../accessibility";
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color"> & {
   accessibilitySlot?: TAccessibilitySlot;
@@ -22,7 +23,7 @@ export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">
   disableRipple?: boolean;
   disableElevation?: boolean;
 };
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
+export const Button = /* @__PURE__ */ forwardRef<HTMLButtonElement, ButtonProps>(function Button({
   variant = "text",
   color = "primary",
   size = "medium",
@@ -58,7 +59,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     event.preventDefault();
     event.stopPropagation();
   } : rest.onClick;
-  const accessibilityProps = getProps(accessibilitySlot, { ...domProps(rest), "aria-disabled": rest["aria-disabled"] ?? (inactive || undefined), tabIndex: inactive && isLink ? -1 : rest.tabIndex, onClick }, accessibilityContext);
+  const accessibilityProps = getProps(accessibilitySlot, { ...domProps(rest), "aria-disabled": rest["aria-disabled"] ?? (inactive || undefined), tabIndex: inactive && isLink ? -1 : rest.tabIndex, onClick,
+    children: <>{startIcon && <span className="tbl-button-icon">{startIcon}</span>}{children}{endIcon && <span className="tbl-button-icon">{endIcon}</span>}</>,
+  }, accessibilityContext);
   return <Component href={inactive && isLink ? undefined : href} ref={ref} type={rest.type ?? (isLink ? undefined : "button")} disabled={isLink ? undefined : inactive} className={["tbl-button", 'tbl-button-' + variant, 'tbl-size-' + size, variation && 'tbl-button-' + variation, className].filter(Boolean).join(' ')} style={{
     ...themeVariables(theme),
     "--table-button-bg": ink,
@@ -66,9 +69,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     width: fullWidth ? "100%" : undefined,
     ...sxStyle(sx),
     ...style
-  } as CSSProperties} data-disabled={disabled || status === "disabled" ? "true" : undefined} {...accessibilityProps}>{startIcon && <span className="tbl-button-icon">{startIcon}</span>}{children}{endIcon && <span className="tbl-button-icon">{endIcon}</span>}</Component>;
+  } as CSSProperties} data-disabled={disabled || status === "disabled" ? "true" : undefined} {...accessibilityProps} />;
 });
-export const IconButton = forwardRef<HTMLButtonElement, ButtonProps>(function IconButton({
+export const IconButton = /* @__PURE__ */ forwardRef<HTMLButtonElement, ButtonProps>(function IconButton({
   className,
   ...props
 }, ref) {
@@ -117,7 +120,12 @@ export function Checkbox({
     ...inputProps,
     ...slotProps?.input
   };
-  return <input {...getProps(accessibilitySlot, { ...props, "aria-checked": indeterminate ? 'mixed' as const : props.checked, ...nativeInputProps }, accessibilityContext)} ref={ref} type="checkbox" className={['tbl-checkbox', 'tbl-size-' + size, nativeInputProps.className, className].filter(Boolean).join(' ')} style={{
+  return <input {...getProps(accessibilitySlot, { ...props, "aria-checked": indeterminate ? 'mixed' as const : props.checked, ...nativeInputProps,
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+      nativeInputProps.onChange?.(event);
+      onChange?.(event, event.target.checked);
+    },
+  }, accessibilityContext)} ref={ref} type="checkbox" className={['tbl-checkbox', 'tbl-size-' + size, nativeInputProps.className, className].filter(Boolean).join(' ')} style={{
     ...themeVariables(theme),
     accentColor: palette[color as keyof Palette] && "main" in Object(palette[color as keyof Palette]) ? (palette[color as keyof Palette] as {
       main: string;
@@ -125,9 +133,6 @@ export function Checkbox({
     ...nativeInputProps.style,
     ...sxStyle(sx),
     ...style
-  }} onChange={event => {
-    nativeInputProps.onChange?.(event);
-    onChange?.(event, event.target.checked);
   }} />;
 }
 export interface ChipProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'color'> {
@@ -166,6 +171,7 @@ export function Chip({
   ...rest
 }: ChipProps) {
   const { getProps } = useTableAccessibility();
+  const t = useTableLocalization();
   const {
     palette
   } = useTheme();
@@ -199,7 +205,7 @@ export function Chip({
     }
   }), icon && <span className="tbl-chip-icon" style={{
     color: iconColor
-  }}>{icon}</span>, <span>{label}</span>, onDelete && <button type="button" className="tbl-chip-delete" disabled={disabled} {...getProps("chipDeleteButton", { "aria-label": "Rimuovi", onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
+  }}>{icon}</span>, <span>{label}</span>, onDelete && <button type="button" className="tbl-chip-delete" disabled={disabled} {...getProps("chipDeleteButton", { "aria-label": t("a11y.remove"), onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onDelete(event);
   } })}>{deleteIcon ?? <Close fontSize="small" />}</button>);

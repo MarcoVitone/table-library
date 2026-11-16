@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import type { Palette } from "@/tables-framework/theme/theme";
 import { IconButton } from "@/tables-framework/ui/controls"; // Importa IconButton
 import type { ReactNode } from "react";
@@ -25,6 +26,7 @@ const SortIcon = ({
   sortIcon,
   justifyContent,
 }: ISortIcon) => {
+  const t = useTableLocalization();
   return (
     <div
       style={{
@@ -41,7 +43,7 @@ const SortIcon = ({
 
       <IconButton
         accessibilitySlot="sortButton"
-        aria-label="Ordina colonna"
+        aria-label={t("a11y.sort")}
         className="sort-icon"
         size="small"
         onClick={(e) => {

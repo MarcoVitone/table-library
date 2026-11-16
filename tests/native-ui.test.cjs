@@ -23,7 +23,7 @@ test('TableCheckbox renders a native named input with its controlled value',()=>
 });
 test('status chip preserves custom colors, label, icon and delete action',()=>{
  const html=renderToStaticMarkup(React.createElement(TableStatusChip,{label:'Attivo',backgroundColor:'#123456',textColor:'#fff',iconColor:'#abcdef',onDelete:()=>{}}));
- assert.match(html,/Attivo/);assert.match(html,/background-color:#123456/);assert.match(html,/<svg/);assert.match(html,/aria-label="Rimuovi"/);
+ assert.match(html,/Attivo/);assert.match(html,/background-color:#123456/);assert.match(html,/<svg/);assert.match(html,/aria-label="Remove"/);
 });
 test('creating partial themes never mutates defaults or a previously created theme',()=>{
  const before=JSON.stringify(defaultTheme);

@@ -5,7 +5,7 @@ interface RowStyleProps {
   isConfigured: boolean;
   isSaved?: boolean;
 }
-export const BaseTr = nativeElement<'tr', RowStyleProps>('tr', 'tbl-row', p => ({
+export const BaseTr = /* @__PURE__ */ nativeElement<'tr', RowStyleProps>('tr', 'tbl-row', p => ({
   position: 'relative',
   outlineStyle: 'none',
   outlineColor: p.theme.palette.secondary.dark,

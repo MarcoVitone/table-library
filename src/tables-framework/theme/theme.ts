@@ -150,7 +150,7 @@ export const defaultTheme = createTheme({
     }
   }
 });
-const ThemeContext = createContext(defaultTheme);
+const ThemeContext = /* @__PURE__ */ createContext(defaultTheme);
 export function ThemeProvider({
   theme,
   children

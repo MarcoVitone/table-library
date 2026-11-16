@@ -1,3 +1,4 @@
+import { useTableLocalization } from "../../localization/use-table-localization";
 import { useEffect, useRef, useState } from "react";
 import type { ICell } from "../../defines/common.types";
 import type { ICellEditing, TCellValue } from "../../defines/editing.types";
@@ -11,6 +12,7 @@ interface Options<V> extends ICellEditing<Record<string, unknown>, V> {
 }
 
 export function useCellEditor<V extends TCellValue>({ data, sourceValue, onCellChange, editable = true, validate }: Options<V>) {
+  const t = useTableLocalization();
   const { rowStatus, setRowsStatus } = useTable(data);
   const [value, setValue] = useState(sourceValue);
   const [previousSource, setPreviousSource] = useState(sourceValue);
@@ -59,7 +61,7 @@ export function useCellEditor<V extends TCellValue>({ data, sourceValue, onCellC
           : previous);
         Promise.resolve(result).catch(reason => {
           if (mounted.current && Object.is(latestSource.current, sourceValue)) {
-            setError(reason instanceof Error ? reason.message : "Salvataggio non riuscito");
+            setError(reason instanceof Error ? reason.message : t("state.saveFailed"));
           }
         }).finally(() => {
           pending.current = false;
@@ -70,7 +72,7 @@ export function useCellEditor<V extends TCellValue>({ data, sourceValue, onCellC
         });
       }
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Salvataggio non riuscito");
+      setError(reason instanceof Error ? reason.message : t("state.saveFailed"));
     }
   };
   return { value, change, cancel, commit, error, setError, isSaving, canEdit };

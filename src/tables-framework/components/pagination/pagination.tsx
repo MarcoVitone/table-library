@@ -1,3 +1,5 @@
+import { useTableLocalization } from "../../localization/use-table-localization";
+import type { TTableTranslator } from "../../localization/messages";
 import type { ReactNode, ReactElement } from "react";
 import { useMemo, isValidElement, useState, useEffect } from "react";
 import {
@@ -42,31 +44,31 @@ const DEFAULT_ICONS = {
   last: "⏭",
 };
 
-const DEFAULT_LABELS = {
-  rowsPerPage: "Righe per pagina:",
-  of: "di",
-  page: "Pagina",
-  firstPage: "Prima pagina",
-  previousPage: "Pagina precedente",
-  nextPage: "Pagina successiva",
-  lastPage: "Ultima pagina",
+const defaultLabels = (t: TTableTranslator) => ({
+  rowsPerPage: t("pagination.rows"),
+  of: t("pagination.of"),
+  page: t("pagination.page"),
+  firstPage: t("pagination.first"),
+  previousPage: t("pagination.previous"),
+  nextPage: t("pagination.next"),
+  lastPage: t("pagination.last"),
   // Phase 2
-  goToPage: "Vai a pagina:",
-  go: "Vai",
+  goToPage: t("pagination.goTo"),
+  go: t("pagination.go"),
   goToPagePlaceholder: "#",
-};
+});
 
 // Phase 2: Default tooltips
-const DEFAULT_TOOLTIPS = {
+const defaultTooltips = (t: TTableTranslator) => ({
   enabled: false,
   showOnButtons: true,
   showOnPageNumbers: true,
-  pageNumber: (page: number) => `Vai a pagina ${page + 1}`,
-  first: "Prima pagina",
-  previous: "Pagina precedente",
-  next: "Pagina successiva",
-  last: "Ultima pagina",
-};
+  pageNumber: (page: number) => t("pagination.pageNumber", { page: page + 1 }),
+  first: t("pagination.first"),
+  previous: t("pagination.previous"),
+  next: t("pagination.next"),
+  last: t("pagination.last"),
+});
 
 // Helper to render slots
 function renderSlot<T>(
@@ -94,21 +96,26 @@ const PaginationInfoDisplay = ({
   startItem,
   endItem,
   totalItems,
-  label = DEFAULT_LABELS.of,
+  label,
   className,
-}: IPaginationInfoProps & { className?: string }) => (
-  <StyledPaginationInfo className={className}>
-    {startItem}-{endItem} {label} {totalItems}
-  </StyledPaginationInfo>
-);
+}: IPaginationInfoProps & { className?: string }) => {
+  const t = useTableLocalization();
+  return (
+    <StyledPaginationInfo className={className}>
+      {startItem}-{endItem} {label ?? t("pagination.of")} {totalItems}
+    </StyledPaginationInfo>
+  );
+};
 
 const PageSizeSelector = ({
   value,
   options,
   onChange,
-  label = DEFAULT_LABELS.rowsPerPage,
+  label,
   className,
 }: IPageSizeSelectorProps & { className?: string }) => {
+  const t = useTableLocalization();
+  const resolvedLabel = label ?? t("pagination.rows");
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSize = Number.parseInt(e.target.value, 10);
     onChange(newSize);
@@ -116,9 +123,9 @@ const PageSizeSelector = ({
 
   return (
     <StyledPaginationInfo className={className}>
-      {label}
+      {resolvedLabel}
       <PageSizeSelect
-        accessibilitySlot="pageSizeSelect" aria-label={label}
+        accessibilitySlot="pageSizeSelect" aria-label={resolvedLabel}
         value={value}
         onChange={handleChange}
         style={{ marginLeft: 8 }}
@@ -173,6 +180,7 @@ const GoToPage = ({
   inputClassName?: string;
   buttonClassName?: string;
 }) => {
+  const t = useTableLocalization();
   const [inputValue, setInputValue] = useState("");
 
   const handleSubmit = () => {
@@ -193,7 +201,7 @@ const GoToPage = ({
     <StyledGoToPageContainer className={className}>
       {label && <span>{label}</span>}
       <StyledGoToPageInput
-        accessibilitySlot="goToPageInput" aria-label={label ?? DEFAULT_LABELS.goToPage}
+        accessibilitySlot="goToPageInput" aria-label={label ?? t("pagination.goTo")}
         type="number"
         min={1}
         max={totalPages}
@@ -204,7 +212,7 @@ const GoToPage = ({
         className={inputClassName}
       />
       <StyledGoToPageButton accessibilitySlot="goToPageButton" onClick={handleSubmit} className={buttonClassName}>
-        {buttonLabel}
+        {buttonLabel ?? t("pagination.go")}
       </StyledGoToPageButton>
     </StyledGoToPageContainer>
   );
@@ -285,6 +293,7 @@ const Pagination = ({
   // Phase 2 props
   tooltips: tooltipsProp,
 }: IPaginationProps) => {
+  const t = useTableLocalization();
   // Merge with defaults - wrapped in useMemo for stable references
   const visibility = useMemo(
     () => ({ ...DEFAULT_VISIBILITY, ...visibilityProp }),
@@ -295,12 +304,12 @@ const Pagination = ({
     [iconsProp]
   );
   const labels = useMemo(
-    () => ({ ...DEFAULT_LABELS, ...labelsProp }),
-    [labelsProp]
+    () => ({ ...defaultLabels(t), ...labelsProp }),
+    [labelsProp, t]
   );
   const tooltips = useMemo(
-    () => ({ ...DEFAULT_TOOLTIPS, ...tooltipsProp }),
-    [tooltipsProp]
+    () => ({ ...defaultTooltips(t), ...tooltipsProp }),
+    [tooltipsProp, t]
   );
 
   // Responsive: determine if in mobile view

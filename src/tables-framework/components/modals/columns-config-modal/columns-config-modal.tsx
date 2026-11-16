@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import { useMemo, useId, type ReactElement, type Dispatch, type SetStateAction } from "react";
 import { Button, IconButton, Checkbox } from "@/tables-framework/ui/controls";
 import { NativeDialog } from "@/tables-framework/ui/dialog";
@@ -21,6 +22,7 @@ const ColumnsConfigModal = <T,>({
   onLayoutChange: setColumnsLayout,
   onReset: resetLayout
 }: IColumnsConfigModalProps<T>): ReactElement => {
+  const t = useTableLocalization();
   // La lista delle colonne segue l'ordine passato come prop (già ordinato dal DynamicTable)
   const orderedCols = useMemo(() => {
     return columns.filter(c => c.type !== "checkbox");
@@ -83,8 +85,8 @@ const ColumnsConfigModal = <T,>({
     });
   };
   const id = useId();
-  return <NativeDialog open={open} onClose={onClose} title="Configura Colonne">
-    <IconButton accessibilitySlot="closeConfigButton" aria-label="Chiudi configurazione" title="Chiudi configurazione" onClick={onClose} size="small" style={{
+  return <NativeDialog open={open} onClose={onClose} title={t("config.title")}>
+    <IconButton accessibilitySlot="closeConfigButton" aria-label={t("a11y.closeConfig")} title={t("a11y.closeConfig")} onClick={onClose} size="small" style={{
       position: 'absolute',
       right: 12,
       top: 12
@@ -95,14 +97,14 @@ const ColumnsConfigModal = <T,>({
           return <li key={col.id} className="tbl-config-item">
           <AccessibilityElement as="label" slot="columnLabel" context={{ columnId: col.id, label: col.label, index }} htmlFor={id + col.id} className="tbl-config-label">{col.label}<small>{col.id}</small></AccessibilityElement>
           <div className="tbl-config-controls">
-            <IconButton accessibilitySlot="moveColumnUpButton" accessibilityContext={{ columnId: col.id, label: col.label, index }} title="Sposta su" aria-label="Sposta su" size="small" onClick={() => handleMoveColumn(index, 'up')} disabled={index === 0}><ArrowUpward fontSize="small" /></IconButton>
-            <IconButton accessibilitySlot="moveColumnDownButton" accessibilityContext={{ columnId: col.id, label: col.label, index }} title="Sposta giù" aria-label="Sposta giù" size="small" onClick={() => handleMoveColumn(index, 'down')} disabled={index === orderedCols.length - 1}><ArrowDownward fontSize="small" /></IconButton>
+            <IconButton accessibilitySlot="moveColumnUpButton" accessibilityContext={{ columnId: col.id, label: col.label, index }} title={t("a11y.moveUp")} aria-label={t("a11y.moveUp")} size="small" onClick={() => handleMoveColumn(index, 'up')} disabled={index === 0}><ArrowUpward fontSize="small" /></IconButton>
+            <IconButton accessibilitySlot="moveColumnDownButton" accessibilityContext={{ columnId: col.id, label: col.label, index }} title={t("a11y.moveDown")} aria-label={t("a11y.moveDown")} size="small" onClick={() => handleMoveColumn(index, 'down')} disabled={index === orderedCols.length - 1}><ArrowDownward fontSize="small" /></IconButton>
             <Checkbox accessibilitySlot="columnVisibility" accessibilityContext={{ columnId: col.id, label: col.label, index }} id={id + col.id} role="switch" className="tbl-switch" checked={!layoutCol?.props?.isHidden} onChange={() => handleToggleColumn(col.id)} disabled={col.hideable === false} size="small" />
           </div>
         </li>;
         })}
     </ul></div>
-    <div className="tbl-dialog-actions"><Button accessibilitySlot="resetConfigButton" onClick={resetLayout} color="inherit" size="small">Ripristina Default</Button><Button accessibilitySlot="closeConfigButton" onClick={onClose} variant="contained">Chiudi</Button></div>
+    <div className="tbl-dialog-actions"><Button accessibilitySlot="resetConfigButton" onClick={resetLayout} color="inherit" size="small">{t("config.reset")}</Button><Button accessibilitySlot="closeConfigButton" onClick={onClose} variant="contained">{t("config.close")}</Button></div>
   </NativeDialog>;
 };
 export { ColumnsConfigModal };

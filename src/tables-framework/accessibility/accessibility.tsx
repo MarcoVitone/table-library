@@ -24,7 +24,7 @@ type ElementProps = HTMLAttributes<HTMLElement> & {
   slot: TAccessibilitySlot;
   context?: IAccessibilityContext;
 };
-export const AccessibilityElement = forwardRef<HTMLElement, ElementProps>(function AccessibilityElement({ as, slot, context, ...props }, ref) {
+export const AccessibilityElement = /* @__PURE__ */ forwardRef<HTMLElement, ElementProps>(function AccessibilityElement({ as, slot, context, ...props }, ref) {
   const { getProps } = useTableAccessibility();
   const nativeProps = getProps(slot, props, context);
   // `as` is always a native tag: createElement forwards the ref without reading it.

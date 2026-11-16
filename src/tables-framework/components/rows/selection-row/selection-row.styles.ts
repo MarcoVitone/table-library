@@ -1,5 +1,5 @@
 import { nativeElement } from "@/tables-framework/ui/native-element";
-export const BaseTr = nativeElement<'tr', {
+export const BaseTr = /* @__PURE__ */ nativeElement<'tr', {
   isSelected: boolean;
   isLoading: boolean;
 }>('tr', 'tbl-row tbl-selection-row', p => ({

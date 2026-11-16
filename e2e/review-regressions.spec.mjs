@@ -22,7 +22,7 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => messages.push(error.message));
   await page.route('**/__review__', route => route.fulfill({
     contentType: 'text/html',
-    body: '<!doctype html><html><head><style>' + styles + '</style></head><body><div id="root"></div><script type="module" src="/__review__.js"></script></body></html>',
+    body: '<!doctype html><html lang="it"><head><style>' + styles + '</style></head><body><div id="root"></div><script type="module" src="/__review__.js"></script></body></html>',
   }));
   await page.route('**/__review__.js', route => route.fulfill({ contentType: 'text/javascript', body: script }));
 });

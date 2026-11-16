@@ -21,19 +21,19 @@ test('loading and error replace stale body data with accessible, valid table row
   const loading = render({ isLoading: true, error: 'Failed', onRetry() {} });
   assert.match(loading, /<table[^>]*aria-busy="true"/);
   assert.match(loading, /<tbody><tr class="tbl-state-row"><td colSpan="1"/);
-  assert.match(loading, /role="status">Caricamento/);
-  assert.doesNotMatch(loading, /Zoe|Anna|Riprova|Failed/);
+  assert.match(loading, /role="status">Loading/);
+  assert.doesNotMatch(loading, /Zoe|Anna|Retry|Failed/);
   const error = render({ error: 'Failed', onRetry() {} });
   assert.match(error, /role="alert">Failed/);
-  assert.match(error, />Riprova<\/button>/);
+  assert.match(error, />Retry<\/button>/);
   assert.doesNotMatch(error, /Zoe|Anna|aria-busy="true"/);
 });
 
 test('empty and no-results states have independent customizable content', () => {
-  assert.match(render({ data: [] }), /Nessun dato disponibile/);
+  assert.match(render({ data: [] }), /No data available/);
   const noResults = render({ layout: { filtering: [{ key: 'name', op: 'match', val: 'absent' }] } });
-  assert.match(noResults, /Nessun risultato per i filtri applicati/);
-  assert.doesNotMatch(noResults, /Nessun dato disponibile/);
+  assert.match(noResults, /No results/);
+  assert.doesNotMatch(noResults, /No data available/);
   assert.match(render({ isLoading: true, loadingContent: 'Please wait' }), /Please wait/);
   assert.match(render({ data: [], emptyContent: 'No customers' }), /No customers/);
   assert.match(render({ data: [], noResultsContent: 'No matches', layout: { filtering: [{ key: 'name', op: 'match', val: 'x' }] } }), /No matches/);

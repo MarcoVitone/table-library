@@ -42,7 +42,7 @@ export function nativeElement<T extends keyof HTMLElementTagNameMap, P extends o
     accessibilitySlot?: TAccessibilitySlot;
     accessibilityContext?: IAccessibilityContext;
   };
-  const Element = forwardRef<HTMLElementTagNameMap[T], Props>((props, ref) => {
+  const Element = /* @__PURE__ */ forwardRef<HTMLElementTagNameMap[T], Props>((props, ref) => {
     const theme = useTheme();
     const { getProps } = useTableAccessibility();
     const {

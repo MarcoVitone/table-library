@@ -26,7 +26,7 @@ export function CustomAccordionSummary({
     className: 'tbl-accordion-arrow'
   }, expandIcon));
 }
-export const CustomBar = nativeElement('div', 'tbl-accordion-bar', ({
+export const CustomBar = /* @__PURE__ */ nativeElement('div', 'tbl-accordion-bar', ({
   theme
 }) => ({
   width: '.2rem',

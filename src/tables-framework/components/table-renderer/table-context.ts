@@ -21,5 +21,5 @@ export const defaultAPI = {
   enableColumnFilters: false,
 };
 
-export const TableContext = createContext<TTableRendererAPI>(defaultAPI);
+export const TableContext = /* @__PURE__ */ createContext<TTableRendererAPI>(defaultAPI);
 

@@ -45,3 +45,9 @@ export type { IGlobalSearchConfig, TGlobalSearch } from "../defines/global-searc
 export type { ITableViewState, ISavedTableView, ISavedViewsConfig } from "../defines/saved-views.types";
 export type { IBulkAction, IBulkActionContext } from "../defines/bulk-actions.types";
 export { parseSavedViews, serializeSavedViews, createTableViewUrl, parseTableViewUrl } from "../utils/saved-views/saved-views";
+export type { IExcelPasteConfig, IPasteCell, IPastePreview } from "../defines/excel-paste.types";
+export { parseExcelClipboard, previewExcelPaste } from "../utils/excel-paste/excel-paste";
+export { TableLocalizationProvider } from "../localization/localization";
+export { useTableLocalization } from "../localization/use-table-localization";
+export { createTableTranslator, englishTableMessages, italianTableMessages } from "../localization/messages";
+export type { ITableLocalization, TTableMessage, TTableMessageValue, TTableTranslator, TTableTextValues } from "../localization/messages";

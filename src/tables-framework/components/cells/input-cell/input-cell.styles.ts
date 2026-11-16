@@ -1,12 +1,12 @@
 import { nativeElement } from "@/tables-framework/ui/native-element";
-export const InputContainer = nativeElement('div', 'tbl-input-container', () => ({
+export const InputContainer = /* @__PURE__ */ nativeElement('div', 'tbl-input-container', () => ({
   width: '100%',
   height: '100%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center'
 }));
-export const InputComponent = nativeElement<'input', {
+export const InputComponent = /* @__PURE__ */ nativeElement<'input', {
   height?: string;
   width?: string;
 }>('input', 'tbl-input', ({

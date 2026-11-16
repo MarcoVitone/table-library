@@ -179,6 +179,9 @@
 .tbl-dialog::backdrop {
   background: #0005
 }
+.tbl-paste-dialog { width: min(800px,calc(100vw - 32px)); }
+.tbl-paste-preview { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.tbl-paste-preview th,.tbl-paste-preview td { padding: .5rem; border: 1px solid var(--table-border,#ddd); text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; }
 .tbl-dialog-title {
   font-size: 1.15rem;
   margin: 0;
@@ -379,4 +382,13 @@
 }
 .tbl-bulk-actions {
   margin-bottom: .5rem;
+}
+.tbl-sort-indicator {
+  display: inline-flex;
+  transition: transform .2s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tbl-sort-indicator, .sort-icon {
+    transition: none !important;
+  }
 }

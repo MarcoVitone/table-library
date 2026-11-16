@@ -1,3 +1,4 @@
+import { useTableLocalization } from "../../localization/use-table-localization";
 import type { ElementType, ReactNode } from "react";
 import { useState, useMemo, useEffect, isValidElement, useCallback } from "react";
 import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell";
@@ -42,6 +43,10 @@ import { useTableQuery } from "@/tables-framework/hooks/use-table-query/use-tabl
 import type { TGlobalSearch } from "@/tables-framework/defines/global-search.types";
 import type { ISavedTableView, ISavedViewsConfig } from "@/tables-framework/defines/saved-views.types";
 import { SavedViewsToolbar } from "../table-sub-components/saved-views-toolbar/saved-views-toolbar";
+import { ExcelPasteToolbar } from "../table-sub-components/excel-paste-toolbar/excel-paste-toolbar";
+import type { IExcelPasteConfig } from "../../defines/excel-paste.types";
+import { TableLocalizationProvider } from "../../localization/localization";
+import type { ITableLocalization } from "../../localization/messages";
 export type { IColumnConfig } from "@/tables-framework/defines/column-config";
 import { TableToolbar } from "@/tables-framework/components/table-sub-components/table-toolbar/table-toolbar";
 import { ColumnsConfigModal } from "@/tables-framework/components/modals/columns-config-modal/columns-config-modal";
@@ -96,6 +101,8 @@ export interface IDynamicTableProps<T>
   enableColumnFilters?: boolean;
   globalSearch?: TGlobalSearch;
   savedViews?: ISavedViewsConfig;
+  excelPaste?: IExcelPasteConfig<T>;
+  localization?: ITableLocalization;
 }
 
 const CELL_COMPONENTS: Record<string, ElementType> = {
@@ -137,6 +144,8 @@ const DynamicTable = <T extends object>({
   virtualization,
   globalSearch = false,
   savedViews,
+  excelPaste,
+  localization,
   isResizable: globalResizable = false,
   // Estrai le nuove props (default false)
   enableColumnReorder = false,
@@ -147,6 +156,7 @@ const DynamicTable = <T extends object>({
   onLayoutChange: externalOnLayoutChange,
   ...tableProps
 }: IDynamicTableProps<T>) => {
+  const t = useTableLocalization(localization);
   const {
     enabled: paginationEnabled = false,
     position: paginationPosition = "bottom",
@@ -478,6 +488,7 @@ const DynamicTable = <T extends object>({
 
   const tableExtensions = (
     <>
+      {excelPaste && <ExcelPasteToolbar data={data} columns={columns} config={excelPaste} idKey={idKey} disabled={isLoading || !!tableProps.error} />}
       {savedViews && <SavedViewsToolbar key={`${savedViews.storage ?? "localStorage"}:${savedViews.key}`}
         config={savedViews} columns={columns} search={searchTerm} pageSize={limit} onApply={(view: ISavedTableView) => {
           setInternalColumnsLayout(view.state.columnsLayout);
@@ -700,15 +711,15 @@ const DynamicTable = <T extends object>({
 
       {globalSearch && <div className="tbl-global-search" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         <AccessibilityElement as="label" slot="globalSearchLabel" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {searchConfig?.label ?? "Ricerca globale"}
-          <AccessibilityElement as="input" slot="globalSearchInput" type="search" value={searchTerm} placeholder={searchConfig?.placeholder ?? "Cerca nelle colonne…"}
+          {searchConfig?.label ?? t("search.label")}
+          <AccessibilityElement as="input" slot="globalSearchInput" type="search" value={searchTerm} placeholder={searchConfig?.placeholder ?? t("search.placeholder")}
             onChange={event => handleSearchChange(event.target.value)}
             onKeyDown={event => {
               if (event.key === "Enter") event.preventDefault();
               if (event.key === "Escape") { event.preventDefault(); handleSearchChange(""); }
             }} />
         </AccessibilityElement>
-        {searchTerm && <AccessibilityElement as="button" slot="globalSearchClearButton" type="button" onClick={() => handleSearchChange("")}>Cancella ricerca globale</AccessibilityElement>}
+        {searchTerm && <AccessibilityElement as="button" slot="globalSearchClearButton" type="button" onClick={() => handleSearchChange("")}>{t("search.clear")}</AccessibilityElement>}
       </div>}
 
       {infiniteScrollConfig?.enabled && (
@@ -755,7 +766,8 @@ const DynamicTable = <T extends object>({
       {paginationPosition === "bottom" && paginationComponent}
     </div>
   );
-  return accessibility ? <AccessibilityProvider value={accessibility}>{content}</AccessibilityProvider> : content;
+  const accessibleContent = accessibility ? <AccessibilityProvider value={accessibility}>{content}</AccessibilityProvider> : content;
+  return localization ? <TableLocalizationProvider value={localization}>{accessibleContent}</TableLocalizationProvider> : accessibleContent;
 };
 
 export { DynamicTable };

@@ -1,3 +1,4 @@
+import { useTableLocalization } from "@/tables-framework/localization/use-table-localization";
 import type { ChangeEvent, FC } from "react";
 import { useCallback, useMemo } from "react";
 import type { IBaseCellProps } from "@/tables-framework/components/cells/base-cell/base-cell.tsx";
@@ -26,6 +27,7 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
   onCellChange,
   ...rest
 }) => {
+  const t = useTableLocalization();
   const {
     setRowStatus,
     rowStatus,
@@ -83,7 +85,7 @@ const CheckboxCell: FC<ICheckboxCellProps> = ({
     >
       <TableCheckbox
         accessibilitySlot={area === "header" ? "selectAllCheckbox" : "rowCheckbox"}
-        aria-label={area === "header" ? "Seleziona tutte le righe" : `Seleziona riga ${data.row.source.id}`}
+        aria-label={area === "header" ? t("a11y.selectAll") : t("a11y.selectRow", { id: data.row.source.id })}
         id={data.row.source.id}
         onChange={onChangeHandler}
         checked={checked}

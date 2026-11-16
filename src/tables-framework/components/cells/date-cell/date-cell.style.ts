@@ -1,5 +1,5 @@
 import { nativeElement } from "@/tables-framework/ui/native-element";
-export const DateTypography = nativeElement('span', 'tbl-date', () => ({
+export const DateTypography = /* @__PURE__ */ nativeElement('span', 'tbl-date', () => ({
   color: '#333',
   fontSize: '.6875rem',
   fontStyle: 'normal',
